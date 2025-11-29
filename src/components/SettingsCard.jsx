@@ -14,7 +14,7 @@ export default function SettingsCard() {
       root.classList.remove("light");
     }
     localStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [theme]); 
 
   const handleLogout = () => {
     localStorage.removeItem("user");
