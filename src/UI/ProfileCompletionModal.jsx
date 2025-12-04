@@ -43,28 +43,6 @@ const ProfileCompletionModal = ({ onClose }) => {
     setTimeout(() => {
       setLoading(false);
       setShowSuccess(true);
-
-      toast.custom(
-        (t) => (
-          <div
-            className={`flex items-center gap-4 bg-[#030E21] border border-[#64B883] rounded-[24px] px-6 py-5 w-full max-w-[625px] h-[69px] transition-opacity duration-300 ${
-              t.visible ? "opacity-100" : "opacity-0"
-            }`}
-            style={{
-              boxShadow: "0px 4px 36px 0px #ACACAC40",
-            }}
-          >
-            <FaCheckCircle size={24} className="text-[#64B883] flex-shrink-0" />
-            <span className="text-white text-base font-normal">
-              Your profile has been updated successfully
-            </span>
-          </div>
-        ),
-        {
-          duration: 4000,
-          position: "top-center",
-        }
-      );
     }, 1500);
   };
 
@@ -73,9 +51,17 @@ const ProfileCompletionModal = ({ onClose }) => {
       <div
         className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px] rounded-3xl border border-[#64B883] p-8 md:p-10 bg-[#030E21] relative overflow-hidden"
         style={{
-          boxShadow: "0px 4px 36px 0px rgba(100, 184, 131, 0.3)",
+          boxShadow: "0px 4px 36px 0px rgba(100, 184, 131, 0. 3)",
         }}
       >
+        {/* Close Button for Success Screen */}
+        <button
+          className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#64B883]/30 hover:rotate-90 z-10"
+          onClick={onClose}
+        >
+          <IoClose size={24} />
+        </button>
+
         {/* Confetti Animation */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="confetti-container">
@@ -98,13 +84,6 @@ const ProfileCompletionModal = ({ onClose }) => {
           </div>
         </div>
 
-        {/* <button
-          className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#64B883]/30 hover:rotate-90 z-10"
-          onClick={onClose}
-        >
-          <IoClose size={24} />
-        </button> */}
-
         <div className="text-center relative z-10">
           {/* Success Icon with Animation */}
           <div className="flex justify-center mb-6">
@@ -117,7 +96,7 @@ const ProfileCompletionModal = ({ onClose }) => {
           </div>
 
           {/* Success Message */}
-          <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4 animate-[fadeInUp_0.6s_ease-out_0.2s_both]">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4 animate-[fadeInUp_0. 6s_ease-out_0.2s_both]">
             Profile Complete!
           </h2>
 
@@ -127,7 +106,7 @@ const ProfileCompletionModal = ({ onClose }) => {
           </p>
 
           {/* Progress Bar */}
-          <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden animate-[fadeInUp_0.6s_ease-out_0. 4s_both]">
+          <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden animate-[fadeInUp_0.6s_ease-out_0.4s_both]">
             <div
               className="h-full bg-gradient-to-r from-[#64B883] to-[#7EE3FF] rounded-full animate-[progressFill_1. 5s_ease-out_0.5s_both]"
               style={{ width: "100%" }}
@@ -229,7 +208,7 @@ const ProfileCompletionModal = ({ onClose }) => {
             <input
               type="text"
               id="jobTitle"
-              className="bg-white/[0. 03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0. 1)] disabled:opacity-60 disabled:cursor-not-allowed"
               placeholder="e.g., Product Manager"
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}

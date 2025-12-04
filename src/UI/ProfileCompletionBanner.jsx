@@ -1,22 +1,44 @@
 import { useState } from "react";
 import { FaChevronRight } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
 import ProfileCompletionModal from "./ProfileCompletionModal";
 
 const ProfileCompletionBanner = ({
   userName = "Ahmed",
   completionPercentage = 50,
+  onClose,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <>
       {!showModal ? (
         <div
-          className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px] h-[180px] md:h-[118px] rounded-3xl border border-[#7EE3FF]/30 p-6 gap-2 bg-[#030E21]"
+          className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px] h-[180px] md:h-[118px] rounded-3xl border border-[#7EE3FF]/30 p-6 gap-2 bg-[#030E21] relative"
           style={{
             boxShadow: "0px 4px 36px 0px #ACACAC40",
           }}
         >
+          {/* Close Button for Banner */}
+          <button
+            className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#7EE3FF]/30 hover:rotate-90"
+            onClick={handleClose}
+          >
+            <IoClose size={24} />
+          </button>
+
           <div className="flex items-center gap-6 h-full justify-between">
             <div className="svg -ml-[15px]">
               <svg
