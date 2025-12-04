@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdError } from "react-icons/md";
 
-const ProfileCompletionModal = ({ onClose }) => {
+const ProfileCompletionModal = ({ onClose, onComplete }) => {
   const [jobTitle, setJobTitle] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +43,13 @@ const ProfileCompletionModal = ({ onClose }) => {
     setTimeout(() => {
       setLoading(false);
       setShowSuccess(true);
+
+      setTimeout(() => {
+        if (onComplete) {
+          onComplete(jobTitle, phoneNumber);
+        }
+        onClose();
+      }, 4000);
     }, 1500);
   };
 
@@ -51,13 +58,18 @@ const ProfileCompletionModal = ({ onClose }) => {
       <div
         className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px] rounded-3xl border border-[#64B883] p-8 md:p-10 bg-[#030E21] relative overflow-hidden"
         style={{
-          boxShadow: "0px 4px 36px 0px rgba(100, 184, 131, 0. 3)",
+          boxShadow: "0px 4px 36px 0px rgba(100, 184, 131, 0.3)",
         }}
       >
         {/* Close Button for Success Screen */}
         <button
           className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#64B883]/30 hover:rotate-90 z-10"
-          onClick={onClose}
+          onClick={() => {
+            if (onComplete) {
+              onComplete(jobTitle, phoneNumber);
+            }
+            onClose();
+          }}
         >
           <IoClose size={24} />
         </button>
@@ -152,7 +164,7 @@ const ProfileCompletionModal = ({ onClose }) => {
             }
           }
 
-          . confetti {
+          .confetti {
             position: absolute;
             width: 8px;
             height: 8px;
@@ -179,74 +191,87 @@ const ProfileCompletionModal = ({ onClose }) => {
   }
 
   return (
-    <div
-      className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px] rounded-3xl border border-[#7EE3FF]/30 p-8 md:p-10 bg-[#030E21] relative"
-      style={{
-        boxShadow: "0px 4px 36px 0px #ACACAC40",
-      }}
-    >
-      <button
-        className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#7EE3FF]/30 hover:rotate-90"
+    <>
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-[4px] z-40"
+        style={{ backdropFilter: "blur(4px)" }}
         onClick={onClose}
-      >
-        <IoClose size={24} />
-      </button>
+      ></div>
 
-      <div className="mt-2">
-        <h2 className="text-xl md:text-2xl font-medium text-white mb-6 md:mb-8 text-center">
-          Let's Complete Your Profile
-        </h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5 md:gap-6">
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="jobTitle"
-              className="text-sm font-medium text-white ml-1"
-            >
-              Job Title
-            </label>
-            <input
-              type="text"
-              id="jobTitle"
-              className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0. 1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              placeholder="e.g., Product Manager"
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="phoneNumber"
-              className="text-sm font-medium text-white ml-1"
-            >
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0. 1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              placeholder="e. g., +20 100 *** ****"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
+      <div className="fixed inset-0 flex items-start justify-center z-50 pt-[76px] px-4 pointer-events-none">
+        <div
+          className="w-[88%] md:w-full max-w-[575px] rounded-3xl border border-[#7EE3FF]/30 p-8 md:p-10 bg-[#030E21] relative pointer-events-auto"
+          style={{
+            boxShadow: "0px 4px 36px 0px #ACACAC40",
+          }}
+        >
           <button
-            type="submit"
-            className="bg-[#7EE3FF] text-[#060B1B] border-none rounded-xl px-5 md:px-6 py-3 md:py-4 text-sm md:text-base font-semibold cursor-pointer transition-all duration-300 mt-2 hover:bg-[#6DD4EE] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
-            disabled={loading}
-            style={{
-              boxShadow: "0 4px 16px rgba(126, 227, 255, 0.3)",
-            }}
+            className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#7EE3FF]/30 hover:rotate-90"
+            onClick={onClose}
           >
-            {loading ? "Saving..." : "Save & Continue"}
+            <IoClose size={24} />
           </button>
-        </form>
+
+          <div className="mt-2">
+            <h2 className="text-xl md:text-2xl font-medium text-white mb-6 md:mb-8 text-center">
+              Let's Complete Your Profile
+            </h2>
+
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-5 md:gap-6"
+            >
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="jobTitle"
+                  className="text-sm font-medium text-white ml-1"
+                >
+                  Job Title
+                </label>
+                <input
+                  type="text"
+                  id="jobTitle"
+                  className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                  placeholder="e.g., Product Manager"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="phoneNumber"
+                  className="text-sm font-medium text-white ml-1"
+                >
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0. 1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                  placeholder="e.g., +20 100 *** ****"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="bg-[#7EE3FF] text-[#060B1B] border-none rounded-xl px-5 md:px-6 py-3 md:py-4 text-sm md:text-base font-semibold cursor-pointer transition-all duration-300 mt-2 hover:bg-[#6DD4EE] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={loading}
+                style={{
+                  boxShadow: "0 4px 16px rgba(126, 227, 255, 0.3)",
+                }}
+              >
+                {loading ? "Saving..." : "Save & Continue"}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

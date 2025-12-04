@@ -7,6 +7,7 @@ const ProfileCompletionBanner = ({
   userName = "Ahmed",
   completionPercentage = 50,
   onClose,
+  onComplete,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -251,7 +252,12 @@ const ProfileCompletionBanner = ({
           </div>
         </div>
       ) : (
-        <ProfileCompletionModal onClose={() => setShowModal(false)} />
+        <div className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px]">
+          <ProfileCompletionModal
+            onClose={() => setShowModal(false)}
+            onComplete={onComplete}
+          />
+        </div>
       )}
     </>
   );

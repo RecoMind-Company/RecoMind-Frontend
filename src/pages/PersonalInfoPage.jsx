@@ -1,19 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 import ProfileAvatar from "../components/ProfileAvatar";
 import InputField from "../components/InputField";
 import LogoutButton from "../components/LogoutButton";
+import ProfileCompletionBanner from "../UI/ProfileCompletionBanner";
 import userB from "../assets/images/userB.png";
 
 const PersonalInfoPage = () => {
   const [userData, setUserData] = useState({
     name: "ALi Alaa",
-    phone: "0164466577",
     email: "ali@gmail.com",
+    phone: "",
+    jobTitle: "",
     profileImage: userB,
+    isProfileComplete: false,
   });
 
   const [hasChanges, setHasChanges] = useState(false);
   const [resetEdit, setResetEdit] = useState(false);
+  const [showCompletionBanner, setShowCompletionBanner] = useState(false);
+
+  useEffect(() => {
+    if (!userData.isProfileComplete && !userData.phone && !userData.jobTitle) {
+      setShowCompletionBanner(true);
+    }
+  }, [userData]);
 
   const handleInputChange = (field, value, resetSave = false) => {
     setUserData((prev) => ({ ...prev, [field]: value }));
@@ -33,21 +44,61 @@ const PersonalInfoPage = () => {
     alert("Changes saved successfully!");
   };
 
-  return (
-    <div className="min-h-screen p-4 sm:px-6 md:px-8 lg:w-[907px] ml-0 lg:ml-[65px] md:pt-8">
-      <h1 className="text-[var(--Secondary)] text-[28px] sm:text-[34px] md:text-[40px] font-semibold mb-8 text-center md:text-left">
-        Personal Info
-      </h1>
+  const handleProfileCompletion = (jobTitle, phoneNumber) => {
+    setUserData((prev) => ({
+      ...prev,
+      jobTitle,
+      phone: phoneNumber,
+      isProfileComplete: true,
+    }));
+    setShowCompletionBanner(false);
+  };
 
-      <div>
+  const handleImageChange = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setUserData((prev) => ({
+            ...prev,
+            profileImage: event.target.result,
+          }));
+          setHasChanges(true);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
+  return (
+    <>
+      <Toaster position="top-center" />
+
+      <div className="min-h-screen p-4 mt-24 sm:px-6 md:px-8 lg:w-[907px] ml-0 lg:ml-[65px] md:pt-8 relative">
+        {showCompletionBanner && (
+          <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
+            <ProfileCompletionBanner
+              userName={userData.name.split(" ")[0]}
+              completionPercentage={50}
+              onClose={() => setShowCompletionBanner(false)}
+              onComplete={handleProfileCompletion}
+            />
+          </div>
+        )}
+
         <div className="flex flex-col items-center md:items-start mb-6">
           <ProfileAvatar
             imageUrl={userData.profileImage}
-            onImageChange={() => console.log("Change image")}
+            onImageChange={handleImageChange}
           />
         </div>
 
-        <div className="border border-[var(--Secondary)] p-4 sm:p-6 md:p-8 rounded-xl">
+        <div className="border border-[var(--Secondary)] p-4 sm:p-6 md:p-8 rounded-3xl">
           <div className="flex flex-col gap-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <InputField
@@ -59,18 +110,6 @@ const PersonalInfoPage = () => {
                 resetEdit={resetEdit}
               />
               <InputField
-                label="Phone"
-                value={userData.phone}
-                onChange={(newValue, resetSave) =>
-                  handleInputChange("phone", newValue, resetSave)
-                }
-                type="tel"
-                resetEdit={resetEdit}
-              />
-            </div>
-
-            <div className="md:w-[48%] w-full">
-              <InputField
                 label="Email"
                 value={userData.email}
                 onChange={(newValue, resetSave) =>
@@ -80,6 +119,28 @@ const PersonalInfoPage = () => {
                 resetEdit={resetEdit}
               />
             </div>
+
+            {userData.isProfileComplete && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <InputField
+                  label="Job Title"
+                  value={userData.jobTitle}
+                  onChange={(newValue, resetSave) =>
+                    handleInputChange("jobTitle", newValue, resetSave)
+                  }
+                  resetEdit={resetEdit}
+                />
+                <InputField
+                  label="Phone"
+                  value={userData.phone}
+                  onChange={(newValue, resetSave) =>
+                    handleInputChange("phone", newValue, resetSave)
+                  }
+                  type="tel"
+                  resetEdit={resetEdit}
+                />
+              </div>
+            )}
           </div>
 
           <button
@@ -95,12 +156,12 @@ const PersonalInfoPage = () => {
             Save Changes
           </button>
         </div>
-      </div>
 
-      <div className="flex justify-center md:justify-start mt-6">
-        <LogoutButton onClick={() => console.log("Logging out...")} />
+        <div className="flex justify-center md:justify-start mt-6">
+          <LogoutButton onClick={() => console.log("Logging out...")} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
