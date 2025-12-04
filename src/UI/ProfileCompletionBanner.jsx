@@ -108,13 +108,13 @@ const ProfileCompletionBanner = ({
                   d="M44.1483 80.3482C44.1483 80.3482 36.4427 82.3035 31.4727 81.9008C27.2392 81.5578 23.14 80.543 21.3853 79.3754"
                   stroke="#7EE3FF"
                   strokeWidth="0.7"
-                  stroke-linecap="round"
+                  strokeLinecap="round"
                 />
                 <path
                   d="M43.3674 83.0724C43.3674 83.0724 36.1697 84.9155 31.6595 84.5498C27.4348 84.2073 24.1067 83.4614 22.3559 82.2942"
                   stroke="#7EE3FF"
                   strokeWidth="0.7"
-                  stroke-linecap="round"
+                  strokeLinecap="round"
                 />
                 <path
                   d="M42.9831 84.435C42.9831 84.435 36.2088 87.1351 31.6986 86.7694C27.474 86.4269 24.4999 85.4079 22.7491 84.2406"
@@ -222,13 +222,13 @@ const ProfileCompletionBanner = ({
                 <path
                   d="M72.1274 47.1793C72.1274 47.1793 73.4059 45.8597 76.7789 46.7859C80.0816 47.6927 80.6468 50.3985 80.5298 50.1702"
                   stroke="#7EE3FF"
-                  stroke-opacity="0.5"
+                  strokeOpacity="0.5"
                   strokeWidth="0.7"
                 />
                 <path
                   d="M73.4777 48.3953C73.4777 48.3953 74.4077 47.7002 76.4193 48.6163C78.389 49.5133 78.4703 51.2582 78.4202 51.104"
                   stroke="#7EE3FF"
-                  stroke-opacity="0.5"
+                  strokeOpacity="0.5"
                   strokeWidth="0.7"
                 />
               </svg>
