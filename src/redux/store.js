@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { SignupReducer } from "./features/SignUp/SignupSlice";
 import { ForgotPasswordReducer } from "./features/ForgotPassword/ForgotPasswordSlice";
 import { VerificationReducer } from "./features/Verification/VerificationSlice";
+import { ChangePasswordReducer } from "./features/ChangePassword/ChangePasswordSlice";
 import { useDispatch } from "react-redux";
 
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     signup: SignupReducer,
     forgotPassword: ForgotPasswordReducer,
     verification: VerificationReducer,
+    changePassword: ChangePasswordReducer,
   },
 });
 

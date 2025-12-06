@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import LogoutButton from "../components/LogoutButton";
 import ProfileCompletionBanner from "../UI/ProfileCompletionBanner";
 import userB from "../assets/images/userB.png";
+import ChangePasswordButton from "../components/ChangePasswordButton";
 
 const PersonalInfoPage = () => {
   const [userData, setUserData] = useState({
@@ -157,8 +158,9 @@ const PersonalInfoPage = () => {
           </button>
         </div>
 
-        <div className="flex justify-center md:justify-start mt-6">
+        <div className="flex justify-center gap-4 md:justify-start mt-6">
           <LogoutButton onClick={() => console.log("Logging out...")} />
+          <ChangePasswordButton />
         </div>
       </div>
     </>
