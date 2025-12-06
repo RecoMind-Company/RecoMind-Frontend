@@ -7,12 +7,37 @@ import Logo from "../assets/images/Logo.png";
 import password from "../assets/images/password.png";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { schemaLogin, schemaRegister } from "../validation/Schema";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "../redux/store";
+import { SignupFunction } from "../redux/features/SignUp/SignupSlice";
 
 const LogRegForm = ({ title }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
-
   const isSignUp = title.toLowerCase().includes("sign");
+
+  const schema = isSignUp ? schemaRegister : schemaLogin;
+  const dispatch = useAppDispatch();
+  const { isloading } = useSelector((state) => state.signup);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const onSubmit = (data) => {
+    console.log(data);
+    if (title.toLowerCase().includes("sign")) {
+      dispatch(SignupFunction(data));
+    } else {
+      console.log("Login data:", data);
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -29,7 +54,7 @@ const LogRegForm = ({ title }) => {
 
   return (
     <>
-      <div className="container flex flex-col md:flex-row items-start md:justify-center gap-12 mt-12 md:mt-12 mx-auto h-[90vh]">
+      <div className="container flex flex-col md:flex-row md:justify-center gap-12 mt-12 md:mt-12 mx-auto h-[90vh] items-center">
         {/* Left Section */}
         <div className="flex-1 flex flex-col items-center md:items-start justify-center w-full gap-12">
           <svg
@@ -359,133 +384,194 @@ const LogRegForm = ({ title }) => {
             <div className="flex-1 h-px bg-[var(--font_primary)] opacity-40"></div>
           </div>
 
-          {/* Name Input (Only for Sign Up) */}
-          {isSignUp && (
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            {/* Name Input (Only for Sign Up) */}
+            {isSignUp && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-[var(--font_primary)] font-medium">
+                  Name
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 text-[var(--border_color)] w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Enter Your Name"
+                    {...register("fullName", { required: true })}
+                    className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                  />
+                </div>
+                {errors.fullName && (
+                  <p className="text-red-500 text-xs">
+                    {errors.fullName.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Email Input */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-[var(--font_primary)] font-medium">
-                Name
+                Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 text-[var(--border_color)] w-5 h-5" />
                 <input
-                  type="text"
-                  placeholder="Enter Your Name"
+                  {...register("email", { required: true })}
+                  type="email"
+                  placeholder="Enter Your Email"
                   className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
                 />
               </div>
-            </div>
-          )}
-
-          {/* Email Input */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-[var(--font_primary)] font-medium">
-              Email
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 text-[var(--border_color)] w-5 h-5" />
-              <input
-                type="email"
-                placeholder="Enter Your Email"
-                className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Password Input */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-[var(--font_primary)] font-medium">
-              Password
-            </label>
-            <div className="relative">
-              <img
-                src={password}
-                alt="Lock Icon"
-                className="absolute left-3 top-3 w-5 h-5"
-              />
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter Your Password"
-                value={passwordValue}
-                onChange={(e) => setPasswordValue(e.target.value)}
-                className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-10 focus:outline-none focus:border-[var(--Secondary)] transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-[var(--font_secondary)]"
-              >
-                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-              </button>
+              {errors.email && (
+                <p className="text-red-500 text-xs">{errors.email.message}</p>
+              )}
             </div>
 
-            {/* Password Info (Only for Sign Up) */}
-            {isSignUp && passwordValue && (
-              <div
-                className={`flex items-center gap-2 mt-2 text-xs ${
-                  passwordValid
-                    ? "text-[var(--success)]"
-                    : "text-[var(--error)]"
-                }`}
-              >
-                {passwordValid ? (
-                  <CheckCircle size={16} className="mt-[2px]" />
-                ) : (
-                  <AlertCircle size={16} className="mt-[2px]" />
+            {/* Password Input */}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-[var(--font_primary)] font-medium">
+                Password
+              </label>
+              <div className="relative">
+                <img
+                  src={password}
+                  alt="Lock Icon"
+                  className="absolute left-3 top-3 w-5 h-5"
+                />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter Your Password"
+                  value={passwordValue}
+                  {...register("password", { required: true, minLength: 6 })}
+                  onChange={(e) => setPasswordValue(e.target.value)}
+                  className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-10 focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-[var(--font_secondary)]"
+                >
+                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                </button>
+              </div>
+
+              {/* Password Info (Only for Sign Up) */}
+              {isSignUp && passwordValue && (
+                <div
+                  className={`flex items-center gap-2 mt-2 text-xs ${
+                    passwordValid
+                      ? "text-[var(--success)]"
+                      : "text-[var(--error)]"
+                  }`}
+                >
+                  {passwordValid ? (
+                    <CheckCircle size={16} className="mt-[2px]" />
+                  ) : (
+                    <AlertCircle size={16} className="mt-[2px]" />
+                  )}
+                  <p>
+                    {passwordValid
+                      ? "Your password meets all requirements"
+                      : "Password must be at least 8 characters, include uppercase, lowercase letters, numbers, and special characters."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {isSignUp && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-[var(--font_primary)] font-medium">
+                  Role
+                </label>
+
+                <div className="flex items-center gap-4 mt-1">
+                  {/* Admin */}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="admin"
+                      className="h-4 w-4 accent-[var(--Secondary)]"
+                      {...register("role")}
+                    />
+                    <span className="text-sm text-[var(--font_primary)]">
+                      Admin
+                    </span>
+                  </label>
+
+                  {/* Team Leader */}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="teamleader"
+                      className="h-4 w-4 accent-[var(--Secondary)]"
+                      {...register("role")}
+                    />
+                    <span className="text-sm text-[var(--font_primary)]">
+                      Team Leader
+                    </span>
+                  </label>
+                </div>
+
+                {errors.role && (
+                  <p className="text-red-500 text-xs">{errors.role.message}</p>
                 )}
-                <p>
-                  {passwordValid
-                    ? "Your password meets all requirements"
-                    : "Password must be at least 8 characters, include uppercase, lowercase letters, numbers, and special characters."}
-                </p>
               </div>
             )}
-          </div>
 
-          {/* Remember & Forgot (Only for Log In) */}
-          {!isSignUp && (
-            <div className="flex items-center justify-between text-sm text-[var(--font_primary)] flex-wrap gap-2">
-              <label className="flex items-center gap-2 font-normal text-base">
-                <input type="checkbox" className="accent-[var(--Secondary)]" />
-                Remember me
-              </label>
-              <span
-                onClick={() => navigate("/forgotpassword")}
-                className="text-[var(--Secondary)] font-normal text-base cursor-pointer hover:underline"
-              >
-                Forgot Password?
-              </span>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button className="mt-4 w-full bg-[var(--Secondary)] text-[var(--Primary)] rounded-lg py-2 font-medium text-[22px] hover:opacity-80 transition-all">
-            {title}
-          </button>
-
-          {/* Switch Between Log In / Sign Up */}
-          <div className="text-center text-sm mt-3 text-[var(--font_primary)]">
-            {isSignUp ? (
-              <>
-                Already have an account?{" "}
-                <Link
-                  to="/"
-                  className="text-[var(--Secondary)] font-normal text-lg !underline"
+            {/* Remember & Forgot (Only for Log In) */}
+            {!isSignUp && (
+              <div className="flex items-center justify-between text-sm text-[var(--font_primary)] flex-wrap gap-2">
+                <label className="flex items-center gap-2 font-normal text-base">
+                  <input
+                    type="checkbox"
+                    className="accent-[var(--Secondary)]"
+                  />
+                  Remember me
+                </label>
+                <span
+                  onClick={() => navigate("/forgotpassword")}
+                  className="text-[var(--Secondary)] font-normal text-base cursor-pointer hover:underline"
                 >
-                  Log In
-                </Link>
-              </>
-            ) : (
-              <>
-                Don’t have an account?{" "}
-                <Link
-                  to="/signup"
-                  className="text-[var(--Secondary)] font-normal text-lg !underline"
-                >
-                  Sign Up
-                </Link>
-              </>
+                  Forgot Password?
+                </span>
+              </div>
             )}
-          </div>
+
+            {/* Submit Button */}
+            <button className="mt-4 w-full bg-[var(--Secondary)] text-[var(--Primary)] rounded-lg py-2 font-medium text-[22px] hover:opacity-80 transition-all">
+              {isloading ? "Please wait..." : title}
+            </button>
+
+            {/* Switch Between Log In / Sign Up */}
+            <div className="text-center text-sm mt-3 text-[var(--font_primary)]">
+              {isSignUp ? (
+                <>
+                  Already have an account?{" "}
+                  <Link
+                    to="/"
+                    className="text-[var(--Secondary)] font-normal text-lg !underline"
+                  >
+                    Log In
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Don’t have an account?{" "}
+                  <Link
+                    to="/signup"
+                    className="text-[var(--Secondary)] font-normal text-lg !underline"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          </form>
         </div>
       </div>
     </>
