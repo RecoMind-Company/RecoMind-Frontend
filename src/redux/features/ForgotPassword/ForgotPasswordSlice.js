@@ -15,6 +15,7 @@ export const ForgotPasswordFunction = createAsyncThunk(
     const { rejectWithValue } = thunkApi;
     try {
       const res = await axiosAuth.post("/forget-password", { email });
+      console.log(res);
 
       if (res.status === 200) {
         toast.success(res.data.message || "Reset email sent successfully!", {
@@ -35,7 +36,6 @@ export const ForgotPasswordFunction = createAsyncThunk(
         errorobj.response?.data?.error ||
         "Failed to send reset email";
 
-      // إذا كان في أخطاء متعددة
       if (
         errorobj.response?.data?.error &&
         typeof errorobj.response.data.error === "object"
