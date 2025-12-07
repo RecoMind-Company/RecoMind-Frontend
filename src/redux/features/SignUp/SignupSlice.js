@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 const initialState = {
   isloading: false,
   data: {},
+  success: false,
 };
 
 export const SignupFunction = createAsyncThunk(
@@ -14,7 +15,7 @@ export const SignupFunction = createAsyncThunk(
     try {
       const res = await axiosAuth.post("/register", data);
       if (res.status === 200) {
-        toast.success("Successfully", {
+        toast.success("Successfully registered!", {
           position: "bottom-center",
           duration: 1500,
           style: {
@@ -23,8 +24,8 @@ export const SignupFunction = createAsyncThunk(
             width: "fit-content",
           },
         });
+        return res.data;
       }
-      console.log(res);
     } catch (error) {
       const errorobj = error;
       const errorMessages = errorobj.response?.data.error;
@@ -43,20 +44,30 @@ export const SignupFunction = createAsyncThunk(
 export const signupSlice = createSlice({
   name: "Signup",
   initialState,
-  reducers: {},
+  reducers: {
+    resetSignupState: (state) => {
+      state.isloading = false;
+      state.data = {};
+      state.success = false;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(SignupFunction.pending, (state) => {
       state.isloading = true;
+      state.success = false;
     });
     builder.addCase(SignupFunction.fulfilled, (state, action) => {
       state.isloading = false;
       state.data = action.payload;
+      state.success = true;
     });
     builder.addCase(SignupFunction.rejected, (state) => {
       state.isloading = false;
       state.data = {};
+      state.success = false;
     });
   },
 });
 
+export const { resetSignupState } = signupSlice.actions;
 export const SignupReducer = signupSlice.reducer;
