@@ -58,10 +58,10 @@ function Main() {
   }, []);
 
   const suggestionCards = [
-    "What if we cut costs 10%?",
-    "What if we cut costs 10%?",
-    "What if we cut costs 10%?",
-    "What if we cut costs 10%?",
+    "What is the total revenue in 2014?",
+    "Show me sales data for last quarter",
+    "Analyze customer trends",
+    "Generate monthly report",
   ];
 
   const handleCardClick = (cardText) => {
@@ -123,6 +123,15 @@ function Main() {
                     </div>
                     <img src={assets.user_icon} alt="User" className="avatar" />
                   </div>
+                ) : message.type === "error" ? (
+                  <div className="ai-message error-message">
+                    <img src={assets.ai_icon} alt="AI" className="avatar" />
+                    <div className="message-content">
+                      <p
+                        dangerouslySetInnerHTML={{ __html: message.content }}
+                      ></p>
+                    </div>
+                  </div>
                 ) : (
                   <div className="ai-message">
                     <img src={assets.ai_icon} alt="AI" className="avatar" />
@@ -143,6 +152,7 @@ function Main() {
                   <div className="skeleton-line long"></div>
                   <div className="skeleton-line medium"></div>
                   <div className="skeleton-line short"></div>
+                  <p className="loading-text">Analyzing your question...</p>
                 </div>
               </div>
             )}
