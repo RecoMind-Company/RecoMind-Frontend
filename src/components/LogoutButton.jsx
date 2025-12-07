@@ -1,11 +1,29 @@
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/features/SignIn/SigninSlice";
+import toast from "react-hot-toast";
 
 const LogoutButton = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    navigate("/");
+    dispatch(logout());
+
+    toast.success("Logged out successfully", {
+      position: "bottom-center",
+      duration: 1500,
+      style: {
+        backgroundColor: "black",
+        color: "white",
+        width: "fit-content",
+      },
+    });
+
+    setTimeout(() => {
+      navigate("/");
+    }, 1000);
   };
 
   return (
@@ -21,7 +39,7 @@ const LogoutButton = () => {
       "
     >
       <LogOut size={22} className="sm:w-5 sm:h-5" />
-      <span className="text-lg  ">Logout</span>
+      <span className="text-lg">Logout</span>
     </button>
   );
 };
