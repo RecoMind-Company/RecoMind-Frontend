@@ -59,7 +59,7 @@ function Main() {
 
   const suggestionCards = [
     "What is the total revenue in 2014?",
-    "Show me sales data for last quarter",
+    "How many orders we made in 2013?",
     "Analyze customer trends",
     "Generate monthly report",
   ];

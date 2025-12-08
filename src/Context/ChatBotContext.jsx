@@ -139,10 +139,14 @@ function ChatBotContextProvider({ children }) {
       return;
     }
 
+    // Get user info
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = user.id || "f8e05038-03ff-419a-b00c-1669c6be857c";
     const userRole = user.role || "admin";
 
+    console.log("👤 User info:", { userId, userRole });
+
+    // Create new session if needed
     if (!currentSessionId) {
       const newSession = {
         id: `session-${Date.now()}`,
@@ -162,6 +166,7 @@ function ChatBotContextProvider({ children }) {
     setLoading(true);
     setShowResult(true);
 
+    // Add user message
     const userMessage = {
       id: `msg-${Date.now()}`,
       type: "user",
@@ -194,95 +199,113 @@ function ChatBotContextProvider({ children }) {
     );
 
     try {
-      console.log("Sending message to API:", {
-        userID: userId,
-        userRole: userRole,
-        user_question: promptToSend,
-      });
+      console.log("📤 Sending message to API...");
 
+      // Step 1: Create task
       const taskResponse = await chatbotAPI.sendMessage(
         promptToSend,
         userId,
         userRole
       );
 
-      console.log("API Response:", taskResponse);
+      console.log("✅ Task created:", taskResponse);
 
-      let aiResponseText = "";
+      if (taskResponse.task_id) {
+        console.log("🎯 Task ID:", taskResponse.task_id);
+        console.log("⏳ Starting to poll for response...");
 
-      if (taskResponse.status === "PENDING") {
-        aiResponseText = `
-          <div style="padding: 16px; background: rgba(126, 227, 255, 0.1); border-left: 3px solid #7ee3ff; border-radius: 8px;">
-            <p style="margin: 0 0 8px 0;"><strong>Task Submitted Successfully!</strong></p>
-            <p style="margin: 0; color: #7ee3ff;">Task ID: ${
-              taskResponse.task_id
-            }</p>
-            <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.8;">Status: ${
-              taskResponse.status
-            }</p>
-            <p style="margin: 4px 0 0 0; font-size: 14px; opacity: 0.8;">${
-              taskResponse.message || "Your request is being processed."
-            }</p>
-          </div>
-        `;
-      } else {
-        aiResponseText = formatResponse(
-          taskResponse.result ||
-            taskResponse.answer ||
-            taskResponse.message ||
+        // Step 2: Wait for response with polling
+        const finalResponse = await chatbotAPI.waitForResponse(
+          taskResponse.task_id,
+          userId,
+          userRole,
+          promptToSend,
+          (progressData) => {
+            console.log("📈 Progress update:", progressData);
+          }
+        );
+
+        console.log("✅ Final response received:", finalResponse);
+
+        // Format the response message
+        const aiResponseText = formatResponse(
+          finalResponse.responseMessage ||
+            finalResponse.result ||
+            finalResponse.answer ||
             "Response received successfully!"
         );
+
+        // Add AI message
+        const aiMessage = {
+          id: `msg-${Date.now() + 1}`,
+          type: "ai",
+          content: aiResponseText,
+          timestamp: new Date().toISOString(),
+          taskId: taskResponse.task_id,
+        };
+
+        // Update session with AI response
+        setChatSessions((prev) =>
+          prev.map((session) => {
+            if (
+              session.id === currentSessionId ||
+              (prev[0] && !currentSessionId)
+            ) {
+              return {
+                ...session,
+                messages: [...session.messages, aiMessage],
+                conversationHistory: [
+                  ...session.conversationHistory,
+                  {
+                    role: "user",
+                    parts: [{ text: promptToSend }],
+                  },
+                  {
+                    role: "model",
+                    parts: [{ text: aiResponseText }],
+                  },
+                ],
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return session;
+          })
+        );
+      } else {
+        throw new Error("No task ID received from API");
+      }
+    } catch (error) {
+      console.error("💥 Error in handleSent:", error);
+
+      // Determine error message
+      let errorText = "An error occurred. Please try again.";
+
+      if (error.message.includes("timeout")) {
+        errorText =
+          "Request timeout. The server is taking too long to respond.  Please try again.";
+      } else if (error.message.includes("Network")) {
+        errorText = "Network error. Please check your internet connection.";
+      } else if (error.message.includes("failed")) {
+        errorText = error.message;
+      } else if (error.response?.status === 400) {
+        errorText = "Invalid request.  Please check your input and try again. ";
+      } else if (error.response?.status === 401) {
+        errorText = "Authentication error. Please log in again.";
+      } else if (error.response?.status === 500) {
+        errorText = "Server error. Please try again later.";
+      } else if (error.message) {
+        errorText = error.message;
       }
 
-      const aiMessage = {
-        id: `msg-${Date.now() + 1}`,
-        type: "ai",
-        content: aiResponseText,
-        timestamp: new Date().toISOString(),
-        taskId: taskResponse.task_id,
-      };
-
-      setChatSessions((prev) =>
-        prev.map((session) => {
-          if (
-            session.id === currentSessionId ||
-            (prev[0] && !currentSessionId)
-          ) {
-            return {
-              ...session,
-              messages: [...session.messages, aiMessage],
-              conversationHistory: [
-                ...session.conversationHistory,
-                {
-                  role: "user",
-                  parts: [{ text: promptToSend }],
-                },
-                {
-                  role: "model",
-                  parts: [{ text: aiResponseText }],
-                },
-              ],
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return session;
-        })
-      );
-    } catch (error) {
-      console.error("Error getting response:", error);
-
+      // Add error message
       const errorMessage = {
         id: `msg-${Date.now() + 1}`,
         type: "error",
         content: `
           <div style="padding: 16px; background: rgba(223, 93, 93, 0.1); border-left: 3px solid #df5d5d; border-radius: 8px;">
             <p style="margin: 0 0 8px 0; color: #df5d5d;"><strong>Error</strong></p>
-            <p style="margin: 0; font-size: 14px;">${
-              error.response?.data?.message ||
-              error.message ||
-              "Failed to send message"
-            }</p>
-            <p style="margin: 8px 0 0 0; font-size: 13px; opacity: 0.7;">Please try again. </p>
+            <p style="margin: 0; font-size: 14px;">${errorText}</p>
+            <p style="margin: 8px 0 0 0; font-size: 13px; opacity: 0.7;">Please try again.</p>
           </div>
         `,
         timestamp: new Date().toISOString(),
