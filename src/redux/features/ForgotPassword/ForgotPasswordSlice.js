@@ -11,11 +11,12 @@ const initialState = {
 
 export const ForgotPasswordFunction = createAsyncThunk(
   "ForgotPassword/forgetPassword",
-  async (email, thunkApi) => {
+  async (data, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      const res = await axiosAuth.post("/forget-password", { email });
-      console.log(res);
+      console.log(data);
+
+      const res = await axiosAuth.post("/forget-password", { email: data });
 
       if (res.status === 200) {
         toast.success(res.data.message || "Reset email sent successfully!", {
@@ -27,6 +28,9 @@ export const ForgotPasswordFunction = createAsyncThunk(
             width: "fit-content",
           },
         });
+        setTimeout(() => {
+          window.location.href = "/verification";
+        }, 1500);
         return res.data;
       }
     } catch (error) {

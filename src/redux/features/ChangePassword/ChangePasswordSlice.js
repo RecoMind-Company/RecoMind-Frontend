@@ -14,7 +14,13 @@ export const ChangePasswordFunction = createAsyncThunk(
   async (data, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      const res = await axiosAuth.post("/reset-password", data);
+      console.log(data);
+      const token = localStorage.getItem("token");
+      const res = await axiosAuth.post("/reset-password", data, {
+        headers: {
+          Authorization: `${token}`,
+        },
+      });
 
       if (res.status === 200) {
         toast.success(res.data.message || "Password changed successfully!", {

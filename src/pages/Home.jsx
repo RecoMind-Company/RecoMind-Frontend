@@ -5,6 +5,12 @@ import { FaRocket } from "react-icons/fa";
 
 const Home = () => {
   const [showBanner, setShowBanner] = useState(true);
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
+  const profileData = {
+    name: storedUser.name || "",
+    email: storedUser.email || "",
+  };
 
   return (
     <>
@@ -12,7 +18,7 @@ const Home = () => {
 
       {showBanner && (
         <ProfileCompletionBanner
-          userName="Ahmed"
+          userName={profileData.name || "User"}
           completionPercentage={50}
           onClose={() => setShowBanner(false)}
         />

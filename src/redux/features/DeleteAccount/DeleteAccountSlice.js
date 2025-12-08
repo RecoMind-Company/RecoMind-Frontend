@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { axiosAuth } from "../../../config";
+import { axiosaccount } from "../../../config";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -11,12 +11,12 @@ const initialState = {
 
 export const DeleteAccountFunction = createAsyncThunk(
   "DeleteAccount/deleteAccount",
-  async (_, thunkApi) => {
+  async (id, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       const token = localStorage.getItem("token");
-      
-      const res = await axiosAuth.delete("/delete-account", {
+
+      const res = await axiosaccount.delete(`/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -25,7 +25,7 @@ export const DeleteAccountFunction = createAsyncThunk(
       if (res.status === 200) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        
+
         toast.success(res.data.message || "Account deleted successfully!", {
           position: "bottom-center",
           duration: 1500,
@@ -41,7 +41,7 @@ export const DeleteAccountFunction = createAsyncThunk(
       const errorobj = error;
       const errorMessage =
         errorobj.response?.data?.message ||
-        errorobj. response?.data?.error ||
+        errorobj.response?.data?.error ||
         "Failed to delete account";
 
       toast.error(errorMessage, {
@@ -65,7 +65,7 @@ export const deleteAccountSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder. addCase(DeleteAccountFunction.pending, (state) => {
+    builder.addCase(DeleteAccountFunction.pending, (state) => {
       state.isloading = true;
       state.success = false;
       state.error = null;

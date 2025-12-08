@@ -6,6 +6,7 @@ import { VerificationReducer } from "./features/Verification/VerificationSlice";
 import { ChangePasswordReducer } from "./features/ChangePassword/ChangePasswordSlice";
 import { DeleteAccountReducer } from "./features/DeleteAccount/DeleteAccountSlice";
 import { useDispatch } from "react-redux";
+import { GetProfileReducer } from "./features/GetProfile/getProfileSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     verification: VerificationReducer,
     changePassword: ChangePasswordReducer,
     deleteAccount: DeleteAccountReducer,
+    getprofile: GetProfileReducer,
   },
 });
 

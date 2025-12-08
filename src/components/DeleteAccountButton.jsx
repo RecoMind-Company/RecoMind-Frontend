@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Trash2, X, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import {
   DeleteAccountFunction,
   resetState,
 } from "../redux/features/DeleteAccount/DeleteAccountSlice";
+import { useEffect } from "react";
+import { GetprofileFunction } from "../redux/features/GetProfile/getProfileSlice";
 
 const DeleteAccountButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,12 +16,19 @@ const DeleteAccountButton = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isloading, success } = useSelector((state) => state.deleteAccount);
+  const { data } = useSelector((state) => state.getprofile);
+
 
   const isConfirmValid = confirmText.toLowerCase() === "delete";
 
+
+  useEffect(() => {
+  dispatch(GetprofileFunction());
+  console.log(data)
+}, []);
   const handleDelete = () => {
     if (!isConfirmValid) return;
-    dispatch(DeleteAccountFunction());
+    dispatch(DeleteAccountFunction(data.id));
   };
 
   const handleClose = () => {

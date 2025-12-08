@@ -15,12 +15,21 @@ import Completed from "../pages/Completed";
 import PersonalInfoPage from "../pages/PersonalInfoPage";
 import DashBoard from "../pages/DashBoard";
 import ChatBot from "../pages/ChatBot";
+import PublicRoute from "../Auth/PublicRoute";
+import ProtectedRoute from "../Auth/ProtectedRoute";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       {/* Auth Routes */}
-      <Route path="/" element={<Layout />}>
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <Layout />
+          </PublicRoute>
+        }
+      >
         <Route index element={<Login />}></Route>
         <Route path="signup" element={<SignUp />}></Route>
         <Route path="forgotpassword" element={<ForgotPassword />}></Route>
@@ -29,7 +38,14 @@ const router = createBrowserRouter(
         <Route path="*" element={<NotFound />}></Route>
       </Route>
       {/* Main Routes */}
-      <Route path="/home" element={<MasterLayout />}>
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <MasterLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Home />} />
         <Route path="dashboard" element={<DashBoard />} />
         <Route path="chatbot" element={<ChatBot />} />

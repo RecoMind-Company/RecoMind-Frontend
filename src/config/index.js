@@ -3,6 +3,9 @@ import axios from "axios";
 export const axiosAuth = axios.create({
   baseURL: "https://api.recomind.site/api/Authentication",
 });
+export const axiosaccount = axios.create({
+  baseURL: "https://api.recomind.site/api/users",
+});
 
 axiosAuth.interceptors.request.use(
   (config) => {

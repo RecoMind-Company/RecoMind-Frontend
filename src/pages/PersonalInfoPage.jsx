@@ -22,6 +22,12 @@ const PersonalInfoPage = () => {
   const [resetEdit, setResetEdit] = useState(false);
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
+  const profileData = {
+    name: storedUser.name || "",
+    email: storedUser.email || "",
+  };
   useEffect(() => {
     if (!userData.isProfileComplete && !userData.phone && !userData.jobTitle) {
       setShowCompletionBanner(true);
@@ -85,7 +91,7 @@ const PersonalInfoPage = () => {
         {showCompletionBanner && (
           <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
             <ProfileCompletionBanner
-              userName={userData.name.split(" ")[0]}
+              userName={profileData.name || "User"}
               completionPercentage={50}
               onClose={() => setShowCompletionBanner(false)}
               onComplete={handleProfileCompletion}
@@ -105,20 +111,15 @@ const PersonalInfoPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <InputField
                 label="Name"
-                value={userData.name}
-                onChange={(newValue, resetSave) =>
-                  handleInputChange("name", newValue, resetSave)
-                }
-                resetEdit={resetEdit}
+                value={profileData.name}
+                onChange={(newValue) => console.log(newValue)}
               />
+
               <InputField
                 label="Email"
-                value={userData.email}
-                onChange={(newValue, resetSave) =>
-                  handleInputChange("email", newValue, resetSave)
-                }
+                value={profileData.email}
+                onChange={(newValue) => console.log(newValue)}
                 type="email"
-                resetEdit={resetEdit}
               />
             </div>
 

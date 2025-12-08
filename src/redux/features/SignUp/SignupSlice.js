@@ -13,6 +13,7 @@ export const SignupFunction = createAsyncThunk(
   async (data, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
+      console.log(data);
       const res = await axiosAuth.post("/register", data);
       if (res.status === 200) {
         toast.success("Successfully registered!", {
@@ -24,18 +25,20 @@ export const SignupFunction = createAsyncThunk(
             width: "fit-content",
           },
         });
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data));
         return res.data;
       }
     } catch (error) {
       const errorobj = error;
-      const errorMessages = errorobj.response?.data.error;
+      console.log(errorobj);
+      const errorMessages = errorobj.response?.data;
       if (errorMessages) {
-        const allErrors = Object.values(errorMessages).flat().join(", ");
-        toast.error(allErrors, {
+        toast.error(errorMessages, {
           position: "bottom-center",
           duration: 1500,
         });
-        return rejectWithValue(allErrors);
+        return rejectWithValue(errorMessages);
       }
     }
   }
@@ -60,6 +63,9 @@ export const signupSlice = createSlice({
       state.isloading = false;
       state.data = action.payload;
       state.success = true;
+      setTimeout(() => {
+        location.replace("/home");
+      }, 2000);
     });
     builder.addCase(SignupFunction.rejected, (state) => {
       state.isloading = false;

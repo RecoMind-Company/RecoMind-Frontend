@@ -16,10 +16,11 @@ export const LoginFunction = createAsyncThunk(
     try {
       const res = await axiosAuth.post("/login", data);
       if (res.status === 200) {
-        const { token, user } = res.data;
+        console.log(res);
+        const { token } = res.data;
 
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(res.data));
 
         toast.success("Login Successfully", {
           position: "bottom-center",
@@ -85,6 +86,9 @@ export const signinSlice = createSlice({
       state.data = action.payload;
       state.isAuthenticated = true;
       state.user = action.payload.user;
+      setTimeout(() => {
+        location.replace("/home");
+      }, 2000);
     });
     builder.addCase(LoginFunction.rejected, (state) => {
       state.isloading = false;
