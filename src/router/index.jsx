@@ -45,7 +45,7 @@ const router = createBrowserRouter(
             <MasterLayout />
           </ProtectedRoute>
         }
-      > 
+      >
         <Route index element={<Home />} />
         <Route path="dashboard" element={<DashBoard />} />
         <Route path="chatbot" element={<ChatBot />} />
