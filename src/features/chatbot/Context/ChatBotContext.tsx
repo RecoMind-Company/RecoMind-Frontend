@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
-import { chatbotAPI } from "../services/chatbotAPI";
+import { chatbotAPI } from "@/features/chatbot/services/chatbotAPI";
 
 const ChatBotContext = createContext(undefined);
 
