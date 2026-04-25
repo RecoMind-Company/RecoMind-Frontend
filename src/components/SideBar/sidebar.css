@@ -9,7 +9,7 @@
   left: 134px;
   top: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
-  width: 330px;
+  width: 380px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   z-index: 50;
