@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/app/apiClient";
+import client from "@/api/client";
 
 export interface UserProfile {
   id: string;
@@ -16,7 +16,7 @@ export const useProfile = () => {
   return useQuery<UserProfile>({
     queryKey: ["profile"],
     queryFn: async () => {
-      const { data } = await apiClient.get("/users/getProfile");
+      const { data } = await client.get("/users/getProfile");
       return data;
     },
     // Only fetch if token exists

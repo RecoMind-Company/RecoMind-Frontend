@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import apiClient from "@/app/apiClient";
+import client from "@/api/client";
 import toast from "react-hot-toast";
 
 interface ChangePasswordParams {
@@ -10,7 +10,7 @@ interface ChangePasswordParams {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: async (params: ChangePasswordParams) => {
-      const { data } = await apiClient.post("/users/changePassword", params);
+      const { data } = await client.post("/users/changePassword", params);
       return data;
     },
     onSuccess: () => {
