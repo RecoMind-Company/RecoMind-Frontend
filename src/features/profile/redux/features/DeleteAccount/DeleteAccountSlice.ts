@@ -2,7 +2,23 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosaccount } from "../../../config";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface AxiosErrorShape {
+  response?: {
+    data?: {
+      message?: string;
+      error?: unknown;
+    };
+  };
+}
+
+interface DeleteAccountState {
+  isloading: boolean;
+  data: object;
+  success: boolean;
+  error: string | null;
+}
+
+const initialState: DeleteAccountState = {
   isloading: false,
   data: {},
   success: false,
@@ -11,7 +27,7 @@ const initialState = {
 
 export const DeleteAccountFunction = createAsyncThunk(
   "DeleteAccount/deleteAccount",
-  async (id, thunkApi) => {
+  async (id: string, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       const token = localStorage.getItem("token");
@@ -38,13 +54,15 @@ export const DeleteAccountFunction = createAsyncThunk(
         return res.data;
       }
     } catch (error) {
-      const errorobj = error;
+      const errorobj = error as AxiosErrorShape;
       const errorMessage =
         errorobj.response?.data?.message ||
-        errorobj.response?.data?.error ||
+        (typeof errorobj.response?.data?.error === "string"
+          ? errorobj.response.data.error
+          : null) ||
         "Failed to delete account";
 
-      toast.error(errorMessage, {
+      toast.error(String(errorMessage), {
         position: "bottom-center",
         duration: 1500,
       });
@@ -72,7 +90,7 @@ export const deleteAccountSlice = createSlice({
     });
     builder.addCase(DeleteAccountFunction.fulfilled, (state, action) => {
       state.isloading = false;
-      state.data = action.payload;
+      state.data = action.payload as object;
       state.success = true;
       state.error = null;
     });
@@ -80,7 +98,7 @@ export const deleteAccountSlice = createSlice({
       state.isloading = false;
       state.data = {};
       state.success = false;
-      state.error = action.payload;
+      state.error = action.payload as string | null;
     });
   },
 });

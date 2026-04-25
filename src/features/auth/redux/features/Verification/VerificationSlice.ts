@@ -2,7 +2,23 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosAuth } from "../../../config";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface AxiosErrorShape {
+  response?: {
+    data?: {
+      message?: string;
+      error?: unknown;
+    };
+  };
+}
+
+interface VerificationState {
+  isloading: boolean;
+  data: object;
+  success: boolean;
+  error: string | null;
+}
+
+const initialState: VerificationState = {
   isloading: false,
   data: {},
   success: false,
@@ -11,7 +27,7 @@ const initialState = {
 
 export const VerificationFunction = createAsyncThunk(
   "Verification/verify",
-  async (data, thunkApi) => {
+  async (data: unknown, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       const res = await axiosAuth.post("/verify", data);
@@ -30,17 +46,21 @@ export const VerificationFunction = createAsyncThunk(
         return res.data;
       }
     } catch (error) {
-      const errorobj = error;
+      const errorobj = error as AxiosErrorShape;
       const errorMessage =
         errorobj.response?.data?.message ||
-        errorobj.response?.data?.error ||
+        (typeof errorobj.response?.data?.error === "string"
+          ? errorobj.response.data.error
+          : null) ||
         "Verification failed";
 
       if (
         errorobj.response?.data?.error &&
         typeof errorobj.response.data.error === "object"
       ) {
-        const allErrors = Object.values(errorobj.response.data.error)
+        const allErrors = Object.values(
+          errorobj.response.data.error as Record<string, unknown[]>
+        )
           .flat()
           .join(", ");
         toast.error(allErrors, {
@@ -49,7 +69,7 @@ export const VerificationFunction = createAsyncThunk(
         });
         return rejectWithValue(allErrors);
       } else {
-        toast.error(errorMessage, {
+        toast.error(String(errorMessage), {
           position: "bottom-center",
           duration: 1500,
         });
@@ -62,7 +82,7 @@ export const VerificationFunction = createAsyncThunk(
 // Resend Code Function
 export const ResendCodeFunction = createAsyncThunk(
   "Verification/resendCode",
-  async (email, thunkApi) => {
+  async (email: string, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       const res = await axiosAuth.post("/resend-code", { email });
@@ -80,10 +100,11 @@ export const ResendCodeFunction = createAsyncThunk(
         return res.data;
       }
     } catch (error) {
+      const errorobj = error as AxiosErrorShape;
       const errorMessage =
-        error.response?.data?.message || "Failed to resend code";
+        errorobj.response?.data?.message || "Failed to resend code";
 
-      toast.error(errorMessage, {
+      toast.error(String(errorMessage), {
         position: "bottom-center",
         duration: 1500,
       });
@@ -112,7 +133,7 @@ export const verificationSlice = createSlice({
     });
     builder.addCase(VerificationFunction.fulfilled, (state, action) => {
       state.isloading = false;
-      state.data = action.payload;
+      state.data = action.payload as object;
       state.success = true;
       state.error = null;
     });
@@ -120,7 +141,7 @@ export const verificationSlice = createSlice({
       state.isloading = false;
       state.data = {};
       state.success = false;
-      state.error = action.payload;
+      state.error = action.payload as string | null;
     });
 
     // Resend Code

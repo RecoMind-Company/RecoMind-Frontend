@@ -1,14 +1,18 @@
-import { useState, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState, useRef, useEffect, ChangeEvent, KeyboardEvent, ClipboardEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Mail, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   VerificationFunction,
   ResendCodeFunction,
   resetState,
 } from "../redux/features/Verification/VerificationSlice";
 import Key from "../assets/images/Key.png";
+
+interface LocationState {
+  email?: string;
+}
 
 const Verification = () => {
   const [email, setEmail] = useState("");
@@ -23,21 +27,22 @@ const Verification = () => {
     confirmNewPassword: false,
   });
 
-  const inputRefs = useRef([]);
-  const dispatch = useDispatch();
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const state = location.state as LocationState;
 
-  const { isloading, success } = useSelector((state) => state.verification);
+  const { isloading, success } = useAppSelector((state) => state.verification);
 
   const [counter, setCounter] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
   useEffect(() => {
-    if (location.state?.email) {
-      setEmail(location.state.email);
+    if (state?.email) {
+      setEmail(state.email);
     }
-  }, [location]);
+  }, [state]);
 
   useEffect(() => {
     if (counter > 0) {
@@ -55,7 +60,7 @@ const Verification = () => {
     dispatch(ResendCodeFunction(email));
   };
 
-  const handleOtpChange = (index, value) => {
+  const handleOtpChange = (index: number, value: string) => {
     const newOtp = [...otp];
     const digit = value.slice(-1);
     newOtp[index] = digit;
@@ -63,12 +68,12 @@ const Verification = () => {
     if (digit && index < otp.length - 1) inputRefs.current[index + 1]?.focus();
   };
 
-  const handleKeyDown = (index, e) => {
+  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otp[index] && index > 0)
       inputRefs.current[index - 1]?.focus();
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (e: ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text/plain").trim();
     if (/^\d{4}$/.test(pasted)) {
@@ -77,12 +82,12 @@ const Verification = () => {
     }
   };
 
-  const isEmailValid = (email) => {
+  const isEmailValid = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const isPasswordValid = (password) => {
+  const isPasswordValid = (password: string) => {
     return password.length >= 8;
   };
 
@@ -97,7 +102,7 @@ const Verification = () => {
     doPasswordsMatch() &&
     isOtpFilled;
 
-  const handleVerify = async (e) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isFormValid) {
@@ -285,11 +290,13 @@ const Verification = () => {
                   <input
                     key={i}
                     type="text"
-                    maxLength="1"
+                    maxLength={1}
                     value={digit}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    ref={(el) => (inputRefs.current[i] = el)}
+                    ref={(el) => {
+                      inputRefs.current[i] = el;
+                    }}
                     disabled={isloading}
                     className="w-[60px] h-[60px] text-center text-3xl font-medium rounded-lg border-2 bg-transparent text-[var(--font_primary)] transition duration-150 focus:ring-0 outline-none border-[var(--border_color)] focus:border-[var(--Secondary)]"
                   />

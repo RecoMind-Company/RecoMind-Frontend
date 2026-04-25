@@ -5,11 +5,13 @@ import { FaRocket } from "react-icons/fa";
 
 const Home = () => {
   const [showBanner, setShowBanner] = useState(true);
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+  
+  const storedUserRaw = localStorage.getItem("user");
+  const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : {};
 
-  const profileData = {
-    name: storedUser.name || "",
-    email: storedUser.email || "",
+  const profileData: { name: string; email: string } = {
+    name: (storedUser.name as string) || "",
+    email: (storedUser.email as string) || "",
   };
 
   return (

@@ -2,7 +2,23 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosAuth } from "../../../config";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface AxiosErrorShape {
+  response?: {
+    data?: {
+      message?: string;
+      error?: unknown;
+    };
+  };
+}
+
+interface ForgotPasswordState {
+  isloading: boolean;
+  data: object;
+  success: boolean;
+  error: string | null;
+}
+
+const initialState: ForgotPasswordState = {
   isloading: false,
   data: {},
   success: false,
@@ -11,7 +27,7 @@ const initialState = {
 
 export const ForgotPasswordFunction = createAsyncThunk(
   "ForgotPassword/forgetPassword",
-  async (data, thunkApi) => {
+  async (data: unknown, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       console.log(data);
@@ -34,17 +50,21 @@ export const ForgotPasswordFunction = createAsyncThunk(
         return res.data;
       }
     } catch (error) {
-      const errorobj = error;
+      const errorobj = error as AxiosErrorShape;
       const errorMessage =
         errorobj.response?.data?.message ||
-        errorobj.response?.data?.error ||
+        (typeof errorobj.response?.data?.error === "string"
+          ? errorobj.response.data.error
+          : null) ||
         "Failed to send reset email";
 
       if (
         errorobj.response?.data?.error &&
         typeof errorobj.response.data.error === "object"
       ) {
-        const allErrors = Object.values(errorobj.response.data.error)
+        const allErrors = Object.values(
+          errorobj.response.data.error as Record<string, unknown[]>
+        )
           .flat()
           .join(", ");
         toast.error(allErrors, {
@@ -53,7 +73,7 @@ export const ForgotPasswordFunction = createAsyncThunk(
         });
         return rejectWithValue(allErrors);
       } else {
-        toast.error(errorMessage, {
+        toast.error(String(errorMessage), {
           position: "bottom-center",
           duration: 1500,
         });
@@ -82,7 +102,7 @@ export const forgotPasswordSlice = createSlice({
     });
     builder.addCase(ForgotPasswordFunction.fulfilled, (state, action) => {
       state.isloading = false;
-      state.data = action.payload;
+      state.data = action.payload as object;
       state.success = true;
       state.error = null;
     });
@@ -90,7 +110,7 @@ export const forgotPasswordSlice = createSlice({
       state.isloading = false;
       state.data = {};
       state.success = false;
-      state.error = action.payload;
+      state.error = action.payload as string | null;
     });
   },
 });

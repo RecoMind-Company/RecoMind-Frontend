@@ -1,17 +1,22 @@
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { logout } from "../redux/features/SignIn/SigninSlice";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
-const LogoutButton = () => {
+interface LogoutButtonProps {
+  onClick?: () => void;
+}
+
+const LogoutButton = ({ onClick }: LogoutButtonProps) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    dispatch(logout());
+    // Clear local storage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-    toast.success("Logged out successfully", {
+    if (onClick) onClick();
+
+    toast.success("Logged out successfully!", {
       position: "bottom-center",
       duration: 1500,
       style: {
@@ -21,25 +26,17 @@ const LogoutButton = () => {
       },
     });
 
-    setTimeout(() => {
-      navigate("/");
-    }, 1000);
+    // Redirect to sign in
+    navigate("/signin");
   };
 
   return (
     <button
       onClick={handleLogout}
-      className="
-        flex items-center justify-center gap-2
-        md:w-[298px] md:h-[63px]
-        w-full h-[50px]
-        rounded-lg bg-[#454A554D] p-4 
-        text-[var(--error)] font-medium text-[18px] 
-        transition-all duration-300 hover:opacity-80
-      "
+      className="flex items-center gap-3 px-6 py-3 bg-[#1C2435] text-red-500 rounded-xl hover:bg-[#252d3d] transition-all border border-red-500/20"
     >
-      <LogOut size={22} className="sm:w-5 sm:h-5" />
-      <span className="text-lg">Logout</span>
+      <LogOut size={20} />
+      <span className="text-[16px] font-semibold">Logout</span>
     </button>
   );
 };

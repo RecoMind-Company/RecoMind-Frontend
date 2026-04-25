@@ -1,19 +1,26 @@
 import "./sidebar.css";
 import { assets } from "../../assets/assets";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, MouseEvent, KeyboardEvent, ChangeEvent } from "react";
 import useChatBot from "../../Context/ChatBotContext";
-import { FaTrashAlt, FaEllipsisV, FaPen, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
+import { FaTrashAlt, FaEllipsisV, FaPen, FaCheck, FaTimes } from "react-icons/fa";
 import { IoSearchOutline, IoWarningOutline } from "react-icons/io5";
 import { toast, Toaster } from "react-hot-toast";
+
+interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  // ... other properties if needed
+}
 
 function Sidebar() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeMenu, setActiveMenu] = useState(null);
-  const [editingSession, setEditingSession] = useState(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [editingSession, setEditingSession] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const inputRef = useRef(null);
-  const sidebarRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const {
     newChat,
@@ -26,12 +33,12 @@ function Sidebar() {
   } = useChatBot();
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    function handleClickOutside(event: MouseEvent | globalThis.MouseEvent) {
       const dropdowns = document.querySelectorAll('.dropdown-menu');
       let clickedInsideDropdown = false;
       
       dropdowns.forEach(dropdown => {
-        if (dropdown.contains(event.target)) {
+        if (dropdown.contains(event.target as Node)) {
           clickedInsideDropdown = true;
         }
       });
@@ -40,7 +47,7 @@ function Sidebar() {
       let clickedMenuButton = false;
       
       menuButtons.forEach(button => {
-        if (button.contains(event.target)) {
+        if (button.contains(event.target as Node)) {
           clickedMenuButton = true;
         }
       });
@@ -87,13 +94,13 @@ function Sidebar() {
     });
   };
 
-  const handleLoadSession = (sessionId) => {
+  const handleLoadSession = (sessionId: string) => {
     if (editingSession !== sessionId) {
       loadSession(sessionId);
     }
   };
 
-  const handleDeleteSession = (e, sessionId) => {
+  const handleDeleteSession = (e: MouseEvent, sessionId: string) => {
     e.stopPropagation();
     setActiveMenu(null);
 
@@ -146,14 +153,14 @@ function Sidebar() {
     );
   };
 
-  const startRenaming = (e, sessionId, currentTitle) => {
+  const startRenaming = (e: MouseEvent, sessionId: string, currentTitle: string) => {
     e.stopPropagation();
     setActiveMenu(null);
     setEditingSession(sessionId);
     setEditTitle(currentTitle);
   };
 
-  const saveRename = (sessionId) => {
+  const saveRename = (sessionId: string) => {
     if (editTitle.trim() !== "") {
       const success = renameSession(sessionId, editTitle.trim());
       if (success) {
@@ -178,7 +185,7 @@ function Sidebar() {
     setEditTitle("");
   };
 
-  const handleKeyDown = (e, sessionId) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, sessionId: string) => {
     if (e.key === "Enter") {
       saveRename(sessionId);
     } else if (e.key === "Escape") {
@@ -186,7 +193,7 @@ function Sidebar() {
     }
   };
 
-  const toggleMenu = (e, sessionId) => {
+  const toggleMenu = (e: MouseEvent, sessionId: string) => {
     e.stopPropagation();
     setActiveMenu(activeMenu === sessionId ? null : sessionId);
   };
@@ -241,10 +248,10 @@ function Sidebar() {
     );
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now - date);
+    const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return "Today";
@@ -258,7 +265,7 @@ function Sidebar() {
     session.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const groupedSessions = filteredSessions.reduce((groups, session) => {
+  const groupedSessions = filteredSessions.reduce((groups: Record<string, ChatSession[]>, session) => {
     const dateLabel = formatDate(session.createdAt);
     if (!groups[dateLabel]) {
       groups[dateLabel] = [];
@@ -296,7 +303,7 @@ function Sidebar() {
                 placeholder="Search"
                 className="search-input"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               />
               <IoSearchOutline className="search-icon" size={18} />
               {searchQuery && (
@@ -333,14 +340,14 @@ function Sidebar() {
                               type="text"
                               className="rename-input"
                               value={editTitle}
-                              onChange={(e) => setEditTitle(e.target.value)}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) => setEditTitle(e.target.value)}
                               onKeyDown={(e) => handleKeyDown(e, session.id)}
                               onClick={(e) => e.stopPropagation()}
                             />
                             <div className="rename-actions">
                               <button
                                 className="rename-btn save"
-                                onClick={(e) => {
+                                onClick={(e: MouseEvent) => {
                                   e.stopPropagation();
                                   saveRename(session.id);
                                 }}
@@ -350,7 +357,7 @@ function Sidebar() {
                               </button>
                               <button
                                 className="rename-btn cancel"
-                                onClick={(e) => {
+                                onClick={(e: MouseEvent) => {
                                   e.stopPropagation();
                                   cancelRename();
                                 }}
@@ -367,7 +374,7 @@ function Sidebar() {
                             <div className="menu-container">
                               <button
                                 className="menu-btn"
-                                onClick={(e) => toggleMenu(e, session.id)}
+                                onClick={(e: MouseEvent) => toggleMenu(e, session.id)}
                               >
                                 <FaEllipsisV size={14} />
                               </button>
@@ -376,7 +383,7 @@ function Sidebar() {
                                 <div className="dropdown-menu">
                                   <button
                                     className="menu-item"
-                                    onClick={(e) =>
+                                    onClick={(e: MouseEvent) =>
                                       startRenaming(e, session.id, session.title)
                                     }
                                   >
@@ -385,7 +392,7 @@ function Sidebar() {
                                   </button>
                                   <button
                                     className="menu-item delete"
-                                    onClick={(e) =>
+                                    onClick={(e: MouseEvent) =>
                                       handleDeleteSession(e, session.id)
                                     }
                                   >

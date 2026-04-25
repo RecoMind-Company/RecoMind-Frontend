@@ -2,7 +2,23 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface AxiosErrorShape {
+  response?: {
+    data?: {
+      message?: string;
+      error?: unknown;
+    };
+  };
+}
+
+interface GetProfileState {
+  isloading: boolean;
+  data: object;
+  success: boolean;
+  error: string | null;
+}
+
+const initialState: GetProfileState = {
   isloading: false,
   data: {},
   success: false,
@@ -27,12 +43,15 @@ export const GetprofileFunction = createAsyncThunk(
 
       return res.data; // SUCCESS
     } catch (error) {
+      const errorobj = error as AxiosErrorShape;
       const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
+        errorobj.response?.data?.message ||
+        (typeof errorobj.response?.data?.error === "string"
+          ? errorobj.response.data.error
+          : null) ||
         "Failed to fetch profile";
 
-      toast.error(errorMessage, {
+      toast.error(String(errorMessage), {
         position: "bottom-center",
         duration: 1500,
       });
@@ -59,7 +78,7 @@ export const getprofile = createSlice({
       })
       .addCase(GetprofileFunction.fulfilled, (state, action) => {
         state.isloading = false;
-        state.data = action.payload;
+        state.data = action.payload as object;
         state.success = true;
         state.error = null;
       })
@@ -67,7 +86,7 @@ export const getprofile = createSlice({
         state.isloading = false;
         state.success = false;
         state.data = {};
-        state.error = action.payload;
+        state.error = action.payload as string | null;
       });
   },
 });

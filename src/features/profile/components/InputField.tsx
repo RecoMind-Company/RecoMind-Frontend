@@ -1,5 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ChangeEvent } from "react";
 import edit from "../assets/images/PencilSimpleLine.png";
+
+interface InputFieldProps {
+  label: string;
+  value: string;
+  onChange: (newValue: string, resetSave?: boolean) => void;
+  type?: string;
+  fullWidth?: boolean;
+  resetEdit?: boolean;
+}
 
 const InputField = ({
   label,
@@ -8,11 +17,11 @@ const InputField = ({
   type = "text",
   fullWidth = true,
   resetEdit,
-}) => {
+}: InputFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [originalValue, setOriginalValue] = useState(value);
   const [tempValue, setTempValue] = useState(value);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isEditing) setTempValue(value);
@@ -41,7 +50,7 @@ const InputField = ({
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTempValue(e.target.value);
     onChange(e.target.value);
   };

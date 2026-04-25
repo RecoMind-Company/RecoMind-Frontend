@@ -2,7 +2,23 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosAuth } from "../../../config";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface AxiosErrorShape {
+  response?: {
+    data?: {
+      message?: string;
+      error?: unknown;
+    };
+  };
+}
+
+interface SigninState {
+  isloading: boolean;
+  data: object;
+  isAuthenticated: boolean;
+  user: object | null;
+}
+
+const initialState: SigninState = {
   isloading: false,
   data: {},
   isAuthenticated: false,
@@ -11,7 +27,7 @@ const initialState = {
 
 export const LoginFunction = createAsyncThunk(
   "LoginFunction/Login",
-  async (data, thunkApi) => {
+  async (data: unknown, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       const res = await axiosAuth.post("/login", data);
@@ -35,18 +51,19 @@ export const LoginFunction = createAsyncThunk(
         return res.data;
       }
     } catch (error) {
-      const errorobj = error;
-      const errorMessages = errorobj.response?.data.error;
+      const errorobj = error as AxiosErrorShape;
+      const errorMessages = errorobj.response?.data?.error;
       if (errorMessages) {
-        const allErrors = Object.values(errorMessages).flat().join(", ");
+        const allErrors = Object.values(errorMessages as Record<string, unknown[]>).flat().join(", ");
         toast.error(allErrors, {
           position: "bottom-center",
           duration: 1500,
         });
         return rejectWithValue(allErrors);
       } else {
-        const errorMessage = errorobj.response?.data?.message || "Login failed";
-        toast.error(errorMessage, {
+        const errorMessage =
+          (error as AxiosErrorShape).response?.data?.message || "Login failed";
+        toast.error(String(errorMessage), {
           position: "bottom-center",
           duration: 1500,
         });
@@ -83,9 +100,9 @@ export const signinSlice = createSlice({
     });
     builder.addCase(LoginFunction.fulfilled, (state, action) => {
       state.isloading = false;
-      state.data = action.payload;
+      state.data = action.payload as object;
       state.isAuthenticated = true;
-      state.user = action.payload.user;
+      state.user = (action.payload as { user: object }).user;
       setTimeout(() => {
         location.replace("/home");
       }, 2000);

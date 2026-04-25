@@ -8,13 +8,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { schemaLogin, schemaRegister } from "../validation/Schema";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useSelector } from "react-redux";
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { SignupFunction } from "../redux/features/SignUp/SignupSlice";
 import { LoginFunction } from "../redux/features/SignIn/SigninSlice";
 import { Toaster } from "react-hot-toast";
 
-const LogRegForm = ({ title }) => {
+interface LogRegFormProps {
+  title: string;
+}
+
+interface AuthFormData {
+  fullName?: string;
+  email: string;
+  password: string;
+  role?: string;
+}
+
+const LogRegForm = ({ title }: LogRegFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
   const isSignUp = title.toLowerCase().includes("sign");
@@ -22,8 +32,8 @@ const LogRegForm = ({ title }) => {
   const schema = isSignUp ? schemaRegister : schemaLogin;
   const dispatch = useAppDispatch();
 
-  const { isloading: signupLoading } = useSelector((state) => state.signup);
-  const { isloading: signinLoading } = useSelector((state) => state.signin);
+  const { isloading: signupLoading } = useAppSelector((state) => state.signup);
+  const { isloading: signinLoading } = useAppSelector((state) => state.signin);
 
   const isloading = isSignUp ? signupLoading : signinLoading;
 
@@ -31,11 +41,11 @@ const LogRegForm = ({ title }) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
+  } = useForm<AuthFormData>({
+    resolver: yupResolver(schema) as any,
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: AuthFormData) => {
     console.log(data);
     if (isSignUp) {
       dispatch(SignupFunction(data));
@@ -44,7 +54,7 @@ const LogRegForm = ({ title }) => {
     }
   };
 
-  const isPasswordValid = (pass) => {
+  const isPasswordValid = (pass: string) => {
     const minLength = pass.length >= 8;
     const upper = /[A-Z]/.test(pass);
     const lower = /[a-z]/.test(pass);
@@ -146,7 +156,7 @@ const LogRegForm = ({ title }) => {
                   <input
                     type="text"
                     placeholder="Enter Your Name"
-                    {...register("fullName", { required: true })}
+                    {...register("fullName")}
                     className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
                   />
                 </div>
@@ -166,7 +176,7 @@ const LogRegForm = ({ title }) => {
               <div className="relative">
                 <Mail className="absolute left-3 top-3 text-[var(--border_color)] w-5 h-5" />
                 <input
-                  {...register("email", { required: true })}
+                  {...register("email")}
                   type="email"
                   placeholder="Enter Your Email"
                   className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
@@ -192,8 +202,11 @@ const LogRegForm = ({ title }) => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter Your Password"
                   value={passwordValue}
-                  {...register("password", { required: true, minLength: 6 })}
-                  onChange={(e) => setPasswordValue(e.target.value)}
+                  {...register("password")}
+                  onChange={(e) => {
+                    register("password").onChange(e);
+                    setPasswordValue(e.target.value);
+                  }}
                   className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-10 focus:outline-none focus:border-[var(--Secondary)] transition-all"
                 />
                 <button
@@ -238,7 +251,6 @@ const LogRegForm = ({ title }) => {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
-                      name="role"
                       value="admin"
                       className="h-4 w-4 accent-[var(--Secondary)]"
                       {...register("role")}
@@ -251,7 +263,6 @@ const LogRegForm = ({ title }) => {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
-                      name="role"
                       value="teamleader"
                       className="h-4 w-4 accent-[var(--Secondary)]"
                       {...register("role")}

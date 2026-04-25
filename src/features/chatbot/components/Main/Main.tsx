@@ -1,14 +1,14 @@
 import "./main.css";
 import { assets } from "../../assets/assets";
 import { useChatBot } from "../../Context/ChatBotContext";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, FormEvent, KeyboardEvent } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
 
 function Main() {
   const { handleSent, setInput, input, showResult, loading, messages } =
     useChatBot();
 
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -64,12 +64,12 @@ function Main() {
     "Generate monthly report",
   ];
 
-  const handleCardClick = (cardText) => {
+  const handleCardClick = (cardText: string) => {
     setInput(cardText);
     handleSent(cardText);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!loading && input.trim()) {
       handleSent();
@@ -79,6 +79,12 @@ function Main() {
   const handleSendClick = () => {
     if (!loading && input.trim()) {
       handleSent();
+    }
+  };
+
+  const handleKeyDown = (card: string, e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      handleCardClick(card);
     }
   };
 
@@ -98,11 +104,7 @@ function Main() {
                   key={index}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      handleCardClick(card);
-                    }
-                  }}
+                  onKeyDown={(e) => handleKeyDown(card, e)}
                 >
                   <p>{card}</p>
                 </div>
@@ -123,17 +125,8 @@ function Main() {
                     </div>
                     <img src={assets.user_icon} alt="User" className="avatar" />
                   </div>
-                ) : message.type === "error" ? (
-                  <div className="ai-message error-message">
-                    <img src={assets.ai_icon} alt="AI" className="avatar" />
-                    <div className="message-content">
-                      <p
-                        dangerouslySetInnerHTML={{ __html: message.content }}
-                      ></p>
-                    </div>
-                  </div>
                 ) : (
-                  <div className="ai-message">
+                  <div className={`ai-message ${message.type === "error" ? "error-message" : ""}`}>
                     <img src={assets.ai_icon} alt="AI" className="avatar" />
                     <div className="message-content">
                       <p

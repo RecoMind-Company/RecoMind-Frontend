@@ -1,239 +1,167 @@
-import { useState } from "react";
-import { Key, Eye, EyeOff, X, AlertCircle } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  ChangePasswordFunction,
-  resetState,
-} from "../redux/features/ChangePassword/ChangePasswordSlice";
+import { KeyRound, Eye, EyeOff, X, AlertCircle } from "lucide-react";
+import { useState, FormEvent } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { ChangePasswordFunction, resetState } from "../redux/features/ChangePassword/ChangePasswordSlice";
+import { toast } from "react-hot-toast";
 
 const ChangePasswordButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [touched, setTouched] = useState({
-    oldPassword: false,
-    newPassword: false,
-    confirmNewPassword: false,
-  });
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const dispatch = useDispatch();
-  const { isloading, success } = useSelector((state) => state.changePassword);
+  const dispatch = useAppDispatch();
+  const { isloading } = useAppSelector((state) => state.changePassword);
 
-  const isPasswordValid = (password) => {
-    return password.length >= 8;
-  };
-
-  const doPasswordsMatch = () => {
-    return newPassword === confirmNewPassword && newPassword.length > 0;
-  };
-
-  const isFormValid =
-    oldPassword.length > 0 &&
-    isPasswordValid(newPassword) &&
-    doPasswordsMatch();
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!isFormValid) return;
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-    const data = {
-      oldPassword,
-      newPassword,
-      confirmNewPassword,
-    };
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
 
-    dispatch(ChangePasswordFunction(data));
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    const resultAction = await dispatch(
+      ChangePasswordFunction({ oldPassword, newPassword })
+    );
+
+    if (ChangePasswordFunction.fulfilled.match(resultAction)) {
+      setShowModal(false);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      dispatch(resetState());
+    }
   };
-
-  const handleClose = () => {
-    setIsOpen(false);
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
-    setTouched({
-      oldPassword: false,
-      newPassword: false,
-      confirmNewPassword: false,
-    });
-    dispatch(resetState());
-  };
-
-  if (success) {
-    setTimeout(() => {
-      handleClose();
-    }, 1500);
-  }
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
-        className="
-          flex items-center justify-center gap-2
-          md:w-[298px] md:h-[63px]
-          w-full h-[50px]
-          rounded-lg bg-[#454A554D] p-4 
-          text-[var(--Secondary)] font-medium text-[18px] 
-          transition-all duration-300 hover:opacity-80
-        "
+        onClick={() => setShowModal(true)}
+        className="flex items-center gap-3 px-6 py-3 bg-[#1C2435] text-white rounded-xl hover:bg-[#252d3d] transition-all border border-gray-700"
       >
-        <Key size={22} className="sm:w-5 sm:h-5" />
-        <span className="text-lg">Change Password</span>
+        <KeyRound size={20} />
+        <span className="text-[16px] font-semibold">Change Password</span>
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-[500px] bg-[var(--Primary)] rounded-lg shadow-2xl p-6 md:p-8 border border-[var(--border_color)]/10">
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1C2435] w-full max-w-md rounded-2xl border border-gray-700 shadow-2xl relative">
             <button
-              onClick={handleClose}
-              disabled={isloading}
-              className="absolute top-4 right-4 text-[var(--font_secondary)] hover:text-[var(--font_primary)] transition-colors disabled:opacity-50"
+              onClick={() => setShowModal(false)}
+              className="absolute right-4 top-4 text-gray-400 hover:text-white transition-all"
             >
               <X size={24} />
             </button>
 
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-[var(--Secondary)] bg-opacity-20 flex items-center justify-center">
-                <Key size={24} className="text-[var(--Secondary)]" />
-              </div>
-              <h2 className="text-2xl font-semibold text-[var(--font_primary)]">
+            <div className="p-8">
+              <h3 className="text-2xl font-bold text-white mb-2">
                 Change Password
-              </h2>
-            </div>
+              </h3>
+              <p className="text-gray-400 mb-8">
+                Update your account password to keep it secure.
+              </p>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-[var(--font_primary)] font-medium">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showOldPassword ? "text" : "password"}
-                    placeholder="Enter current password"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                    onBlur={() => setTouched({ ...touched, oldPassword: true })}
-                    disabled={isloading}
-                    className={`w-full bg-transparent border rounded-md py-2 px-4 pr-10 focus:outline-none transition-all disabled:opacity-50 ${
-                      touched.oldPassword && oldPassword.length === 0
-                        ? "border-[var(--error)]"
-                        : "border-[var(--border_color)] focus:border-[var(--Secondary)]"
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowOldPassword(!showOldPassword)}
-                    className="absolute right-3 top-3 text-[var(--border_color)]"
-                  >
-                    {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300 ml-1">
+                    Old Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showOld ? "text" : "password"}
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                      placeholder="Enter old password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowOld(!showOld)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    >
+                      {showOld ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[var(--font_primary)] font-medium">
-                  New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showNewPassword ? "text" : "password"}
-                    placeholder="Enter new password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    onBlur={() => setTouched({ ...touched, newPassword: true })}
-                    disabled={isloading}
-                    className={`w-full bg-transparent border rounded-md py-2 px-4 pr-10 focus:outline-none transition-all disabled:opacity-50 ${
-                      touched.newPassword && !isPasswordValid(newPassword)
-                        ? "border-[var(--error)]"
-                        : "border-[var(--border_color)] focus:border-[var(--Secondary)]"
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-3 text-[var(--border_color)]"
-                  >
-                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300 ml-1">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNew ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                      placeholder="Enter new password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNew(!showNew)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    >
+                      {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
-                {touched.newPassword &&
-                  !isPasswordValid(newPassword) &&
-                  newPassword.length > 0 && (
-                    <p className="text-[var(--error)] text-sm flex items-center gap-1">
-                      <AlertCircle size={14} /> Password must be at least 8
-                      characters
-                    </p>
-                  )}
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[var(--font_primary)] font-medium">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm new password"
-                    value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    onBlur={() =>
-                      setTouched({ ...touched, confirmNewPassword: true })
-                    }
-                    disabled={isloading}
-                    className={`w-full bg-transparent border rounded-md py-2 px-4 pr-10 focus:outline-none transition-all disabled:opacity-50 ${
-                      touched.confirmNewPassword && !doPasswordsMatch()
-                        ? "border-[var(--error)]"
-                        : "border-[var(--border_color)] focus:border-[var(--Secondary)]"
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3 text-[var(--border_color)]"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff size={20} />
-                    ) : (
-                      <Eye size={20} />
-                    )}
-                  </button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300 ml-1">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                      placeholder="Confirm new password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    >
+                      {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
-                {touched.confirmNewPassword &&
-                  !doPasswordsMatch() &&
-                  confirmNewPassword.length > 0 && (
-                    <p className="text-[var(--error)] text-sm flex items-center gap-1">
-                      <AlertCircle size={14} /> Passwords do not match
-                    </p>
-                  )}
-              </div>
 
-              <div className="flex gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  disabled={isloading}
-                  className="flex-1 rounded-lg py-2. 5 font-medium text-[16px] transition-all border border-[var(--border_color)] text-[var(--font_primary)] hover:opacity-80 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
+                {newPassword && confirmPassword && newPassword !== confirmPassword && (
+                  <div className="flex items-center gap-2 text-red-500 text-sm ml-1">
+                    <AlertCircle size={14} />
+                    <span>Passwords do not match</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={isloading || !isFormValid}
-                  className="flex-1 rounded-lg py-2.5 font-medium text-[16px] transition-all bg-[var(--Secondary)] text-[var(--Primary)] hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  disabled={isloading}
+                  className="w-full py-4 bg-[var(--Secondary)] text-[var(--Primary)] rounded-xl font-bold text-lg hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center"
                 >
                   {isloading ? (
-                    <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                    <div className="w-6 h-6 border-2 border-[var(--Primary)] border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    "Change Password"
+                    "Update Password"
                   )}
                 </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Toaster } from "react-hot-toast";
 import ProfileAvatar from "../components/ProfileAvatar";
 import InputField from "../components/InputField";
@@ -8,8 +8,17 @@ import userB from "../assets/images/userB.png";
 import ChangePasswordButton from "../components/ChangePasswordButton";
 import DeleteAccountButton from "../components/DeleteAccountButton";
 
+interface UserData {
+  name: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  profileImage: string;
+  isProfileComplete: boolean;
+}
+
 const PersonalInfoPage = () => {
-  const [userData, setUserData] = useState({
+  const [userData, setUserData] = useState<UserData>({
     name: "ALi Alaa",
     email: "ali@gmail.com",
     phone: "",
@@ -22,19 +31,20 @@ const PersonalInfoPage = () => {
   const [resetEdit, setResetEdit] = useState(false);
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+  const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
 
   const profileData = {
-    name: storedUser.name || "",
-    email: storedUser.email || "",
+    name: (storedUser.name as string) || "",
+    email: (storedUser.email as string) || "",
   };
+
   useEffect(() => {
     if (!userData.isProfileComplete && !userData.phone && !userData.jobTitle) {
       setShowCompletionBanner(true);
     }
   }, [userData]);
 
-  const handleInputChange = (field, value, resetSave = false) => {
+  const handleInputChange = (field: keyof UserData, value: string | boolean, resetSave = false) => {
     setUserData((prev) => ({ ...prev, [field]: value }));
     if (resetSave) {
       setHasChanges(false);
@@ -52,7 +62,7 @@ const PersonalInfoPage = () => {
     alert("Changes saved successfully!");
   };
 
-  const handleProfileCompletion = (jobTitle, phoneNumber) => {
+  const handleProfileCompletion = (jobTitle: string, phoneNumber: string) => {
     setUserData((prev) => ({
       ...prev,
       jobTitle,
@@ -66,16 +76,19 @@ const PersonalInfoPage = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = e.target.files[0];
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
-          setUserData((prev) => ({
-            ...prev,
-            profileImage: event.target.result,
-          }));
-          setHasChanges(true);
+          if (event.target?.result) {
+            setUserData((prev) => ({
+              ...prev,
+              profileImage: event.target?.result as string,
+            }));
+            setHasChanges(true);
+          }
         };
         reader.readAsDataURL(file);
       }

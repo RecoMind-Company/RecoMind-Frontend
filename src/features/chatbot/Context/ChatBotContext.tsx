@@ -1,29 +1,80 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { chatbotAPI } from "@/features/chatbot/services/chatbotAPI";
 
-const ChatBotContext = createContext(undefined);
+/* ─────────── Types ─────────── */
+interface Message {
+  id: string;
+  type: "user" | "ai" | "error";
+  content: string;
+  timestamp: string;
+  taskId?: string;
+}
 
-function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
+interface ConversationEntry {
+  role: string;
+  parts: { text: string }[];
+}
+
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  conversationHistory: ConversationEntry[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ChatBotContextType {
+  input: string;
+  setInput: (v: string) => void;
+  recentPrompt: string;
+  setRecentPrompt: (prompt: string) => void;
+  prevPrompts: string[];
+  setPrevPrompts: () => void;
+  showResult: boolean;
+  setShowResult: (v: boolean) => void;
+  handleSent: (promptText?: string) => Promise<void>;
+  resultData: string;
+  setResultData: (v: string) => void;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+  newChat: () => void;
+  clearChatHistory: () => void;
+  deletePrompt: (sessionId: string) => void;
+  conversationHistory: ConversationEntry[];
+  messages: Message[];
+  setMessages: () => void;
+  chatSessions: ChatSession[];
+  currentSessionId: string | null;
+  currentSession: ChatSession | null;
+  loadSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => void;
+  renameSession: (sessionId: string, newTitle: string) => boolean;
+}
+
+const ChatBotContext = createContext<ChatBotContextType | undefined>(undefined);
+
+function ChatBotContextProvider({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState("");
-  const [chatSessions, setChatSessions] = useState(() => {
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
     const saved = localStorage.getItem("chatSessions");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? (JSON.parse(saved) as ChatSession[]) : [];
   });
 
-  const [currentSessionId, setCurrentSessionId] = useState(() => {
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
     const saved = localStorage.getItem("currentSessionId");
     return saved || null;
   });
 
   const currentSession =
-    chatSessions.find((s) => s.id === currentSessionId) || null;
+    chatSessions.find((s) => s.id === currentSessionId) ?? null;
   const prevPrompts = chatSessions.map((s) => s.title);
 
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
 
-  const animationRef = useRef(null);
+  const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
     localStorage.setItem("chatSessions", JSON.stringify(chatSessions));
@@ -50,7 +101,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     };
   }, []);
 
-  const formatResponse = (text) => {
+  const formatResponse = (text: string): string => {
     let formatted = text;
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
     formatted = formatted.replace(/\*(.*?)\*/g, "<i>$1</i>");
@@ -68,7 +119,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
   const newChat = () => {
     cancelAnimation();
 
-    const newSession = {
+    const newSession: ChatSession = {
       id: `session-${Date.now()}`,
       title: "New Chat",
       messages: [],
@@ -85,7 +136,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     setResultData("");
   };
 
-  const renameSession = (sessionId, newTitle) => {
+  const renameSession = (sessionId: string, newTitle: string): boolean => {
     if (!newTitle || !newTitle.trim()) {
       return false;
     }
@@ -106,7 +157,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     return true;
   };
 
-  const loadSession = (sessionId) => {
+  const loadSession = (sessionId: string) => {
     const session = chatSessions.find((s) => s.id === sessionId);
     if (session) {
       cancelAnimation();
@@ -118,13 +169,13 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     }
   };
 
-  const deleteSession = (sessionId) => {
+  const deleteSession = (sessionId: string) => {
     setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
 
     if (currentSessionId === sessionId) {
       const remaining = chatSessions.filter((s) => s.id !== sessionId);
       if (remaining.length > 0) {
-        setCurrentSessionId(remaining[0].id);
+        setCurrentSessionId(remaining[0]!.id);
       } else {
         setCurrentSessionId(null);
         setShowResult(false);
@@ -132,23 +183,26 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     }
   };
 
-  async function handleSent(promptText) {
-    const promptToSend = promptText || input;
+  async function handleSent(promptText?: string) {
+    const promptToSend = promptText ?? input;
 
     if (!promptToSend.trim()) {
       return;
     }
 
     // Get user info
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const userId = user.id || "f8e05038-03ff-419a-b00c-1669c6be857c";
-    const userRole = user.role || "admin";
+    const user = JSON.parse(localStorage.getItem("user") ?? "{}") as {
+      id?: string;
+      role?: string;
+    };
+    const userId = user.id ?? "f8e05038-03ff-419a-b00c-1669c6be857c";
+    const userRole = user.role ?? "admin";
 
     console.log("👤 User info:", { userId, userRole });
 
     // Create new session if needed
     if (!currentSessionId) {
-      const newSession = {
+      const newSession: ChatSession = {
         id: `session-${Date.now()}`,
         title:
           promptToSend.slice(0, 30) + (promptToSend.length > 30 ? "..." : ""),
@@ -167,7 +221,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     setShowResult(true);
 
     // Add user message
-    const userMessage = {
+    const userMessage: Message = {
       id: `msg-${Date.now()}`,
       type: "user",
       content: promptToSend,
@@ -180,7 +234,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
           session.id === currentSessionId ||
           (session.messages.length === 0 && !currentSessionId)
         ) {
-          const updatedSession = {
+          const updatedSession: ChatSession = {
             ...session,
             messages: [...session.messages, userMessage],
             updatedAt: new Date().toISOString(),
@@ -202,11 +256,11 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
       console.log("📤 Sending message to API...");
 
       // Step 1: Create task
-      const taskResponse = await chatbotAPI.sendMessage(
+      const taskResponse = (await chatbotAPI.sendMessage(
         promptToSend,
         userId,
         userRole
-      );
+      )) as { task_id?: string };
 
       console.log("✅ Task created:", taskResponse);
 
@@ -215,28 +269,32 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
         console.log("⏳ Starting to poll for response...");
 
         // Step 2: Wait for response with polling
-        const finalResponse = await chatbotAPI.waitForResponse(
+        const finalResponse = (await chatbotAPI.waitForResponse(
           taskResponse.task_id,
           userId,
           userRole,
           promptToSend,
-          (progressData) => {
+          (progressData: unknown) => {
             console.log("📈 Progress update:", progressData);
           }
-        );
+        )) as {
+          responseMessage?: string;
+          result?: string;
+          answer?: string;
+        };
 
         console.log("✅ Final response received:", finalResponse);
 
         // Format the response message
         const aiResponseText = formatResponse(
-          finalResponse.responseMessage ||
-            finalResponse.result ||
-            finalResponse.answer ||
+          finalResponse.responseMessage ??
+            finalResponse.result ??
+            finalResponse.answer ??
             "Response received successfully!"
         );
 
         // Add AI message
-        const aiMessage = {
+        const aiMessage: Message = {
           id: `msg-${Date.now() + 1}`,
           type: "ai",
           content: aiResponseText,
@@ -280,25 +338,30 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
       // Determine error message
       let errorText = "An error occurred. Please try again.";
 
-      if (error.message.includes("timeout")) {
+      const err = error as {
+        message?: string;
+        response?: { status?: number };
+      };
+
+      if (err.message?.includes("timeout")) {
         errorText =
           "Request timeout. The server is taking too long to respond.  Please try again.";
-      } else if (error.message.includes("Network")) {
+      } else if (err.message?.includes("Network")) {
         errorText = "Network error. Please check your internet connection.";
-      } else if (error.message.includes("failed")) {
-        errorText = error.message;
-      } else if (error.response?.status === 400) {
+      } else if (err.message?.includes("failed")) {
+        errorText = err.message ?? errorText;
+      } else if (err.response?.status === 400) {
         errorText = "Invalid request.  Please check your input and try again. ";
-      } else if (error.response?.status === 401) {
+      } else if (err.response?.status === 401) {
         errorText = "Authentication error. Please log in again.";
-      } else if (error.response?.status === 500) {
+      } else if (err.response?.status === 500) {
         errorText = "Server error. Please try again later.";
-      } else if (error.message) {
-        errorText = error.message;
+      } else if (err.message) {
+        errorText = err.message;
       }
 
       // Add error message
-      const errorMessage = {
+      const errorMessage: Message = {
         id: `msg-${Date.now() + 1}`,
         type: "error",
         content: `
@@ -342,7 +405,7 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     setResultData("");
   };
 
-  const setRecentPrompt = (prompt) => {
+  const setRecentPrompt = (prompt: string) => {
     const session = chatSessions.find((s) =>
       s.title.includes(prompt.slice(0, 20))
     );
@@ -351,10 +414,10 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     }
   };
 
-  const contextValue = {
+  const contextValue: ChatBotContextType = {
     input,
     setInput,
-    recentPrompt: currentSession?.title || "",
+    recentPrompt: currentSession?.title ?? "",
     setRecentPrompt,
     prevPrompts,
     setPrevPrompts: () => {},
@@ -368,8 +431,8 @@ function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
     newChat,
     clearChatHistory,
     deletePrompt: deleteSession,
-    conversationHistory: currentSession?.conversationHistory || [],
-    messages: currentSession?.messages || [],
+    conversationHistory: currentSession?.conversationHistory ?? [],
+    messages: currentSession?.messages ?? [],
     setMessages: () => {},
     chatSessions,
     currentSessionId,

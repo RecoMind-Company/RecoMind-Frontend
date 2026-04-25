@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { IoClose } from "react-icons/io5";
 import { toast } from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdError } from "react-icons/md";
 
-const ProfileCompletionModal = ({ onClose, onComplete }) => {
+interface ProfileCompletionModalProps {
+  onClose: () => void;
+  onComplete?: ((jobTitle: string, phoneNumber: string) => void) | undefined;
+}
+
+const ProfileCompletionModal = ({ onClose, onComplete }: ProfileCompletionModalProps) => {
   const [jobTitle, setJobTitle] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!jobTitle.trim() || !phoneNumber.trim()) {
@@ -108,11 +113,11 @@ const ProfileCompletionModal = ({ onClose, onComplete }) => {
           </div>
 
           {/* Success Message */}
-          <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4 animate-[fadeInUp_0. 6s_ease-out_0.2s_both]">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4 animate-[fadeInUp_0.6s_ease-out_0.2s_both]">
             Profile Complete!
           </h2>
 
-          <p className="text-base md:text-lg text-white/80 mb-6 animate-[fadeInUp_0.6s_ease-out_0. 3s_both]">
+          <p className="text-base md:text-lg text-white/80 mb-6 animate-[fadeInUp_0.6s_ease-out_0.3s_both]">
             Your profile is now{" "}
             <span className="text-[#64B883] font-semibold">100% complete</span>
           </p>
@@ -120,7 +125,7 @@ const ProfileCompletionModal = ({ onClose, onComplete }) => {
           {/* Progress Bar */}
           <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden animate-[fadeInUp_0.6s_ease-out_0.4s_both]">
             <div
-              className="h-full bg-gradient-to-r from-[#64B883] to-[#7EE3FF] rounded-full animate-[progressFill_1. 5s_ease-out_0.5s_both]"
+              className="h-full bg-gradient-to-r from-[#64B883] to-[#7EE3FF] rounded-full animate-[progressFill_1.5s_ease-out_0.5s_both]"
               style={{ width: "100%" }}
             ></div>
           </div>
@@ -132,7 +137,7 @@ const ProfileCompletionModal = ({ onClose, onComplete }) => {
           </p>
         </div>
 
-        <style jsx>{`
+        <style>{`
           @keyframes scaleIn {
             from {
               transform: scale(0);
@@ -249,7 +254,7 @@ const ProfileCompletionModal = ({ onClose, onComplete }) => {
                 <input
                   type="tel"
                   id="phoneNumber"
-                  className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0. 1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="e.g., +20 100 *** ****"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}

@@ -1,6 +1,11 @@
 import { Edit2 } from "lucide-react";
 
-const ProfileAvatar = ({ imageUrl, onImageChange }) => {
+interface ProfileAvatarProps {
+  imageUrl: string;
+  onImageChange: () => void;
+}
+
+const ProfileAvatar = ({ imageUrl, onImageChange }: ProfileAvatarProps) => {
   return (
     <div className="relative w-[166px] h-[166px] mb-6">
       <img

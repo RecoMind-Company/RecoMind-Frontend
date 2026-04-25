@@ -4,8 +4,25 @@ const CHATBOT_BASE_URL = "https://api.recomind.site/api/Chatbot";
 const POLLING_INTERVAL = 10000;
 const MAX_POLLING_TIME = 300000;
 
+interface CreateQueryResponse {
+  task_id: string;
+  [key: string]: unknown;
+}
+
+interface ChatbotResponse {
+  status: "SUCCESS" | "FAILURE" | "PENDING" | string;
+  responseMessage?: string;
+  result?: string;
+  answer?: string;
+  [key: string]: unknown;
+}
+
 export const chatbotAPI = {
-  async sendMessage(userQuestion, userId, userRole) {
+  async sendMessage(
+    userQuestion: string,
+    userId: string | number,
+    userRole: string
+  ): Promise<CreateQueryResponse> {
     try {
       console.log("📤 Sending message to CreateQuery.. .");
 
@@ -20,15 +37,20 @@ export const chatbotAPI = {
       if (response.status === 200) {
         return response.data;
       }
+      throw new Error("Failed to send message");
     } catch (error) {
       console.error("❌ Error sending message:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to send message"
-      );
+      const err = error as { response?: { data?: { message?: string } } };
+      throw new Error(err.response?.data?.message || "Failed to send message");
     }
   },
 
-  async getTaskResponse(taskId, userId, userRole, userQuestion) {
+  async getTaskResponse(
+    taskId: string,
+    userId: string | number,
+    userRole: string,
+    userQuestion: string
+  ): Promise<ChatbotResponse> {
     try {
       console.log("📥 Checking task status:", taskId);
 
@@ -44,18 +66,28 @@ export const chatbotAPI = {
       if (response.status === 200) {
         return response.data;
       }
+      throw new Error("Failed to get task response");
     } catch (error) {
-      console.error("⚠️ Error getting task response:", error.message);
+      const err = error as { message?: string };
+      console.error("⚠️ Error getting task response:", err.message);
       throw error;
     }
   },
 
-  async waitForResponse(taskId, userId, userRole, userQuestion, onProgress) {
+  async waitForResponse(
+    taskId: string,
+    userId: string | number,
+    userRole: string,
+    userQuestion: string,
+    onProgress?: (progressData: ChatbotResponse | { status: string; message: string }) => void
+  ): Promise<ChatbotResponse> {
     return new Promise(async (resolve, reject) => {
       const startTime = Date.now();
       let attemptCount = 0;
 
       console.log("⏳ Starting to poll for response...");
+
+      let pollInterval: ReturnType<typeof setInterval>;
 
       // ✅ Poll immediately first time
       const checkStatus = async () => {
@@ -70,7 +102,7 @@ export const chatbotAPI = {
 
           // Check timeout
           if (elapsedTime > MAX_POLLING_TIME) {
-            clearInterval(pollInterval);
+            if (pollInterval) clearInterval(pollInterval);
             console.error("⏱️ Timeout reached");
             reject(new Error("Request timeout - please try again"));
             return;
@@ -91,12 +123,12 @@ export const chatbotAPI = {
 
           // Check status
           if (responseData.status === "SUCCESS") {
-            clearInterval(pollInterval);
+            if (pollInterval) clearInterval(pollInterval);
             console.log("✅ Task completed successfully!");
             console.log("📨 Response:", responseData.responseMessage);
             resolve(responseData);
           } else if (responseData.status === "FAILURE") {
-            clearInterval(pollInterval);
+            if (pollInterval) clearInterval(pollInterval);
             console.error("❌ Task failed");
             reject(
               new Error(
@@ -109,7 +141,8 @@ export const chatbotAPI = {
             console.log(`📊 Current status: ${responseData.status}`);
           }
         } catch (error) {
-          console.warn("⚠️ Polling error (will retry):", error.message);
+          const err = error as { message?: string };
+          console.warn("⚠️ Polling error (will retry):", err.message);
 
           // Don't stop polling on error, just notify
           if (onProgress) {
@@ -125,7 +158,7 @@ export const chatbotAPI = {
       await checkStatus();
 
       // ✅ Then check every POLLING_INTERVAL
-      const pollInterval = setInterval(checkStatus, POLLING_INTERVAL);
+      pollInterval = setInterval(checkStatus, POLLING_INTERVAL);
     });
   },
 };

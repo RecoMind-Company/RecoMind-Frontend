@@ -2,7 +2,13 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosAuth } from "../../../config";
 import toast from "react-hot-toast";
 
-const initialState = {
+interface SignupState {
+  isloading: boolean;
+  data: object;
+  success: boolean;
+}
+
+const initialState: SignupState = {
   isloading: false,
   data: {},
   success: false,
@@ -10,7 +16,7 @@ const initialState = {
 
 export const SignupFunction = createAsyncThunk(
   "SignupFunction/Signup",
-  async (data, thunkApi) => {
+  async (data: unknown, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       console.log(data);
@@ -30,11 +36,11 @@ export const SignupFunction = createAsyncThunk(
         return res.data;
       }
     } catch (error) {
-      const errorobj = error;
+      const errorobj = error as { response?: { data?: unknown } };
       console.log(errorobj);
       const errorMessages = errorobj.response?.data;
       if (errorMessages) {
-        toast.error(errorMessages, {
+        toast.error(String(errorMessages), {
           position: "bottom-center",
           duration: 1500,
         });
@@ -61,7 +67,7 @@ export const signupSlice = createSlice({
     });
     builder.addCase(SignupFunction.fulfilled, (state, action) => {
       state.isloading = false;
-      state.data = action.payload;
+      state.data = action.payload as object;
       state.success = true;
       setTimeout(() => {
         location.replace("/home");
