@@ -1,11 +1,2 @@
-import LogRegForm from "../components/LogRegForm";
-
-const SignUp = () => {
-  return (
-    <div>
-      <LogRegForm title="Sign Up" />
-    </div>
-  );
-};
-
-export default SignUp;
+export { default } from "../features/auth/pages/SignUp";
+export * from "../features/auth/pages/SignUp";

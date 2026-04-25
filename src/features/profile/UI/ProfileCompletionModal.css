@@ -1,0 +1,230 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInOverlay 0.3s ease;
+  padding: 20px;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-container {
+  background: linear-gradient(
+    135deg,
+    rgba(7, 14, 28, 0.98) 0%,
+    rgba(10, 20, 35, 0.98) 100%
+  );
+  border: 1px solid rgba(126, 227, 255, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 520px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(126, 227, 255, 0.1),
+    inset 0 1px 0 rgba(126, 227, 255, 0.15);
+  animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(126, 227, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-content {
+  margin-top: 8px;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-left: 4px;
+}
+
+.form-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(126, 227, 255, 0.3);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-input:focus {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #7ee3ff;
+  box-shadow: 0 0 0 3px rgba(126, 227, 255, 0.1);
+}
+
+.form-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-btn {
+  background: #7ee3ff;
+  color: #060b1b;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  font-family: inherit;
+  box-shadow: 0 4px 16px rgba(126, 227, 255, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #6dd4ee;
+  box-shadow: 0 6px 24px rgba(126, 227, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.success-toast {
+  background: rgba(7, 14, 28, 0.98);
+  border: 1px solid rgba(126, 227, 255, 0.3);
+  border-radius: 12px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(126, 227, 255, 0.2);
+  animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 320px;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-toast.toast-visible {
+  opacity: 1;
+}
+
+.success-toast.toast-hidden {
+  opacity: 0;
+}
+
+.success-toast .toast-icon {
+  color: #7ee3ff;
+  flex-shrink: 0;
+}
+
+.success-toast span {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .modal-container {
+    padding: 32px 24px;
+    margin: 20px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    margin-bottom: 24px;
+  }
+
+  .form-input {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .submit-btn {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+
+  .success-toast {
+    min-width: auto;
+    max-width: 90vw;
+  }
+}
