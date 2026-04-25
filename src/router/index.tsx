@@ -3,25 +3,38 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
-import Layout from "../layouts/Layout";
-import Login from "../pages/Login";
-import SignUp from "../pages/SignUp";
-import MasterLayout from "../layouts/MasterLayout";
-import Home from "../pages/Home";
-import NotFound from "../UI/NotFound";
-import ForgotPassword from "../pages/ForgotPassword";
-import Verification from "../pages/Verification";
-import Completed from "../pages/Completed";
-import PersonalInfoPage from "../pages/PersonalInfoPage";
-import DashBoard from "../pages/DashBoard";
-import ChatBot from "../pages/ChatBot";
-import PublicRoute from "../Auth/PublicRoute";
-import ProtectedRoute from "../Auth/ProtectedRoute";
+
+/* Layouts */
+import Layout from "@/layouts/Layout";
+import MasterLayout from "@/layouts/MasterLayout";
+
+/* Auth Feature */
+import Login from "@/features/auth/pages/Login";
+import SignUp from "@/features/auth/pages/SignUp";
+import ForgotPassword from "@/features/auth/pages/ForgotPassword";
+import Verification from "@/features/auth/pages/Verification";
+import Completed from "@/features/auth/pages/Completed";
+
+import PublicRoute from "@/features/auth/Auth/PublicRoute";
+import ProtectedRoute from "@/features/auth/Auth/ProtectedRoute";
+
+/* Dashboard Feature */
+import Home from "@/features/dashboard/pages/Home";
+import DashBoard from "@/features/dashboard/pages/DashBoard";
+
+/* Chatbot Feature */
+import ChatBot from "@/features/chatbot/pages/ChatBot";
+
+/* Profile Feature */
+import PersonalInfoPage from "@/features/profile/pages/PersonalInfoPage";
+
+/* Shared */
+import NotFound from "@/UI/NotFound";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      {/* Auth Routes */}
+      {/* ================= AUTH ================= */}
       <Route
         path="/"
         element={
@@ -30,14 +43,15 @@ const router = createBrowserRouter(
           </PublicRoute>
         }
       >
-        <Route index element={<Login />}></Route>
-        <Route path="signup" element={<SignUp />}></Route>
-        <Route path="forgotpassword" element={<ForgotPassword />}></Route>
-        <Route path="verification" element={<Verification />}></Route>
-        <Route path="completed" element={<Completed />}></Route>
-        <Route path="*" element={<NotFound />}></Route>
+        <Route index element={<Login />} />
+        <Route path="signup" element={<SignUp />} />
+        <Route path="forgotpassword" element={<ForgotPassword />} />
+        <Route path="verification" element={<Verification />} />
+        <Route path="completed" element={<Completed />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
-      {/* Main Routes */}
+
+      {/* ================= APP ================= */}
       <Route
         path="/home"
         element={
@@ -52,7 +66,8 @@ const router = createBrowserRouter(
         <Route path="profile" element={<PersonalInfoPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
-    </>
-  )
+    </>,
+  ),
 );
+
 export default router;

@@ -9,7 +9,7 @@ import { schemaLogin, schemaRegister } from "../validation/Schema";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSelector } from "react-redux";
-import { useAppDispatch } from "../redux/store";
+import { useAppDispatch } from "@/app/hooks";
 import { SignupFunction } from "../redux/features/SignUp/SignupSlice";
 import { LoginFunction } from "../redux/features/SignIn/SigninSlice";
 import { Toaster } from "react-hot-toast";

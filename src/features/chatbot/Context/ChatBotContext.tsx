@@ -3,7 +3,7 @@ import { chatbotAPI } from "../services/chatbotAPI";
 
 const ChatBotContext = createContext(undefined);
 
-function ChatBotContextProvider({ children }) {
+function ChatBotContextProvider({ children } : { children: React.ReactNode }) {
   const [input, setInput] = useState("");
   const [chatSessions, setChatSessions] = useState(() => {
     const saved = localStorage.getItem("chatSessions");

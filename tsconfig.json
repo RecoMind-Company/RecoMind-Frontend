@@ -6,7 +6,6 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* Bundler */
     "moduleResolution": "bundler",
     "allowJs": true,
     "allowImportingTsExtensions": true,
@@ -15,10 +14,14 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Strict */
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src"]
 }
