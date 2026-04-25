@@ -3,15 +3,15 @@ import { useState } from "react";
 import ProfileCompletionBanner from "../UI/ProfileCompletionBanner";
 import { FaRocket } from "react-icons/fa";
 
+import { useProfile } from "../../profile/hooks/useProfile";
+
 const Home = () => {
   const [showBanner, setShowBanner] = useState(true);
-  
-  const storedUserRaw = localStorage.getItem("user");
-  const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : {};
+  const { data: profile } = useProfile();
 
-  const profileData: { name: string; email: string } = {
-    name: (storedUser.name as string) || "",
-    email: (storedUser.email as string) || "",
+  const profileData = {
+    name: profile?.fullName || "",
+    email: profile?.email || "",
   };
 
   return (

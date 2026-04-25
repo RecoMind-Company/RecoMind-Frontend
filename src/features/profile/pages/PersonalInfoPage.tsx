@@ -17,7 +17,11 @@ interface UserData {
   isProfileComplete: boolean;
 }
 
+import { useProfile } from "../hooks/useProfile";
+
 const PersonalInfoPage = () => {
+  const { data: profile, isLoading } = useProfile();
+
   const [userData, setUserData] = useState<UserData>({
     name: "ALi Alaa",
     email: "ali@gmail.com",
@@ -31,12 +35,18 @@ const PersonalInfoPage = () => {
   const [resetEdit, setResetEdit] = useState(false);
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
-  const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
-
-  const profileData = {
-    name: (storedUser.name as string) || "",
-    email: (storedUser.email as string) || "",
-  };
+  useEffect(() => {
+    if (profile) {
+      setUserData((prev) => ({
+        ...prev,
+        name: profile.fullName || prev.name,
+        email: profile.email || prev.email,
+        phone: profile.phoneNumber || prev.phone,
+        jobTitle: profile.jobTitle || prev.jobTitle,
+        profileImage: profile.imagePath || prev.profileImage,
+      }));
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!userData.isProfileComplete && !userData.phone && !userData.jobTitle) {
@@ -104,7 +114,7 @@ const PersonalInfoPage = () => {
         {showCompletionBanner && (
           <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
             <ProfileCompletionBanner
-              userName={profileData.name || "User"}
+              userName={userData.name || "User"}
               completionPercentage={50}
               onClose={() => setShowCompletionBanner(false)}
               onComplete={handleProfileCompletion}
@@ -124,14 +134,14 @@ const PersonalInfoPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <InputField
                 label="Name"
-                value={profileData.name}
-                onChange={(newValue) => console.log(newValue)}
+                value={userData.name}
+                onChange={(newValue) => handleInputChange("name", newValue)}
               />
 
               <InputField
                 label="Email"
-                value={profileData.email}
-                onChange={(newValue) => console.log(newValue)}
+                value={userData.email}
+                onChange={(newValue) => handleInputChange("email", newValue)}
                 type="email"
               />
             </div>
