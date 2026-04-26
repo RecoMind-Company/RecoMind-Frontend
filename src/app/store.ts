@@ -11,6 +11,10 @@ import { ChangePasswordReducer } from "@/features/profile/redux/features/ChangeP
 import { DeleteAccountReducer } from "@/features/profile/redux/features/DeleteAccount/DeleteAccountSlice";
 import { GetProfileReducer } from "@/features/profile/redux/features/GetProfile/getProfileSlice";
 
+/* ================= HOME ================= */
+import { HomeReducer } from "@/features/home/redux/Homeslice";
+
+
 /* ================= STORE ================= */
 export const store = configureStore({
   reducer: {
@@ -22,6 +26,8 @@ export const store = configureStore({
     changePassword: ChangePasswordReducer,
     deleteAccount: DeleteAccountReducer,
     getprofile: GetProfileReducer,
+
+    home: HomeReducer,
   },
 });
 
