@@ -18,9 +18,8 @@ import Completed from "@/features/auth/pages/Completed";
 import PublicRoute from "@/features/auth/Auth/PublicRoute";
 import ProtectedRoute from "@/features/auth/Auth/ProtectedRoute";
 
-/* Dashboard Feature */
+/* Home Feature */
 import Home from "@/features/dashboard/pages/Home";
-import DashBoard from "@/features/dashboard/pages/DashBoard";
 
 /* Chatbot Feature */
 import ChatBot from "@/features/chatbot/pages/ChatBot";
@@ -61,7 +60,6 @@ const router = createBrowserRouter(
         }
       >
         <Route index element={<Home />} />
-        <Route path="dashboard" element={<DashBoard />} />
         <Route path="chatbot" element={<ChatBot />} />
         <Route path="profile" element={<PersonalInfoPage />} />
         <Route path="*" element={<NotFound />} />
