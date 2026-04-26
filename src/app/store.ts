@@ -14,6 +14,9 @@ import { GetProfileReducer } from "@/features/profile/redux/features/GetProfile/
 /* ================= HOME ================= */
 import { HomeReducer } from "@/features/home/redux/Homeslice";
 
+/* ================= TASKS ================= */
+import { TasksReducer } from "@/features/tasksBoard/redux/tasksSlice";
+
 
 /* ================= STORE ================= */
 export const store = configureStore({
@@ -28,6 +31,7 @@ export const store = configureStore({
     getprofile: GetProfileReducer,
 
     home: HomeReducer,
+    tasks: TasksReducer,
   },
 });
 

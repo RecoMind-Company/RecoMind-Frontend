@@ -29,6 +29,7 @@ import PersonalInfoPage from "@/features/profile/pages/PersonalInfoPage";
 
 /* Shared */
 import NotFound from "@/UI/NotFound";
+import TodaysTasks from "@/features/tasksBoard/pages/TodaysTasks";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -60,6 +61,7 @@ const router = createBrowserRouter(
         }
       >
         <Route index element={<Home />} />
+        <Route path="tasks" element={<TodaysTasks />} />
         <Route path="chatbot" element={<ChatBot />} />
         <Route path="profile" element={<PersonalInfoPage />} />
         <Route path="*" element={<NotFound />} />

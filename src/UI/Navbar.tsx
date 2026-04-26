@@ -17,10 +17,10 @@ const Navbar = () => {
   const menuItems: MenuItem[] = [
     { id: "home", icon: Home, label: "Home", path: "/home" },
     {
-      id: "dashboard",
+      id: "tasks",
       icon: LayoutDashboard,
-      label: "Dashboard",
-      path: "/home/dashboard",
+      label: "Tasks",
+      path: "/home/tasks",
     },
     { id: "chatbot", icon: Bot, label: "Chatbot", path: "/home/chatbot" },
     {

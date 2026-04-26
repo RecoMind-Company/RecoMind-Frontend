@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 
@@ -16,6 +17,7 @@ import NotificationsPanel from "../components/Notificationspanel";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const {
     userName,
     greeting,
@@ -108,7 +110,7 @@ const Home: React.FC = () => {
 
       {/* ===== OVERDUE BANNER ===== */}
       {overdueCount > 0 && (
-        <OverdueBanner count={overdueCount} onViewTasks={() => {}} />
+        <OverdueBanner count={overdueCount} onViewTasks={() => navigate("/home/tasks")} />
       )}
 
       {/* ===== WEEKLY PLAN ===== */}
@@ -121,7 +123,10 @@ const Home: React.FC = () => {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold text-lg">Daily Focus</h2>
-            <button className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity">
+            <button 
+              onClick={() => navigate("/home/tasks")}
+              className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity"
+            >
               View All
             </button>
           </div>
