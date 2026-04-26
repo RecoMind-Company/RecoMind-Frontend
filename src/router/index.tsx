@@ -19,7 +19,7 @@ import PublicRoute from "@/features/auth/Auth/PublicRoute";
 import ProtectedRoute from "@/features/auth/Auth/ProtectedRoute";
 
 /* Home Feature */
-import Home from "@/features/dashboard/pages/Home";
+import Home from "@/features/home/pages/Home";
 
 /* Chatbot Feature */
 import ChatBot from "@/features/chatbot/pages/ChatBot";
