@@ -16,7 +16,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const { isloading, success } = useAppSelector(
-    (state) => state.forgotPassword
+    (state) => state.forgotPassword,
   );
 
   const isEmailValid = (email: string) => {
