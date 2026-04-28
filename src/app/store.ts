@@ -17,6 +17,8 @@ import { HomeReducer } from "@/features/home/redux/Homeslice";
 /* ================= TASKS ================= */
 import { TasksReducer } from "@/features/tasksBoard/redux/tasksSlice";
 
+/* ================= PROPOSALS ================= */
+import { ProposalsReducer } from "@/features/proposals/redux/proposalsSlice";
 
 /* ================= STORE ================= */
 export const store = configureStore({
@@ -32,6 +34,7 @@ export const store = configureStore({
 
     home: HomeReducer,
     tasks: TasksReducer,
+    proposals: ProposalsReducer,
   },
 });
 

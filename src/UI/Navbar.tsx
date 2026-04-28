@@ -22,6 +22,12 @@ const Navbar = () => {
       label: "Tasks",
       path: "/home/tasks",
     },
+    {
+      id: "proposals",
+      icon: Home,
+      label: "Proposals",
+      path: "/home/proposals"
+    },
     { id: "chatbot", icon: Bot, label: "Chatbot", path: "/home/chatbot" },
     {
       id: "profile",
