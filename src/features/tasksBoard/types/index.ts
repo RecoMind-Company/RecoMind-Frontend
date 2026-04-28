@@ -27,7 +27,7 @@ export interface Task {
   project: string;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate: string;     // ISO string
+  dueDate: string; // ISO string — full date used for calendar matching
   dueDateDisplay: string; // "Due in 6h" | "Feb 28" etc.
   isLate?: boolean;
   lateDisplay?: string; // "6 hours Late"
@@ -42,7 +42,9 @@ export interface TasksState {
   tasks: Task[];
   activeBoard: BoardType;
   viewMode: ViewMode;
-  selectedDate: string; // ISO date string
+  selectedDate: string; // board date strip — ISO date "YYYY-MM-DD"
+  calendarSelectedDate: string | null; // calendar clicked day — ISO date "YYYY-MM-DD" | null
+  calendarMonth: string; // "YYYY-MM" for the displayed calendar month
   selectedTask: Task | null;
   showTaskModal: boolean;
   showAddTaskModal: boolean;

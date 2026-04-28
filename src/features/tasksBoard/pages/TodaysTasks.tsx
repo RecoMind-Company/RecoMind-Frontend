@@ -8,27 +8,21 @@ import {
   setViewMode,
   openAddTaskModal,
 } from "../redux/tasksSlice";
-import type { BoardType, ViewMode } from "../types";
+import type { BoardType } from "../types";
 import DateNavigator from "../components/Board/DateNavigator";
 import BoardView from "../components/Board/BoardView";
+import CalendarView from "../components/Calendar/CalendarView";
 import AddTaskModal from "../components/Modals/AddTaskModal";
 import TaskDetailModal from "../components/Modals/TaskDetailModal";
 
 const TodaysTasks: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const {
-    activeBoard,
-    viewMode,
-    showAddTaskModal,
-    showTaskModal,
-    loading,
-  } = useSelector((s: RootState) => s.tasks);
+  const { activeBoard, viewMode, showAddTaskModal, showTaskModal, loading } =
+    useSelector((s: RootState) => s.tasks);
 
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
-
-  const selectedMonth = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   if (loading) {
     return (
@@ -41,6 +35,17 @@ const TodaysTasks: React.FC = () => {
     );
   }
 
+  // ===== CALENDAR MODE — render the full calendar page =====
+  if (viewMode === "calendar") {
+    return (
+      <>
+        <CalendarView />
+        {showTaskModal && <TaskDetailModal />}
+      </>
+    );
+  }
+
+  // ===== BOARD MODE =====
   return (
     <div
       className="flex flex-col min-h-screen px-4 py-6 md:px-8"
@@ -50,26 +55,33 @@ const TodaysTasks: React.FC = () => {
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
           <h1 className="text-white text-2xl font-bold">Today's Tasks</h1>
-          <p className="text-[#7f7f7f] text-sm mt-0.5">{selectedMonth}</p>
+          <p className="text-[#7f7f7f] text-sm mt-0.5">
+            {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+          </p>
         </div>
 
         {/* Board / Calendar toggle */}
         <div
           className="flex items-center rounded-xl p-1 gap-1"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+          }}
         >
           {([
-            { mode: "board" as ViewMode, icon: <LayoutGrid size={13} />, label: "Board" },
-            { mode: "calendar" as ViewMode, icon: <Calendar size={13} />, label: "Calendar" },
-          ] as const).map(({ mode, icon, label }) => (
+            { mode: "board" as const,    icon: <LayoutGrid size={13} />, label: "Board" },
+            { mode: "calendar" as const, icon: <Calendar   size={13} />, label: "Calendar" },
+          ]).map(({ mode, icon, label }) => (
             <button
               key={mode}
               onClick={() => dispatch(setViewMode(mode))}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200"
               style={{
                 background: viewMode === mode ? "rgba(126,227,255,0.1)" : "transparent",
-                color: viewMode === mode ? "#7ee3ff" : "#7f7f7f",
-                border: viewMode === mode ? "1px solid rgba(126,227,255,0.2)" : "1px solid transparent",
+                color:      viewMode === mode ? "#7ee3ff" : "#7f7f7f",
+                border:     viewMode === mode
+                  ? "1px solid rgba(126,227,255,0.2)"
+                  : "1px solid transparent",
               }}
             >
               {icon}
@@ -79,7 +91,7 @@ const TodaysTasks: React.FC = () => {
         </div>
       </div>
 
-      {/* ===== DATE NAVIGATOR ===== */}
+      {/* ===== DATE STRIP ===== */}
       <DateNavigator />
 
       {/* ===== BOARD TABS ===== */}
@@ -87,11 +99,11 @@ const TodaysTasks: React.FC = () => {
         className="flex items-center justify-between mb-5"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
       >
-        <div className="flex items-center gap-0">
+        <div className="flex items-center">
           {([
-            { board: "plans" as BoardType, icon: <Target size={13} />, label: "Plans Board" },
-            { board: "personal" as BoardType, icon: <User size={13} />, label: "Personal Board" },
-          ] as const).map(({ board, icon, label }) => (
+            { board: "plans" as BoardType,    icon: <Target size={13} />, label: "Plans Board" },
+            { board: "personal" as BoardType, icon: <User   size={13} />, label: "Personal Board" },
+          ]).map(({ board, icon, label }) => (
             <button
               key={board}
               onClick={() => dispatch(setActiveBoard(board))}
@@ -100,7 +112,6 @@ const TodaysTasks: React.FC = () => {
             >
               {icon}
               {label}
-              {/* Active underline */}
               {activeBoard === board && (
                 <span
                   className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
@@ -111,7 +122,7 @@ const TodaysTasks: React.FC = () => {
           ))}
         </div>
 
-        {/* Add Task button - only on Personal Board */}
+        {/* Add Task — personal board only */}
         {activeBoard === "personal" && (
           <button
             onClick={() => dispatch(openAddTaskModal())}
@@ -127,24 +138,9 @@ const TodaysTasks: React.FC = () => {
         )}
       </div>
 
-      {/* ===== MAIN CONTENT ===== */}
+      {/* ===== KANBAN ===== */}
       <div className="flex-1">
-        {viewMode === "board" ? (
-          <BoardView />
-        ) : (
-          // Calendar placeholder - implement as needed
-          <div
-            className="flex items-center justify-center h-64 rounded-2xl"
-            style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px dashed rgba(255,255,255,0.08)",
-              color: "#7f7f7f",
-              fontSize: "14px",
-            }}
-          >
-            Calendar View — Coming Soon
-          </div>
-        )}
+        <BoardView />
       </div>
 
       {/* ===== MODALS ===== */}
