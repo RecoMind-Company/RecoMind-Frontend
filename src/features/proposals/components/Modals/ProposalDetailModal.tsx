@@ -6,6 +6,8 @@ import {
   RefreshCw,
   Send,
   Save,
+  FileText,
+  Clock,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
@@ -61,8 +63,13 @@ const ProposalDetailModal: React.FC = () => {
   const proposal = selectedProposal;
   const s = statusConfig[proposal.status];
   const isRejected = proposal.status === "rejected";
+  const isDraft = proposal.status === "draft";
   const isPending = proposal.status === "pending";
-  const showActions = isPending || proposal.status === "draft";
+  const showActions = isPending || isDraft;
+  const showComments =
+    proposal.status === "accepted" ||
+    proposal.status === "rejected" ||
+    proposal.status === "under_review";
 
   const handleComment = () => {
     if (!commentText.trim()) return;
@@ -70,14 +77,232 @@ const ProposalDetailModal: React.FC = () => {
     setCommentText("");
   };
 
-  const handleRevalidate = () => {
-    dispatch(revalidateProposal(proposal));
-  };
+  // ========================================================
+  // DRAFT VIEW — compact modal with only "Send for Approval"
+  // ========================================================
+  if (isDraft) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{
+          background: "rgba(6,11,27,0.88)",
+          backdropFilter: "blur(12px)",
+        }}
+        onClick={() => dispatch(closeProposalModal())}
+      >
+        <div
+          className="w-full max-w-sm rounded-2xl overflow-hidden flex flex-col"
+          style={{
+            background: "#0a1628",
+            border: "1.5px solid rgba(126,227,255,0.12)",
+            maxHeight: "85vh",
+            animation: "slideUp 0.22s ease",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <style>{`
+            @keyframes slideUp {
+              from { opacity:0; transform:translateY(14px); }
+              to   { opacity:1; transform:translateY(0); }
+            }
+            .scroll-thin::-webkit-scrollbar { width:3px; }
+            .scroll-thin::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:4px; }
+          `}</style>
 
+          {/* Input bar */}
+          <div
+            className="px-5 py-4 flex items-center gap-3"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <div
+              className="flex-1 px-4 py-2 rounded-xl text-sm"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#7f7f7f",
+              }}
+            >
+              {proposal.plan || "Open A new Branch"}
+            </div>
+            <button
+              onClick={() => dispatch(closeProposalModal())}
+              className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors flex-shrink-0"
+              style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <X size={13} color="#7f7f7f" />
+            </button>
+          </div>
+
+          {/* Date + status row */}
+          <div className="px-5 py-3 flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <Clock size={11} color="#7f7f7f" />
+              <span className="text-[11px]" style={{ color: "#7f7f7f" }}>
+                Created at{" "}
+                {new Date(proposal.createdAt).toLocaleDateString("en-GB")}
+              </span>
+            </div>
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
+              style={{
+                background: s.bg,
+                color: s.color,
+                border: `1px solid ${s.border}`,
+              }}
+            >
+              {s.label}
+            </span>
+          </div>
+
+          {/* Report */}
+          <div className="flex-1 overflow-y-auto scroll-thin px-5 pb-4">
+            <h3
+              className="text-white font-bold text-base mb-3"
+              style={{
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                paddingBottom: "8px",
+              }}
+            >
+              The Validation Report
+            </h3>
+            <div
+              className="text-xs leading-relaxed whitespace-pre-line"
+              style={{ color: "#b8adad" }}
+            >
+              {proposal.validationReport || "No validation report available."}
+            </div>
+          </div>
+
+          {/* Send for Approval only */}
+          <div
+            className="px-5 py-4 flex-shrink-0"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <button
+              onClick={() => dispatch(sendForApproval(proposal))}
+              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              style={{
+                background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
+                color: "#060b1b",
+              }}
+            >
+              <Send size={13} />
+              Send for Approval
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================================================
+  // VALIDATION REPORT VIEW — full width, no sidebar
+  // (pending = just validated, not yet saved/sent)
+  // ========================================================
+  if (isPending) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{
+          background: "rgba(6,11,27,0.9)",
+          backdropFilter: "blur(12px)",
+        }}
+        onClick={() => dispatch(closeProposalModal())}
+      >
+        <div
+          className="w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col"
+          style={{
+            background: "#0a1628",
+            border: "1.5px solid rgba(126,227,255,0.15)",
+            maxHeight: "88vh",
+            animation: "slideUp 0.22s ease",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <style>{`
+            @keyframes slideUp {
+              from { opacity:0; transform:translateY(14px); }
+              to   { opacity:1; transform:translateY(0); }
+            }
+            .scroll-thin::-webkit-scrollbar { width:3px; }
+            .scroll-thin::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:4px; }
+          `}</style>
+
+          {/* Input bar */}
+          <div
+            className="px-6 py-4"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <div
+              className="w-full px-4 py-2.5 rounded-xl text-sm"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#7f7f7f",
+              }}
+            >
+              {proposal.plan || "Open A new Branch"}
+            </div>
+          </div>
+
+          {/* Report content */}
+          <div className="flex-1 overflow-y-auto scroll-thin px-6 py-5">
+            <h3 className="text-white font-bold text-xl mb-4">
+              The Validation Report
+            </h3>
+            <div
+              className="text-sm leading-relaxed whitespace-pre-line"
+              style={{ color: "#b8adad" }}
+            >
+              {proposal.validationReport}
+            </div>
+          </div>
+
+          {/* Save / Send */}
+          <div
+            className="flex gap-3 px-6 py-4 flex-shrink-0"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <button
+              onClick={() => dispatch(saveDraft(proposal))}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                color: "#eeeeee",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <Save size={13} />
+              Save Draft
+            </button>
+            <button
+              onClick={() => dispatch(sendForApproval(proposal))}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              style={{
+                background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
+                color: "#060b1b",
+              }}
+            >
+              <Send size={13} />
+              Send for Approval
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================================================
+  // FULL DETAIL VIEW — accepted / rejected / under_review
+  // (with left panel + right comments)
+  // ========================================================
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(6,11,27,0.88)", backdropFilter: "blur(10px)" }}
+      style={{
+        background: "rgba(6,11,27,0.88)",
+        backdropFilter: "blur(10px)",
+      }}
       onClick={() => dispatch(closeProposalModal())}
     >
       <div
@@ -93,15 +318,15 @@ const ProposalDetailModal: React.FC = () => {
       >
         <style>{`
           @keyframes slideUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from { opacity:0; transform:translateY(12px); }
+            to   { opacity:1; transform:translateY(0); }
           }
-          .scroll-thin::-webkit-scrollbar { width: 4px; }
-          .scroll-thin::-webkit-scrollbar-track { background: transparent; }
-          .scroll-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+          .scroll-thin::-webkit-scrollbar { width:4px; }
+          .scroll-thin::-webkit-scrollbar-track { background:transparent; }
+          .scroll-thin::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:4px; }
         `}</style>
 
-        {/* ===== LEFT PANEL ===== */}
+        {/* LEFT PANEL */}
         <div
           className="flex-1 flex flex-col overflow-hidden"
           style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
@@ -204,10 +429,9 @@ const ProposalDetailModal: React.FC = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Re-Validate button */}
+                {/* Re-Validate */}
                 <button
-                  onClick={handleRevalidate}
+                  onClick={() => dispatch(revalidateProposal(proposal))}
                   disabled={isValidating}
                   className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
                   style={{
@@ -229,13 +453,10 @@ const ProposalDetailModal: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <RefreshCw size={13} />
-                      Re-Validate
+                      <RefreshCw size={13} /> Re-Validate
                     </>
                   )}
                 </button>
-
-                {/* Validation steps during re-validate */}
                 {isValidating && (
                   <div className="mt-3 space-y-1.5">
                     {validationSteps.map((step, i) => (
@@ -278,44 +499,10 @@ const ProposalDetailModal: React.FC = () => {
               {proposal.validationReport || "No validation report available."}
             </div>
           </div>
-
-          {/* Save / Send buttons (for pending/draft) */}
-          {showActions && (
-            <div
-              className="flex gap-3 px-6 py-4 flex-shrink-0"
-              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <button
-                onClick={() => dispatch(saveDraft(proposal))}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  color: "#eeeeee",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                <Save size={13} />
-                Save Draft
-              </button>
-              <button
-                onClick={() => dispatch(sendForApproval(proposal))}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
-                  color: "#060b1b",
-                }}
-              >
-                <Send size={13} />
-                Send for Approval
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* ===== RIGHT PANEL: COMMENTS ===== */}
+        {/* RIGHT PANEL: COMMENTS */}
         <div className="w-64 flex flex-col flex-shrink-0">
-          {/* Comments header */}
           <div
             className="flex items-center gap-2 px-5 py-5 flex-shrink-0"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
@@ -340,7 +527,6 @@ const ProposalDetailModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Comments list */}
           <div className="flex-1 overflow-y-auto scroll-thin px-4 py-3 space-y-4">
             {proposal.comments.length === 0 ? (
               <p
@@ -389,7 +575,6 @@ const ProposalDetailModal: React.FC = () => {
             )}
           </div>
 
-          {/* Comment input */}
           <div className="px-4 pb-4 pt-2 flex-shrink-0">
             <div className="relative">
               <input
