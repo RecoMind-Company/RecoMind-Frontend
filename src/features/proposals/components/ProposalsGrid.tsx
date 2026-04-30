@@ -1,5 +1,5 @@
-import React from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { ChevronDown, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import type { FilterType } from "../types";
@@ -11,7 +11,6 @@ const FILTERS: { label: string; value: FilterType }[] = [
   { label: "Accepted", value: "accepted" },
   { label: "Rejected", value: "rejected" },
   { label: "Under Review", value: "under_review" },
-  { label: "Drafts", value: "draft" },
 ];
 
 const ProposalsGrid: React.FC = () => {
@@ -19,13 +18,38 @@ const ProposalsGrid: React.FC = () => {
   const { proposals, activeFilter } = useSelector(
     (s: RootState) => s.proposals,
   );
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isDraftsView = activeFilter === "draft";
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const filtered = proposals.filter((p) => {
     if (activeFilter === "all") return p.status !== "draft";
+    if (activeFilter === "draft") return p.status === "draft";
     return p.status === activeFilter;
   });
+
+  const activeLabel =
+    FILTERS.find((f) => f.value === activeFilter)?.label ?? "All";
+
+  const handleSelect = (value: FilterType) => {
+    dispatch(setActiveFilter(value));
+    setDropdownOpen(false);
+  };
 
   return (
     <div>
@@ -35,46 +59,88 @@ const ProposalsGrid: React.FC = () => {
           {isDraftsView ? "Your Drafts" : "Your Proposals"}
         </h2>
 
-        {/* Filter controls */}
         <div className="flex items-center gap-2">
-          {/* All dropdown */}
-          <div className="relative">
+          {/* ── Dropdown filter ── */}
+          <div ref={dropdownRef} className="relative">
             <button
+              onClick={() => setDropdownOpen((o) => !o)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
               style={{
-                background:
-                  activeFilter !== "draft"
-                    ? "rgba(126,227,255,0.08)"
-                    : "rgba(255,255,255,0.04)",
-                color: activeFilter !== "draft" ? "#7ee3ff" : "#7f7f7f",
-                border:
-                  activeFilter !== "draft"
-                    ? "1px solid rgba(126,227,255,0.2)"
-                    : "1px solid rgba(255,255,255,0.08)",
-              }}
-              onClick={() => {
-                // Cycle through non-draft filters
-                const nonDraft = FILTERS.filter((f) => f.value !== "draft");
-                if (nonDraft.length === 0) return;
-                const idx = nonDraft.findIndex((f) => f.value === activeFilter);
-                const next = nonDraft[(idx + 1) % nonDraft.length];
-                if (!next) return;
-                dispatch(setActiveFilter(next.value));
+                background: !isDraftsView
+                  ? "rgba(126,227,255,0.08)"
+                  : "rgba(255,255,255,0.04)",
+                color: !isDraftsView ? "#7ee3ff" : "#7f7f7f",
+                border: !isDraftsView
+                  ? "1px solid rgba(126,227,255,0.2)"
+                  : "1px solid rgba(255,255,255,0.08)",
               }}
             >
-              {FILTERS.find(
-                (f) => f.value === activeFilter && f.value !== "draft",
-              )?.label || "All"}
-              <ChevronDown size={11} />
+              {isDraftsView ? "All" : activeLabel}
+              <ChevronDown
+                size={11}
+                style={{
+                  transition: "transform 0.2s",
+                  transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
             </button>
+
+            {/* Dropdown menu */}
+            {dropdownOpen && (
+              <div
+                className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-30 min-w-[140px]"
+                style={{
+                  background: "#0d1b3e",
+                  border: "1px solid rgba(126,227,255,0.15)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                  animation: "dropDown 0.15s ease",
+                }}
+              >
+                <style>{`
+                  @keyframes dropDown {
+                    from { opacity: 0; transform: translateY(-6px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                  }
+                `}</style>
+                {FILTERS.map((f) => {
+                  const isActive = activeFilter === f.value;
+                  return (
+                    <button
+                      key={f.value}
+                      onClick={() => handleSelect(f.value)}
+                      className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium transition-colors"
+                      style={{
+                        color: isActive ? "#7ee3ff" : "#b8adad",
+                        background: isActive
+                          ? "rgba(126,227,255,0.07)"
+                          : "transparent",
+                      }}
+                      onMouseEnter={(e) =>
+                        !isActive &&
+                        ((
+                          e.currentTarget as HTMLButtonElement
+                        ).style.background = "rgba(255,255,255,0.04)")
+                      }
+                      onMouseLeave={(e) =>
+                        !isActive &&
+                        ((
+                          e.currentTarget as HTMLButtonElement
+                        ).style.background = "transparent")
+                      }
+                    >
+                      {f.label}
+                      {isActive && <Check size={11} color="#7ee3ff" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Drafts tab */}
+          {/* ── Drafts tab ── */}
           <button
             onClick={() =>
-              dispatch(
-                setActiveFilter(activeFilter === "draft" ? "all" : "draft"),
-              )
+              dispatch(setActiveFilter(isDraftsView ? "all" : "draft"))
             }
             className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
             style={{
