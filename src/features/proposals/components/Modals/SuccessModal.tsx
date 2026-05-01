@@ -17,7 +17,7 @@ const SuccessModal: React.FC = () => {
       dispatch(closeSuccessModal());
     }, 3000);
     return () => clearTimeout(timer);
-  }, [dispatch]);
+  }, [dispatch]);  
 
   return (
     <div
