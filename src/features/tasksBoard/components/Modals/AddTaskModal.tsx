@@ -134,7 +134,7 @@ const AddTaskModal: React.FC = () => {
             </div>
 
             {/* Start Date + Deadline row */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
               {/* Start Date */}
               <div className="flex-1">
                 <label style={labelStyle}>Start Date</label>
@@ -159,7 +159,7 @@ const AddTaskModal: React.FC = () => {
               </div>
 
               {/* Deadline */}
-              <div className="flex-1">
+              {/* <div className="flex-1">
                 <label style={labelStyle}>Deadline</label>
                 <div className="relative">
                   <input
@@ -179,10 +179,8 @@ const AddTaskModal: React.FC = () => {
                   />
                 </div>
                 {errors.deadLine && <p style={errorStyle}>{errors.deadLine.message}</p>}
-              </div>
-            </div>
-
-            {/* Priority */}
+              </div> */}
+                          {/* Priority */}
             <div>
               <label style={labelStyle}>Priority</label>
               <Controller
@@ -215,6 +213,9 @@ const AddTaskModal: React.FC = () => {
                 )}
               />
             </div>
+            </div>
+
+
 
             {/* Invite Team */}
             <button
