@@ -33,7 +33,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchHomeData());
-  }, [dispatch]);
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 

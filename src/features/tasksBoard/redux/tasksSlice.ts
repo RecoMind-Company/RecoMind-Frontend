@@ -778,3 +778,50 @@ export const {
 } = tasksSlice.actions;
 
 export const TasksReducer = tasksSlice.reducer;
+
+
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+export const taskSlice = createApi({
+  reducerPath: "task",
+  tagTypes: ["Task"],
+  refetchOnReconnect: true,
+  refetchOnMountOrArgChange: true,
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://api.recomind.site/",
+    prepareHeaders: (headers) => {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
+  endpoints: (builder) => ({
+    addTask: builder.mutation({
+      query: (data) => ({
+        url: "/api/tasks/plan-1/add-task",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [{ type: "Task", id: "LIST" }],
+    }),
+    getAllTasks: builder.query({
+      query: () => ({
+        url: "/api/tasks/plan-1/tasks",
+        method: "GET",
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }: { id: string }) => ({
+                type: "Task" as const,
+                id,
+              })),
+              { type: "Task", id: "LIST" },
+            ]
+          : [{ type: "Task", id: "LIST" }],
+    }),
+  }),
+});
+export const { useAddTaskMutation, useGetAllTasksQuery } = taskSlice;

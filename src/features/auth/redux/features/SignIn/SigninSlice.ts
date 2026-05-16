@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { axiosAuth } from "../../../config";
 import toast from "react-hot-toast";
 
 interface AxiosErrorShape {
@@ -27,16 +26,26 @@ const initialState: SigninState = {
 
 export const LoginFunction = createAsyncThunk(
   "LoginFunction/Login",
-  async (data: unknown, thunkApi) => {
+  async (data: { email: string; password: string }, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      const res = await axiosAuth.post("/login", data);
-      if (res.status === 200) {
+      // Use the auth API endpoint
+      const response = await fetch("https://api.recomind.site/api/Authentication/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const res = await response.json();
+
+      if (response.ok) {
         console.log(res);
-        const { token } = res.data;
+        const { token } = res;
 
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(res.data));
+        localStorage.setItem("user", JSON.stringify(res));
 
         toast.success("Login Successfully", {
           position: "bottom-center",
@@ -48,27 +57,22 @@ export const LoginFunction = createAsyncThunk(
           },
         });
 
-        return res.data;
-      }
-    } catch (error) {
-      const errorobj = error as AxiosErrorShape;
-      const errorMessages = errorobj.response?.data?.error;
-      if (errorMessages) {
-        const allErrors = Object.values(errorMessages as Record<string, unknown[]>).flat().join(", ");
-        toast.error(allErrors, {
-          position: "bottom-center",
-          duration: 1500,
-        });
-        return rejectWithValue(allErrors);
+        return res;
       } else {
-        const errorMessage =
-          (error as AxiosErrorShape).response?.data?.message || "Login failed";
-        toast.error(String(errorMessage), {
+        const errorMessage = res.message || "Login failed";
+        toast.error(errorMessage, {
           position: "bottom-center",
           duration: 1500,
         });
         return rejectWithValue(errorMessage);
       }
+    } catch (error) {
+      const errorMessage = "Login failed";
+      toast.error(errorMessage, {
+        position: "bottom-center",
+        duration: 1500,
+      });
+      return rejectWithValue(errorMessage);
     }
   }
 );
