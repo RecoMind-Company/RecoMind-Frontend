@@ -9,7 +9,7 @@ interface WeeklyPlanCardProps {
 const WeeklyPlanCard: React.FC<WeeklyPlanCardProps> = ({ plan }) => {
   return (
     <div
-      className="rounded-2xl p-6 mb-6 relative overflow-hidden"
+      className="rounded-2xl p-6 hidden mb-6 relative overflow-hidden"
       style={{
         background: "linear-gradient(135deg, #0d1b3e 0%, #091428 100%)",
         border: "1px solid rgba(126,227,255,0.1)",
