@@ -10,7 +10,7 @@ interface AxiosErrorShape {
     };
   };
 }
-
+ 
 interface ChangePasswordState {
   isloading: boolean;
   data: object;

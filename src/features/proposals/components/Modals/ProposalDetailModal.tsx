@@ -93,7 +93,7 @@ const ProposalDetailModal: React.FC = () => {
         <div
           className="w-full max-w-sm rounded-2xl overflow-hidden flex flex-col"
           style={{
-            background: "#0a1628",
+            background: "#060B1B",
             border: "1.5px solid rgba(126,227,255,0.12)",
             maxHeight: "85vh",
             animation: "slideUp 0.22s ease",
@@ -310,7 +310,7 @@ const ProposalDetailModal: React.FC = () => {
         style={{
           maxWidth: "820px",
           maxHeight: "90vh",
-          background: "#0a1628",
+          background: "#060B1B",
           border: "1.5px solid rgba(126,227,255,0.12)",
           animation: "slideUp 0.22s ease",
         }}
