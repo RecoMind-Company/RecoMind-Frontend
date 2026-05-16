@@ -40,7 +40,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
       <div
         className="w-full max-w-sm rounded-2xl overflow-hidden"
         style={{
-          background: "#0d1b3e",
+          background: "#060B1B",
           border: "1px solid rgba(126,227,255,0.15)",
         }}
       >
@@ -56,7 +56,9 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
         </div>
 
         {/* Members list */}
-        <div className="p-4 space-y-2 max-h-72 overflow-y-auto">
+        <div className="p-4 space-y-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-[#7EE3FF]
+            scrollbar-track-transparent
+            scrollbar-thumb-rounded-full">
           {MOCK_MEMBERS.map((member, i) => {
             const isSelected = selected.includes(member.id + i);
             const uniqueId = member.id + i;
