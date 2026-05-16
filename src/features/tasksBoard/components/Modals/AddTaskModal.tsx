@@ -88,7 +88,7 @@ const AddTaskModal: React.FC = () => {
         style={{ background: "rgba(6,11,27,0.8)", backdropFilter: "blur(8px)" }}
       >
         <div
-          className="w-full max-w-sm rounded-2xl"
+          className="w-full max-w-[85%] md:max-w-[40%] rounded-2xl"
           style={{
             background: "#0d1b3e",
             border: "1px solid rgba(126,227,255,0.15)",

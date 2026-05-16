@@ -59,7 +59,7 @@ const Home: React.FC = () => {
         <div>
           <p className="text-sm" style={{ color: "#7ee3ff" }}>
             {greeting}
-            <span className="text-[#df5d5d] ml-0.5">.</span>
+            <span className="text-[#7EE3FF] ml-0.5">,</span>
           </p>
           <h1 className="text-white text-3xl font-bold mt-0.5">{userName}</h1>
           <p className="text-[#7f7f7f] text-sm mt-1">
@@ -70,7 +70,7 @@ const Home: React.FC = () => {
         {/* Bell Icon */}
         <button
           onClick={() => dispatch(toggleNotifications())}
-          className="relative mt-1 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
+          className="relative mt-1 w-10 h-10 right-0 top-[40px] md:top-[35px] rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
           style={{
             background: notificationsOpen
               ? "rgba(126,227,255,0.1)"
