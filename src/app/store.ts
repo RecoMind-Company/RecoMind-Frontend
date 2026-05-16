@@ -1,3 +1,5 @@
+import {  taskSlice, TasksReducer } from './../features/tasksBoard/redux/tasksSlice';
+import { authSlice } from './../features/auth/redux/authApi';
 import { configureStore } from "@reduxjs/toolkit";
 
 /* ================= AUTH ================= */
@@ -15,7 +17,6 @@ import { GetProfileReducer } from "@/features/profile/redux/features/GetProfile/
 import { HomeReducer } from "@/features/home/redux/Homeslice";
 
 /* ================= TASKS ================= */
-import { TasksReducer } from "@/features/tasksBoard/redux/tasksSlice";
 
 /* ================= PROPOSALS ================= */
 import { ProposalsReducer } from "@/features/proposals/redux/proposalsSlice";
@@ -27,15 +28,19 @@ export const store = configureStore({
     signin: SigninReducer,
     forgotPassword: ForgotPasswordReducer,
     verification: VerificationReducer,
+    [taskSlice.reducerPath]: taskSlice.reducer,
+    tasks: TasksReducer,
+    [authSlice.reducerPath]: authSlice.reducer,
 
     changePassword: ChangePasswordReducer,
     deleteAccount: DeleteAccountReducer,
     getprofile: GetProfileReducer,
 
     home: HomeReducer,
-    tasks: TasksReducer,
     proposals: ProposalsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(taskSlice.middleware, authSlice.middleware),
 });
 
 /* ================= TYPES ================= */

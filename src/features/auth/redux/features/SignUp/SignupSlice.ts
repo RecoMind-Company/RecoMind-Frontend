@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { axiosAuth } from "../../../config";
 import toast from "react-hot-toast";
 
 interface SignupState {
@@ -16,12 +15,22 @@ const initialState: SignupState = {
 
 export const SignupFunction = createAsyncThunk(
   "SignupFunction/Signup",
-  async (data: unknown, thunkApi) => {
+  async (data: { email: string; fullName: string; password: string; role: string }, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
       console.log(data);
-      const res = await axiosAuth.post("/register", data);
-      if (res.status === 200) {
+      // Use the auth API endpoint
+      const response = await fetch("https://api.recomind.site/api/Authentication/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const res = await response.json();
+
+      if (response.ok) {
         toast.success("Successfully registered!", {
           position: "bottom-center",
           duration: 1500,
@@ -31,21 +40,24 @@ export const SignupFunction = createAsyncThunk(
             width: "fit-content",
           },
         });
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data));
-        return res.data;
-      }
-    } catch (error) {
-      const errorobj = error as { response?: { data?: unknown } };
-      console.log(errorobj);
-      const errorMessages = errorobj.response?.data;
-      if (errorMessages) {
-        toast.error(String(errorMessages), {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res));
+        return res;
+      } else {
+        const errorMessage = res.message || "Registration failed";
+        toast.error(errorMessage, {
           position: "bottom-center",
           duration: 1500,
         });
-        return rejectWithValue(errorMessages);
+        return rejectWithValue(errorMessage);
       }
+    } catch (error) {
+      const errorMessage = "Registration failed";
+      toast.error(errorMessage, {
+        position: "bottom-center",
+        duration: 1500,
+      });
+      return rejectWithValue(errorMessage);
     }
   }
 );
