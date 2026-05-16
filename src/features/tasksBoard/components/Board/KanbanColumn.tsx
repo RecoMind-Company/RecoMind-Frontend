@@ -2,8 +2,8 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import type { Task, TaskStatus } from "../../types";
-import { localMoveTask, setDragOver } from "../../redux/tasksSlice";
 import TaskCard from "./TaskCard";
+import { setDragOver, localMoveTask } from "../../redux/tasksSlice";
 
 interface KanbanColumnProps {
   status: TaskStatus;
@@ -13,6 +13,7 @@ interface KanbanColumnProps {
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, label, tasks, dotColor }) => {
+  
   const dispatch = useDispatch<AppDispatch>();
   const dragOverColumn = useSelector((s: RootState) => s.tasks.dragOverColumn);
   const isOver = dragOverColumn === status;

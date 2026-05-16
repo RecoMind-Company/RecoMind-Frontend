@@ -12,7 +12,7 @@ const SuccessModal: React.FC = () => {
   const isSaved = showSuccessModal === "saved";
 
   // Auto-redirect after 3 seconds
-  useEffect(() => {
+  useEffect(() => { 
     const timer = setTimeout(() => {
       dispatch(closeSuccessModal());
     }, 3000);

@@ -8,10 +8,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { schemaLogin, schemaRegister } from "../validation/Schema";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { SignupFunction } from "../redux/features/SignUp/SignupSlice";
-import { LoginFunction } from "../redux/features/SignIn/SigninSlice";
-import { Toaster } from "react-hot-toast";
+import { useLoginMutation, useRegisterMutation } from "../redux/authApi";
+import { Toaster, toast } from "react-hot-toast";
 
 interface LogRegFormProps {
   title: string;
@@ -28,14 +26,14 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
   const isSignUp = title.toLowerCase().includes("sign");
+  const navigate = useNavigate();
 
   const schema = isSignUp ? schemaRegister : schemaLogin;
-  const dispatch = useAppDispatch();
 
-  const { isloading: signupLoading } = useAppSelector((state) => state.signup);
-  const { isloading: signinLoading } = useAppSelector((state) => state.signin);
+  const [login, { isLoading: loginLoading }] = useLoginMutation();
+  const [registerMutation, { isLoading: registerLoading }] = useRegisterMutation();
 
-  const isloading = isSignUp ? signupLoading : signinLoading;
+  const isloading = isSignUp ? registerLoading : loginLoading;
 
   const {
     register,
@@ -45,12 +43,44 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
     resolver: yupResolver(schema) as any,
   });
 
-  const onSubmit = (data: AuthFormData) => {
+  const onSubmit = async (data: AuthFormData) => {
     console.log(data);
-    if (isSignUp) {
-      dispatch(SignupFunction(data));
-    } else {
-      dispatch(LoginFunction(data));
+    try {
+      if (isSignUp) {
+        const res = await registerMutation(data).unwrap();
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res));
+        toast.success("Successfully registered!", {
+          position: "bottom-center",
+          duration: 1500,
+          style: {
+            backgroundColor: "black",
+            color: "white",
+            width: "fit-content",
+          },
+        });
+        navigate("/home");
+      } else {
+        const res = await login(data).unwrap();
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res));
+        toast.success("Login Successfully", {
+          position: "bottom-center",
+          duration: 1500,
+          style: {
+            backgroundColor: "black",
+            color: "white",
+            width: "fit-content",
+          },
+        });
+        navigate("/home");
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || (isSignUp ? "Registration failed" : "Login failed");
+      toast.error(errorMessage, {
+        position: "bottom-center",
+        duration: 1500,
+      });
     }
   };
 

@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { X, Calendar, UserPlus } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useForm, Controller, type SubmitHandler } from "react-hook-form";
 import type { AppDispatch, RootState } from "@/app/store";
-import {
-  closeAddTaskModal,
-  openInviteModal,
-  closeInviteModal,
-} from "../../redux/tasksSlice";
-import { createTask } from "../../redux/tasksSlice";
 import InviteModal from "./InviteModal";
 import type { TaskPriority, TeamMember } from "../../types";
+import { useAddTaskMutation, closeAddTaskModal, openInviteModal } from "../../redux/tasksSlice";
 
 const priorityOptions: { label: string; value: TaskPriority; color: string }[] = [
   { label: "HIGH",   value: "HIGH",   color: "#df5d5d" },
@@ -17,33 +13,44 @@ const priorityOptions: { label: string; value: TaskPriority; color: string }[] =
   { label: "LOW",    value: "LOW",    color: "#7ee3ff" },
 ];
 
+interface IAddTaskInputs {
+  title: string;
+  description?: string;
+  startDate: string;
+  deadLine: string;
+  priority: TaskPriority;
+}
+
 const AddTaskModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { showInviteModal, activeBoard } = useSelector((s: RootState) => s.tasks);
-
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState<TaskPriority>("HIGH");
+  const { showInviteModal } = useSelector((s: RootState) => s.tasks);
+  const [addTask, { isLoading }] = useAddTaskMutation();
   const [assignees, setAssignees] = useState<TeamMember[]>([]);
 
-  const handleCreate = () => {
-    if (!title.trim()) return;
-    dispatch(
-      createTask({
-        title,
-        description,
-        project: "Q1 Brand Awareness",
-        status: "todo",
-        priority,
-        dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
-        dueDateDisplay: dueDate
-          ? new Date(dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-          : "Due today",
-        assignees,
-        boardType: activeBoard,
-      })
-    );
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<IAddTaskInputs>({
+    defaultValues: { priority: "HIGH" },
+  });
+
+  const onSubmit: SubmitHandler<IAddTaskInputs> = async (data) => {
+    try {
+      const res= await addTask({
+        title: data.title,
+        description: data.description ?? "",
+        status: 0,                                              // عدّل حسب الـ API
+        startDate: new Date(data.startDate).toISOString(),
+        deadLine: new Date(data.deadLine).toISOString(),
+      }).unwrap();
+
+      console.log("Task created successfully:", res);
+      dispatch(closeAddTaskModal());
+    } catch (err) {
+      console.error("Failed to create task:", err);
+    }
   };
 
   const handleInviteConfirm = (members: TeamMember[]) => {
@@ -59,6 +66,12 @@ const AddTaskModal: React.FC = () => {
     color: "#eeeeee",
     fontSize: "13px",
     outline: "none",
+  };
+
+  const errorStyle: React.CSSProperties = {
+    color: "#df5d5d",
+    fontSize: "10px",
+    marginTop: "4px",
   };
 
   const labelStyle: React.CSSProperties = {
@@ -82,7 +95,8 @@ const AddTaskModal: React.FC = () => {
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4"
+          <div
+            className="flex items-center justify-between px-5 py-4"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           >
             <span className="text-white font-semibold text-sm">Add New Personal Task</span>
@@ -94,16 +108,19 @@ const AddTaskModal: React.FC = () => {
             </button>
           </div>
 
-          <div className="p-5 space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
             {/* Task Name */}
             <div>
               <label style={labelStyle}>Task Name</label>
               <input
-                style={inputStyle}
+                style={{
+                  ...inputStyle,
+                  borderColor: errors.title ? "#df5d5d60" : "rgba(255,255,255,0.09)",
+                }}
                 placeholder="What do you need to do?"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                {...register("title", { required: "Task name is required" })}
               />
+              {errors.title && <p style={errorStyle}>{errors.title.message}</p>}
             </div>
 
             {/* Description */}
@@ -112,62 +129,106 @@ const AddTaskModal: React.FC = () => {
               <textarea
                 style={{ ...inputStyle, resize: "none", height: "72px" }}
                 placeholder="Add more details..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...register("description")}
               />
             </div>
 
-            {/* Date + Priority row */}
+            {/* Start Date + Deadline row */}
             <div className="flex gap-3">
-              {/* Due date */}
+              {/* Start Date */}
               <div className="flex-1">
-                <label style={labelStyle}>Due date</label>
+                <label style={labelStyle}>Start Date</label>
                 <div className="relative">
                   <input
                     type="date"
-                    style={{ ...inputStyle, paddingRight: "36px", colorScheme: "dark" }}
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
+                    style={{
+                      ...inputStyle,
+                      paddingRight: "36px",
+                      colorScheme: "dark",
+                      borderColor: errors.startDate ? "#df5d5d60" : "rgba(255,255,255,0.09)",
+                    }}
+                    {...register("startDate", { required: "Required" })}
                   />
-                  <Calendar size={13} color="#7f7f7f" className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Calendar
+                    size={13}
+                    color="#7f7f7f"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  />
                 </div>
+                {errors.startDate && <p style={errorStyle}>{errors.startDate.message}</p>}
               </div>
 
-              {/* Priority */}
-              <div>
-                <label style={labelStyle}>Priority</label>
-                <div className="flex gap-1.5">
-                  {priorityOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setPriority(opt.value)}
-                      className="px-2.5 py-2 rounded-lg text-[10px] font-bold transition-all duration-150"
-                      style={{
-                        background: priority === opt.value
-                          ? `${opt.color}25`
-                          : "rgba(255,255,255,0.04)",
-                        color: priority === opt.value ? opt.color : "#7f7f7f",
-                        border: priority === opt.value
-                          ? `1px solid ${opt.color}60`
-                          : "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+              {/* Deadline */}
+              <div className="flex-1">
+                <label style={labelStyle}>Deadline</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    style={{
+                      ...inputStyle,
+                      paddingRight: "36px",
+                      colorScheme: "dark",
+                      borderColor: errors.deadLine ? "#df5d5d60" : "rgba(255,255,255,0.09)",
+                    }}
+                    {...register("deadLine", { required: "Required" })}
+                  />
+                  <Calendar
+                    size={13}
+                    color="#7f7f7f"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  />
                 </div>
+                {errors.deadLine && <p style={errorStyle}>{errors.deadLine.message}</p>}
               </div>
+            </div>
+
+            {/* Priority */}
+            <div>
+              <label style={labelStyle}>Priority</label>
+              <Controller
+                name="priority"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex gap-1.5">
+                    {priorityOptions.map((opt) => (
+                      <button
+                        type="button"
+                        key={opt.value}
+                        onClick={() => field.onChange(opt.value)}
+                        className="px-2.5 py-2 rounded-lg text-[10px] font-bold transition-all duration-150"
+                        style={{
+                          background:
+                            field.value === opt.value
+                              ? `${opt.color}25`
+                              : "rgba(255,255,255,0.04)",
+                          color: field.value === opt.value ? opt.color : "#7f7f7f",
+                          border:
+                            field.value === opt.value
+                              ? `1px solid ${opt.color}60`
+                              : "1px solid rgba(255,255,255,0.08)",
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
             </div>
 
             {/* Invite Team */}
             <button
+              type="button"
               onClick={() => dispatch(openInviteModal())}
               className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all hover:bg-white/[0.04]"
               style={{ border: "1px dashed rgba(255,255,255,0.12)" }}
             >
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: "rgba(126,227,255,0.08)", border: "1px solid rgba(126,227,255,0.2)" }}
+                style={{
+                  background: "rgba(126,227,255,0.08)",
+                  border: "1px solid rgba(126,227,255,0.2)",
+                }}
               >
                 <UserPlus size={13} color="#7ee3ff" />
               </div>
@@ -184,18 +245,20 @@ const AddTaskModal: React.FC = () => {
 
             {/* Create button */}
             <button
-              onClick={handleCreate}
-              disabled={!title.trim()}
+              type="submit"
+              disabled={isLoading}
               className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)", color: "#060b1b" }}
+              style={{
+                background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
+                color: "#060b1b",
+              }}
             >
-              Create Task
+              {isLoading ? "Creating..." : "Create Task"}
             </button>
-          </div>
+          </form>
         </div>
       </div>
 
-      {/* Invite modal on top */}
       {showInviteModal && <InviteModal onConfirm={handleInviteConfirm} />}
     </>
   );

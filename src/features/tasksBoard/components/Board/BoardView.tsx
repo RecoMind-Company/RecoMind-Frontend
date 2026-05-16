@@ -1,8 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
-import type { TaskStatus } from "../../types";
+import type { TaskStatus, Task } from "../../types";
 import KanbanColumn from "./KanbanColumn";
+import { useGetAllTasksQuery } from "../../redux/tasksSlice";
 
 const PLANS_COLUMNS: { status: TaskStatus; label: string; dotColor: string }[] =
   [
@@ -22,19 +23,58 @@ const PERSONAL_COLUMNS: {
 ];
 
 const BoardView: React.FC = () => {
-  const { tasks, activeBoard, selectedDate } = useSelector(
+  const { activeBoard, selectedDate } = useSelector(
     (s: RootState) => s.tasks,
   );
+  const { data: apiTasks, isLoading } = useGetAllTasksQuery("");
 
   const columns = activeBoard === "plans" ? PLANS_COLUMNS : PERSONAL_COLUMNS;
 
-  // Filter: same boardType AND same calendar date as selectedDate
-  const boardTasks = tasks.filter((t) => {
-    if (t.boardType !== activeBoard) return false;
-    // Compare only the date part (YYYY-MM-DD)
-    const taskDate = new Date(t.dueDate).toISOString().split("T")[0];
-    return taskDate === selectedDate;
+  // Transform API data to match Task type
+  const transformedTasks = (apiTasks || []).map((apiTask: any) => {
+    const now = new Date();
+    const deadline = new Date(apiTask.deadLine);
+    const isOverdue = deadline < now && apiTask.status !== "completed";
+
+    // Map API status to app status
+    let status: TaskStatus = "todo";
+    if (apiTask.status === "completed") {
+      status = activeBoard === "plans" ? "review" : "done";
+    } else if (isOverdue) {
+      status = "overdue";
+    } else if (apiTask.status === "active") {
+      status = "todo";
+    }
+
+    return {
+      id: apiTask.questId,
+      title: apiTask.title,
+      description: apiTask.description || "",
+      project: "Project",
+      status,
+      priority: "MEDIUM" as const,
+      dueDate: apiTask.deadLine,
+      dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      boardType: activeBoard,
+      completed: apiTask.status === "completed",
+      isLate: isOverdue,
+      lateDisplay: isOverdue ? "Overdue" : undefined,
+      assignees: apiTask.userAssignedQuests?.map((userId: string) => ({ id: userId, name: `User ${userId}`, role: "Member" })) || [],
+      comments: [],
+    } as Task;
   });
+
+  // Filter: same boardType (show all tasks regardless of date for now)
+  const boardTasks = transformedTasks.filter((t: Task) => {
+    if (t.boardType !== activeBoard) return false;
+    // Show all tasks - remove date filter for testing
+    // const taskDate = new Date(t.dueDate).toISOString().split("T")[0];
+    // return taskDate === selectedDate;
+    return true;
+  });
+
+  if (isLoading) return <div className="text-white p-4">Loading tasks...</div>;
+  console.log(apiTasks);
 
   return (
     <div
@@ -47,7 +87,7 @@ const BoardView: React.FC = () => {
           status={col.status}
           label={col.label}
           dotColor={col.dotColor}
-          tasks={boardTasks.filter((t) => t.status === col.status)}
+          tasks={boardTasks.filter((t: Task) => t.status === col.status)}
         />
       ))}
     </div>
