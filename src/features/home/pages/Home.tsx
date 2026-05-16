@@ -108,7 +108,7 @@ const Home: React.FC = () => {
         <NotificationsPanel />
       </div>
 
-      {/* ===== OVERDUE BANNER ===== */}
+      {/* ===== OVERDUE BANNER ===== */} 
       {overdueCount > 0 && (
         <OverdueBanner count={overdueCount} onViewTasks={() => navigate("/home/tasks")} />
       )}
