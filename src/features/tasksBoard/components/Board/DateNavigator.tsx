@@ -74,16 +74,24 @@ const DateNavigator: React.FC = () => {
                 style={{
                   minWidth: "44px",
                   padding: "8px 6px",
+
                   background: isSelected
-                    ? "rgba(126,227,255,0.08)"
+                    ? "#0E152A"
                     : isToday
-                    ? "rgba(255,255,255,0.05)"
-                    : "transparent",
+                      ? "rgba(255,255,255,0.05)"
+                      : "transparent",
+
                   border: isSelected
                     ? "1.5px solid rgba(126,227,255,0.5)"
                     : isToday
-                    ? "1px solid rgba(255,255,255,0.12)"
-                    : "1px solid rgba(255,255,255,0.06)",
+                      ? "1px solid #7EE3FF"
+                      : "1px solid rgba(255,255,255,0.06)",
+
+                  boxShadow: isSelected
+                    ? "0 0 18px rgba(126,227,255,0.40)"
+                    : isToday
+                      ? "0 0 10px rgba(126,227,255,0.22)"
+                      : "none",
                 }}
               >
                 <span
