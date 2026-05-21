@@ -12,9 +12,9 @@ interface TaskCardProps {
 }
 
 const priorityConfig = {
-  HIGH:   { color: "#df5d5d", bg: "rgba(223,93,93,0.12)",   border: "rgba(223,93,93,0.25)" },
-  MEDIUM: { color: "#e8a838", bg: "rgba(232,168,56,0.12)",  border: "rgba(232,168,56,0.25)" },
-  LOW:    { color: "#7ee3ff", bg: "rgba(126,227,255,0.10)", border: "rgba(126,227,255,0.2)" },
+  HIGH: { color: "#df5d5d", bg: "rgba(223,93,93,0.12)", border: "rgba(223,93,93,0.25)" },
+  MEDIUM: { color: "#e8a838", bg: "rgba(232,168,56,0.12)", border: "rgba(232,168,56,0.25)" },
+  LOW: { color: "#7ee3ff", bg: "rgba(126,227,255,0.10)", border: "rgba(126,227,255,0.2)" },
 };
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) => {
@@ -36,11 +36,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
       draggable
       onDragStart={(e) => onDragStart?.(e, task.id)}
       onClick={handleCardClick}
-      className="group relative rounded-xl p-3.5 mb-2.5 cursor-pointer select-none transition-all duration-200"
+      className="group relative rounded-xl p-3.5 mb-2.5 max-h-[104px] cursor-pointer select-none transition-all duration-200"
       style={{
         background: isDragging
           ? "rgba(126,227,255,0.08)"
-          : "rgba(255,255,255,0.04)",
+          : "#0E152A",
         border: isDragging
           ? "1px solid rgba(126,227,255,0.35)"
           : "1px solid rgba(255,255,255,0.07)",
@@ -101,21 +101,44 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
       {/* Due / Late info */}
       <div className="flex items-center justify-between mt-2.5">
         <div className="flex items-center gap-1.5">
-          {task.isLate ? (
-            <AlertTriangle size={11} color="#df5d5d" />
-          ) : task.status === "review" || task.status === "done" ? (
-            <Calendar size={11} color="#7f7f7f" />
-          ) : (
-            <Clock size={11} color="#7f7f7f" />
+          <div className="flex items-center gap-1.5">
+            {task.isLate ? (
+              <AlertTriangle size={11} color="#df5d5d" />
+            ) : task.status === "review" || task.status === "done" ? (
+              <Calendar size={11} color="#7f7f7f" />
+            ) : (
+              <Clock size={11} color="#7f7f7f" />
+            )}
+            <span
+              className="text-[11px]"
+              style={{ color: task.isLate ? "#df5d5d" : "#7f7f7f" }}
+            >
+              {task.isLate ? task.lateDisplay : task.dueDateDisplay}
+            </span>
+          </div>
+          {/* Assignees */}
+          {task.assignees.length > 0 && (
+            <div className="flex items-center gap-1 ">
+              {task.assignees.slice(0, 3).map((a, i) => (
+                <div
+                  key={a.id}
+                  title={a.name}
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold"
+                  style={{
+                    background: `hsl(${(i * 80 + 200) % 360}, 45%, 38%)`,
+                    border: "1.5px solid rgba(255,255,255,0.12)",
+                    marginLeft: i > 0 ? "-5px" : "0",
+                  }}
+                >
+                  {a.name.charAt(0)}
+                </div>
+              ))}
+              {task.assignees.length > 3 && (
+                <span className="text-[9px] text-[#7f7f7f] ml-1">+{task.assignees.length - 3}</span>
+              )}
+            </div>
           )}
-          <span
-            className="text-[11px]"
-            style={{ color: task.isLate ? "#df5d5d" : "#7f7f7f" }}
-          >
-            {task.isLate ? task.lateDisplay : task.dueDateDisplay}
-          </span>
         </div>
-
         {/* Priority badge - only on non-done */}
         {!isCompleted && (
           <span
@@ -127,28 +150,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
         )}
       </div>
 
-      {/* Assignees */}
-      {task.assignees.length > 0 && (
-        <div className="flex items-center gap-1 mt-2.5">
-          {task.assignees.slice(0, 3).map((a, i) => (
-            <div
-              key={a.id}
-              title={a.name}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold"
-              style={{
-                background: `hsl(${(i * 80 + 200) % 360}, 45%, 38%)`,
-                border: "1.5px solid rgba(255,255,255,0.12)",
-                marginLeft: i > 0 ? "-5px" : "0",
-              }}
-            >
-              {a.name.charAt(0)}
-            </div>
-          ))}
-          {task.assignees.length > 3 && (
-            <span className="text-[9px] text-[#7f7f7f] ml-1">+{task.assignees.length - 3}</span>
-          )}
-        </div>
-      )}
+
     </div>
   );
 };

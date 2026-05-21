@@ -212,7 +212,7 @@ const ProposalDetailModal: React.FC = () => {
         <div
           className="w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col"
           style={{
-            background: "#0a1628",
+            background: "#060B1B",
             border: "1.5px solid rgba(126,227,255,0.15)",
             maxHeight: "88vh",
             animation: "slideUp 0.22s ease",
@@ -485,7 +485,7 @@ const ProposalDetailModal: React.FC = () => {
             )}
 
           {/* Validation Report */}
-          <div className="flex-1 overflow-y-auto scroll-thin px-6 py-4">
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[] scrollbar-track-transparent px-6 py-4">
             <p
               className="text-[10px] font-bold uppercase tracking-wider mb-3"
               style={{ color: "#7f7f7f" }}

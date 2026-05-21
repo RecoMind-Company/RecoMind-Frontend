@@ -35,7 +35,6 @@ const TodaysTasks: React.FC = () => {
     );
   }
 
-  // ===== CALENDAR MODE — render the full calendar page =====
   if (viewMode === "calendar") {
     return (
       <>
@@ -45,12 +44,8 @@ const TodaysTasks: React.FC = () => {
     );
   }
 
-  // ===== BOARD MODE =====
   return (
-    <div
-      className="flex flex-col min-h-screen px-4 py-6 md:px-8"
-      style={{ maxWidth: "1100px", margin: "0 auto" }}
-    >
+    <div className="flex flex-col min-h-[100dvh] py-6 md:px-8 overflow-x-hidden">
       {/* ===== PAGE HEADER ===== */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
@@ -60,7 +55,6 @@ const TodaysTasks: React.FC = () => {
           </p>
         </div>
 
-        {/* Board / Calendar toggle */}
         <div
           className="flex items-center rounded-xl p-1 gap-1"
           style={{
@@ -122,7 +116,6 @@ const TodaysTasks: React.FC = () => {
           ))}
         </div>
 
-        {/* Add Task — personal board only */}
         {activeBoard === "personal" && (
           <button
             onClick={() => dispatch(openAddTaskModal())}
@@ -133,14 +126,15 @@ const TodaysTasks: React.FC = () => {
             }}
           >
             <Plus size={14} />
-            Add Task
           </button>
         )}
       </div>
 
       {/* ===== KANBAN ===== */}
-      <div className="flex-1">
-        <BoardView />
+      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+        <div className="flex h-full min-w-max">
+          <BoardView />
+        </div>
       </div>
 
       {/* ===== MODALS ===== */}
