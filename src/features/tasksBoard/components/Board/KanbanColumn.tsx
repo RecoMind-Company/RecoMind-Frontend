@@ -38,16 +38,17 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, label, tasks, dotCo
     const taskId = e.dataTransfer.getData("taskId");
     if (taskId) {
       dispatch(localMoveTask({ taskId, newStatus: status }));
-      // TODO: also call API via moveTask thunk
-      // dispatch(moveTask({ taskId, newStatus: status }));
     }
     dispatch(setDragOver(null));
   };
 
   return (
     <div
-      className="flex-1 min-w-0 flex flex-col rounded-2xl p-4 transition-all duration-200"
+      className="flex flex-col rounded-2xl p-4 transition-all duration-200"
       style={{
+        flex: "1 1 0",
+        minWidth: "280px",
+        maxWidth: "420px",
         background: isOver
           ? "rgba(126,227,255,0.04)"
           : "rgba(255,255,255,0.02)",
@@ -82,7 +83,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, label, tasks, dotCo
           {tasks.length}
         </span>
       </div>
-
+      <div className="bg-[#0F1E35] mb-[10px] p-[2px] rounded-lg w-full"></div>
       {/* Tasks list */}
       <div className="flex-1 overflow-y-auto pr-0.5" style={{ scrollbarWidth: "none" }}>
         {tasks.length === 0 ? (
