@@ -9,14 +9,8 @@ import {
   setViewMode,
 } from "../../redux/tasksSlice";
 
-// ===============================================================
-// HELPERS
-// ===============================================================
-
-/** Get "YYYY-MM-DD" from a Date object */
 const toISO = (d: Date) => d.toISOString().split("T")[0] ?? d.toISOString();
 
-/** Parse "YYYY-MM" → { year, month (0-based) } */
 const parseMonth = (m: string) => {
   const parts = m.split("-");
   const year = Number(parts[0]) || new Date().getFullYear();
@@ -27,13 +21,11 @@ const parseMonth = (m: string) => {
   return { year, month };
 };
 
-/** Get all tasks whose dueDate falls on a given ISO date */
 const getTasksForDate = (tasks: Task[], iso: string) =>
   tasks.filter((t) => toISO(new Date(t.dueDate)) === iso);
 
 const todayISO = toISO(new Date());
 
-// Status-based pill colours
 const statusColor = (t: Task) => {
   if (t.status === "overdue")
     return {
@@ -54,11 +46,6 @@ const statusColor = (t: Task) => {
   };
 };
 
-// ===============================================================
-// SUB-COMPONENTS
-// ===============================================================
-
-// ---- Stats cards row ----
 const StatsRow: React.FC<{ tasks: Task[] }> = ({ tasks }) => {
   const total = tasks.length;
   const completed = tasks.filter((t) => t.completed).length;
@@ -67,24 +54,9 @@ const StatsRow: React.FC<{ tasks: Task[] }> = ({ tasks }) => {
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const cards = [
-    {
-      label: "Total Tasks",
-      value: total,
-      sub: "This month",
-      accent: "#eeeeee",
-    },
-    {
-      label: "Completed",
-      value: completed,
-      sub: `${pct}% done`,
-      accent: "#64b883",
-    },
-    {
-      label: "Overdue",
-      value: overdue,
-      sub: "Need attention",
-      accent: "#df5d5d",
-    },
+    { label: "Total Tasks", value: total, sub: "This month", accent: "#eeeeee" },
+    { label: "Completed", value: completed, sub: `${pct}% done`, accent: "#64b883" },
+    { label: "Overdue", value: overdue, sub: "Need attention", accent: "#df5d5d" },
     { label: "To-Do", value: todo, sub: "Active now", accent: "#7ee3ff" },
   ];
 
@@ -114,7 +86,6 @@ const StatsRow: React.FC<{ tasks: Task[] }> = ({ tasks }) => {
   );
 };
 
-// ---- Selected day tasks panel ----
 const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
   date,
   tasks,
@@ -135,7 +106,6 @@ const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
         border: "1px solid rgba(255,255,255,0.07)",
       }}
     >
-      {/* Header */}
       <div
         className="flex items-center gap-3 px-5 py-3"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
@@ -159,7 +129,6 @@ const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
         </span>
       </div>
 
-      {/* Tasks */}
       <div className="p-4 space-y-2">
         {dayTasks.length === 0 ? (
           <p className="text-[#7f7f7f] text-sm py-4 text-center">
@@ -185,8 +154,6 @@ const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
               >
                 {task.title}
               </span>
-
-              {/* Personal badge */}
               {task.boardType === "personal" && (
                 <span
                   className="text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0"
@@ -207,9 +174,8 @@ const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
   );
 };
 
-// ---- Single calendar day cell ----
 const DayCell: React.FC<{
-  date: Date | null; // null = padding cell
+  date: Date | null;
   isCurrentMonth: boolean;
   tasks: Task[];
   isToday: boolean;
@@ -227,7 +193,7 @@ const DayCell: React.FC<{
   return (
     <button
       onClick={onClick}
-      className="rounded-xl p-2 text-left transition-all duration-150 w-full"
+      className="rounded-xl p-2 text-left max-h-[200px] h-full transition-all duration-150 w-full"
       style={{
         minHeight: "80px",
         background: isSelected
@@ -243,13 +209,9 @@ const DayCell: React.FC<{
         cursor: "pointer",
       }}
     >
-      {/* Day number + Today label */}
       <div className="flex items-center gap-1 mb-1.5">
         {isToday && (
-          <span
-            className="text-[9px] font-semibold"
-            style={{ color: "#7ee3ff" }}
-          >
+          <span className="text-[9px] font-semibold" style={{ color: "#7ee3ff" }}>
             Today
           </span>
         )}
@@ -267,7 +229,6 @@ const DayCell: React.FC<{
         </span>
       </div>
 
-      {/* Task pills */}
       <div className="space-y-1">
         {shown.map((t) => {
           const c = statusColor(t);
@@ -296,9 +257,6 @@ const DayCell: React.FC<{
   );
 };
 
-// ===============================================================
-// MAIN COMPONENT
-// ===============================================================
 const CalendarView: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, calendarSelectedDate, calendarMonth } = useSelector(
@@ -310,26 +268,22 @@ const CalendarView: React.FC = () => {
     [calendarMonth],
   );
 
-  // All days in the grid (including padding from prev/next month)
   const gridDays = useMemo(() => {
-    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
 
     const cells: { date: Date | null; isCurrentMonth: boolean }[] = [];
 
-    // Prev month padding
     for (let i = firstDay - 1; i >= 0; i--) {
       cells.push({
         date: new Date(year, month - 1, daysInPrevMonth - i),
         isCurrentMonth: false,
       });
     }
-    // Current month
     for (let d = 1; d <= daysInMonth; d++) {
       cells.push({ date: new Date(year, month, d), isCurrentMonth: true });
     }
-    // Next month padding to fill 6 rows × 7 cols = 42
     while (cells.length < 42) {
       cells.push({
         date: new Date(
@@ -344,7 +298,6 @@ const CalendarView: React.FC = () => {
     return cells;
   }, [year, month]);
 
-  // Month stats = all tasks in this calendar month
   const monthTasks = useMemo(() => {
     return tasks.filter((t) => {
       const d = new Date(t.dueDate);
@@ -384,11 +337,9 @@ const CalendarView: React.FC = () => {
       className="flex flex-col px-4 py-6 md:px-8 pb-10"
       style={{ maxWidth: "900px", margin: "0 auto" }}
     >
-      {/* ===== TOP BAR ===== */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <h1 className="text-white text-2xl font-bold">My Tasks</h1>
 
-        {/* Board / Calendar toggle */}
         <div
           className="flex items-center rounded-xl p-1 gap-1"
           style={{
@@ -397,16 +348,8 @@ const CalendarView: React.FC = () => {
           }}
         >
           {[
-            {
-              mode: "board" as const,
-              icon: <LayoutGrid size={13} />,
-              label: "Board",
-            },
-            {
-              mode: "calendar" as const,
-              icon: <Calendar size={13} />,
-              label: "Calendar",
-            },
+            { mode: "board" as const, icon: <LayoutGrid size={13} />, label: "Board" },
+            { mode: "calendar" as const, icon: <Calendar size={13} />, label: "Calendar" },
           ].map(({ mode, icon, label }) => (
             <button
               key={mode}
@@ -429,7 +372,6 @@ const CalendarView: React.FC = () => {
         </div>
       </div>
 
-      {/* ===== MONTH NAV ===== */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={goToPrevMonth}
@@ -450,77 +392,77 @@ const CalendarView: React.FC = () => {
         </button>
       </div>
 
-      {/* ===== STATS ROW ===== */}
       <StatsRow tasks={monthTasks} />
 
-      {/* ===== SELECTED DAY PANEL ===== */}
       {calendarSelectedDate && (
         <DayTasksPanel date={calendarSelectedDate} tasks={tasks} />
       )}
 
-      {/* ===== CALENDAR GRID ===== */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: "rgba(255,255,255,0.02)",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        {/* Day-of-week headers */}
-        <div
-          className="grid grid-cols-7 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
-        >
-          {DAY_HEADERS.map((h) => (
-            <div
-              key={h}
-              className="py-3 text-center text-[10px] font-semibold tracking-wider"
-              style={{ color: "#7f7f7f" }}
-            >
-              {h}
-            </div>
-          ))}
-        </div>
-
-        {/* Weeks */}
-        {Array.from({ length: 6 }, (_, rowIdx) => (
+      {/* Scrollable wrapper على الموبايل فقط */}
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div style={{ minWidth: "600px" }}>
           <div
-            key={rowIdx}
-            className="grid grid-cols-7 gap-px"
-            style={{ background: "rgba(255,255,255,0.03)" }}
+            className="rounded-2xl overflow-hidden"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
           >
-            {gridDays.slice(rowIdx * 7, rowIdx * 7 + 7).map((cell, colIdx) => {
-              const isoDate = cell.date ? toISO(cell.date) : "";
-              const dayTasks = cell.date ? getTasksForDate(tasks, isoDate) : [];
-              const isToday = isoDate === todayISO;
-              const isSelected = isoDate === calendarSelectedDate;
-
-              return (
+            <div
+              className="grid grid-cols-7 border-b"
+              style={{ borderColor: "rgba(255,255,255,0.06)" }}
+            >
+              {DAY_HEADERS.map((h) => (
                 <div
-                  key={colIdx}
-                  className="p-1"
-                  style={{ background: "rgba(6,11,27,0.6)" }}
+                  key={h}
+                  className="py-3 text-center text-[10px] font-semibold tracking-wider"
+                  style={{ color: "#7f7f7f" }}
                 >
-                  <DayCell
-                    date={cell.date}
-                    isCurrentMonth={cell.isCurrentMonth}
-                    tasks={dayTasks}
-                    isToday={isToday}
-                    isSelected={isSelected}
-                    onClick={() => {
-                      if (!cell.date) return;
-                      if (isSelected) {
-                        dispatch(setCalendarSelectedDate(null));
-                      } else {
-                        dispatch(setCalendarSelectedDate(isoDate));
-                      }
-                    }}
-                  />
+                  {h}
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            {Array.from({ length: 6 }, (_, rowIdx) => (
+              <div
+                key={rowIdx}
+                className="grid grid-cols-7 gap-px"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                {gridDays.slice(rowIdx * 7, rowIdx * 7 + 7).map((cell, colIdx) => {
+                  const isoDate = cell.date ? toISO(cell.date) : "";
+                  const dayTasks = cell.date ? getTasksForDate(tasks, isoDate) : [];
+                  const isToday = isoDate === todayISO;
+                  const isSelected = isoDate === calendarSelectedDate;
+
+                  return (
+                    <div
+                      key={colIdx}
+                      className="p-1"
+                      style={{ background: "rgba(6,11,27,0.6)" }}
+                    >
+                      <DayCell
+                        date={cell.date}
+                        isCurrentMonth={cell.isCurrentMonth}
+                        tasks={dayTasks}
+                        isToday={isToday}
+                        isSelected={isSelected}
+                        onClick={() => {
+                          if (!cell.date) return;
+                          if (isSelected) {
+                            dispatch(setCalendarSelectedDate(null));
+                          } else {
+                            dispatch(setCalendarSelectedDate(isoDate));
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

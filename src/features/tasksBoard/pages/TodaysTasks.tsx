@@ -45,7 +45,7 @@ const TodaysTasks: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen px-4 py-6 md:px-8">
+    <div className="flex flex-col min-h-[100dvh] py-6 md:px-8 overflow-x-hidden">
       {/* ===== PAGE HEADER ===== */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
@@ -126,14 +126,15 @@ const TodaysTasks: React.FC = () => {
             }}
           >
             <Plus size={14} />
-            Add Task
           </button>
         )}
       </div>
 
       {/* ===== KANBAN ===== */}
-      <div className="flex-1 flex overflow-hidden">
-        <BoardView />
+      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+        <div className="flex h-full min-w-max">
+          <BoardView />
+        </div>
       </div>
 
       {/* ===== MODALS ===== */}

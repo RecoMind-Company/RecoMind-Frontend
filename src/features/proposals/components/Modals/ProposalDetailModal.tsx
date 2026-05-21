@@ -485,7 +485,7 @@ const ProposalDetailModal: React.FC = () => {
             )}
 
           {/* Validation Report */}
-          <div className="flex-1 overflow-y-auto scroll-thin px-6 py-4">
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[] scrollbar-track-transparent px-6 py-4">
             <p
               className="text-[10px] font-bold uppercase tracking-wider mb-3"
               style={{ color: "#7f7f7f" }}
