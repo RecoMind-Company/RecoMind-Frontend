@@ -1,10 +1,11 @@
 import "./planSidebar.css";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { ChevronLeft, Target, ClipboardList, Clock } from "lucide-react";
+import { Target, ClipboardList, Clock } from "lucide-react";
 import { useGetAllPlansQuery } from "../../redux/plansSlice";
 import type { RootState } from "@/app/store";
 import type { Plan } from "../../types";
+import { assets } from "@/assets/assets";
 
 const hasToken = () =>
   typeof window !== "undefined" && !!localStorage.getItem("token");
@@ -105,7 +106,11 @@ export default function PlanSidebar() {
             onClick={() => setCollapsed((c) => !c)}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <ChevronLeft size={18} />
+            <img
+              className={`ps-menu ${collapsed ? "ps-rotated" : ""}`}
+              src={assets.menu_icon}
+              alt="Menu"
+            />
           </button>
         </div>
 
@@ -142,7 +147,6 @@ export default function PlanSidebar() {
             !isError &&
             plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)}
         </div>
-
       </div>
     </div>
   );
