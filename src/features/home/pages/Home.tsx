@@ -52,7 +52,7 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 py-6 md:px-8 relative" style={{ maxWidth: "1100px", margin: "0 auto" }}>
+    <div className="min-h-screen px-4 py-6 md:px-8 relative">
       
       {/* ===== HEADER ===== */}
       <div className="flex items-start justify-between mb-6 relative">

@@ -51,7 +51,7 @@ const ChangePasswordButton = () => {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="flex items-center gap-3 px-6 py-3 bg-[#1C2435] text-white rounded-xl hover:bg-[#252d3d] transition-all border border-gray-700"
+        className="flex items-center gap-3 px-6 py-3  text-white rounded-xl hover:bg-[#252d3d] transition-all border border-gray-700"
       >
         <KeyRound size={20} />
         <span className="text-[16px] font-semibold">Change Password</span>

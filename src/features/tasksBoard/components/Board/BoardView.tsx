@@ -30,13 +30,11 @@ const BoardView: React.FC = () => {
 
   const columns = activeBoard === "plans" ? PLANS_COLUMNS : PERSONAL_COLUMNS;
 
-  // Transform API data to match Task type
   const transformedTasks = (apiTasks || []).map((apiTask: any) => {
     const now = new Date();
     const deadline = new Date(apiTask.deadLine);
     const isOverdue = deadline < now && apiTask.status !== "completed";
 
-    // Map API status to app status
     let status: TaskStatus = "todo";
     if (apiTask.status === "completed") {
       status = activeBoard === "plans" ? "review" : "done";
@@ -64,12 +62,8 @@ const BoardView: React.FC = () => {
     } as Task;
   });
 
-  // Filter: same boardType (show all tasks regardless of date for now)
   const boardTasks = transformedTasks.filter((t: Task) => {
     if (t.boardType !== activeBoard) return false;
-    // Show all tasks - remove date filter for testing
-    // const taskDate = new Date(t.dueDate).toISOString().split("T")[0];
-    // return taskDate === selectedDate;
     return true;
   });
 
@@ -78,7 +72,7 @@ const BoardView: React.FC = () => {
 
   return (
     <div
-      className="flex gap-4 flex-1 overflow-x-auto pb-4"
+      className="flex gap-4 w-full overflow-x-auto pb-4"
       style={{ minHeight: 0 }}
     >
       {columns.map((col) => (

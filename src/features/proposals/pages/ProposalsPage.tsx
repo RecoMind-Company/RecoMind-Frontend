@@ -31,7 +31,6 @@ const ProposalsPage: React.FC = () => {
   return (
     <div
       className="min-h-screen px-4 py-8 md:px-10 relative"
-      style={{ maxWidth: "1000px", margin: "0 auto" }}
     >
       {/* Plan input */}
       <PlanInputBox />
