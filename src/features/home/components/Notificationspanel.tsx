@@ -9,7 +9,7 @@ import {
 const NotificationsPanel: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { notifications, notificationsOpen } = useSelector(
-    (state: RootState) => state.home
+    (state: RootState) => state.home,
   );
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -46,11 +46,14 @@ const NotificationsPanel: React.FC = () => {
       `}</style>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4"
+      <div
+        className="flex items-center justify-between px-5 py-4"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-white font-semibold text-sm">Notifications</span>
+          <span className="text-white font-semibold text-sm">
+            Notifications
+          </span>
           {unreadCount > 0 && (
             <span
               className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
@@ -96,9 +99,10 @@ const NotificationsPanel: React.FC = () => {
               <div className="flex items-start gap-3">
                 {/* Avatar */}
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                   style={{
-                    background: "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
+                    background:
+                      "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
                     border: "1.5px solid rgba(126,227,255,0.2)",
                     color: "#7ee3ff",
                   }}
@@ -107,8 +111,12 @@ const NotificationsPanel: React.FC = () => {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-xs font-medium">{notif.sender}</p>
-                  <p className="text-[#7f7f7f] text-[10px] mt-0.5">{notif.time}</p>
+                  <p className="text-white text-xs font-medium">
+                    {notif.sender}
+                  </p>
+                  <p className="text-[#7f7f7f] text-[10px] mt-0.5">
+                    {notif.time}
+                  </p>
                   <p className="text-[#b8adad] text-xs mt-1 leading-relaxed truncate">
                     "{notif.message}"
                   </p>

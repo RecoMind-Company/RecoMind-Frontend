@@ -195,7 +195,7 @@ const TodaysTasks: React.FC = () => {
               {activeBoard === "personal" && (
                 <button
                   onClick={() => dispatch(openAddTaskModal())}
-                  className="flex items-center gap-2 px-4 py-2 rounded-[8px] text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     background:
                       "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",

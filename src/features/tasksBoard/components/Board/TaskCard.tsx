@@ -3,7 +3,12 @@ import { Clock, AlertTriangle, Calendar, GripVertical } from "lucide-react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/app/store";
 import type { Task, TaskStatus } from "../../types";
-import { openTaskModal, localMoveTask, localToggleComplete, setDragOver } from "../../redux/tasksSlice";
+import {
+  openTaskModal,
+  localMoveTask,
+  localToggleComplete,
+  setDragOver,
+} from "../../redux/tasksSlice";
 
 interface TaskCardProps {
   task: Task;
@@ -12,12 +17,28 @@ interface TaskCardProps {
 }
 
 const priorityConfig = {
-  HIGH: { color: "#df5d5d", bg: "rgba(223,93,93,0.12)", border: "rgba(223,93,93,0.25)" },
-  MEDIUM: { color: "#e8a838", bg: "rgba(232,168,56,0.12)", border: "rgba(232,168,56,0.25)" },
-  LOW: { color: "#7ee3ff", bg: "rgba(126,227,255,0.10)", border: "rgba(126,227,255,0.2)" },
+  HIGH: {
+    color: "#df5d5d",
+    bg: "rgba(223,93,93,0.12)",
+    border: "rgba(223,93,93,0.25)",
+  },
+  MEDIUM: {
+    color: "#e8a838",
+    bg: "rgba(232,168,56,0.12)",
+    border: "rgba(232,168,56,0.25)",
+  },
+  LOW: {
+    color: "#7ee3ff",
+    bg: "rgba(126,227,255,0.10)",
+    border: "rgba(126,227,255,0.2)",
+  },
 };
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) => {
+const TaskCard: React.FC<TaskCardProps> = ({
+  task,
+  isDragging,
+  onDragStart,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
   const p = priorityConfig[task.priority];
   const isCompleted = task.completed;
@@ -38,17 +59,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
       onClick={handleCardClick}
       className="group relative rounded-xl p-3.5 mb-2.5 max-h-[104px] cursor-pointer select-none transition-all duration-200"
       style={{
-        background: isDragging
-          ? "rgba(126,227,255,0.08)"
-          : "#0E152A",
+        background: isDragging ? "rgba(126,227,255,0.08)" : "#0E152A",
         border: isDragging
           ? "1px solid rgba(126,227,255,0.35)"
           : "1px solid rgba(255,255,255,0.07)",
         opacity: isDragging ? 0.5 : 1,
         transform: isDragging ? "rotate(2deg)" : "none",
-        boxShadow: isDragging
-          ? "0 8px 32px rgba(0,0,0,0.4)"
-          : "none",
+        boxShadow: isDragging ? "0 8px 32px rgba(0,0,0,0.4)" : "none",
       }}
     >
       {/* Grip handle - visible on hover */}
@@ -65,7 +82,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
       )}
 
       {/* Project label */}
-      <p className="text-[10px] mb-2" style={{ color: "rgba(126,227,255,0.6)" }}>
+      <p
+        className="text-[10px] mb-2"
+        style={{ color: "rgba(126,227,255,0.6)" }}
+      >
         ◆ {task.project}
       </p>
 
@@ -74,7 +94,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
         {/* Checkbox */}
         <button
           onClick={handleCheckbox}
-          className="flex-shrink-0 mt-0.5 w-4 h-4 rounded flex items-center justify-center transition-all duration-200"
+          className="shrink-0 mt-0.5 w-4 h-4 rounded flex items-center justify-center transition-all duration-200"
           style={{
             border: isCompleted ? "none" : "1.5px solid rgba(255,255,255,0.25)",
             background: isCompleted ? "#7ee3ff" : "transparent",
@@ -82,7 +102,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
         >
           {isCompleted && (
             <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
-              <path d="M1 4L3.5 6.5L9 1" stroke="#060b1b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M1 4L3.5 6.5L9 1"
+                stroke="#060b1b"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           )}
         </button>
@@ -134,7 +160,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
                 </div>
               ))}
               {task.assignees.length > 3 && (
-                <span className="text-[9px] text-[#7f7f7f] ml-1">+{task.assignees.length - 3}</span>
+                <span className="text-[9px] text-[#7f7f7f] ml-1">
+                  +{task.assignees.length - 3}
+                </span>
               )}
             </div>
           )}
@@ -143,14 +171,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isDragging, onDragStart }) =>
         {!isCompleted && (
           <span
             className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
-            style={{ background: p.bg, color: p.color, border: `1px solid ${p.border}` }}
+            style={{
+              background: p.bg,
+              color: p.color,
+              border: `1px solid ${p.border}`,
+            }}
           >
             {task.priority}
           </span>
         )}
       </div>
-
-
     </div>
   );
 };

@@ -9,7 +9,10 @@ interface ProfileCompletionModalProps {
   onComplete?: ((jobTitle: string, phoneNumber: string) => void) | undefined;
 }
 
-const ProfileCompletionModal = ({ onClose, onComplete }: ProfileCompletionModalProps) => {
+const ProfileCompletionModal = ({
+  onClose,
+  onComplete,
+}: ProfileCompletionModalProps) => {
   const [jobTitle, setJobTitle] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +32,7 @@ const ProfileCompletionModal = ({ onClose, onComplete }: ProfileCompletionModalP
               boxShadow: "0px 4px 36px 0px #ACACAC40",
             }}
           >
-            <MdError size={24} className="text-red-500 flex-shrink-0" />
+            <MdError size={24} className="text-red-500 shrink-0" />
             <span className="text-white text-base font-normal">
               Please fill in all fields
             </span>
@@ -38,7 +41,7 @@ const ProfileCompletionModal = ({ onClose, onComplete }: ProfileCompletionModalP
         {
           duration: 3000,
           position: "top-center",
-        }
+        },
       );
       return;
     }
@@ -93,8 +96,8 @@ const ProfileCompletionModal = ({ onClose, onComplete }: ProfileCompletionModalP
                     i % 3 === 0
                       ? "#64B883"
                       : i % 3 === 1
-                      ? "#7EE3FF"
-                      : "#FFC107",
+                        ? "#7EE3FF"
+                        : "#FFC107",
                 }}
               />
             ))}
