@@ -1,5 +1,8 @@
-import {  taskSlice, TasksReducer } from './../features/tasksBoard/redux/tasksSlice';
-import { authSlice } from './../features/auth/redux/authApi';
+import {
+  taskSlice,
+  TasksReducer,
+} from "./../features/tasksBoard/redux/tasksSlice";
+import { authSlice } from "./../features/auth/redux/authApi";
 import { configureStore } from "@reduxjs/toolkit";
 
 /* ================= AUTH ================= */
@@ -7,6 +10,7 @@ import { SignupReducer } from "@/features/auth/redux/features/SignUp/SignupSlice
 import { SigninReducer } from "@/features/auth/redux/features/SignIn/SigninSlice";
 import { ForgotPasswordReducer } from "@/features/auth/redux/features/ForgotPassword/ForgotPasswordSlice";
 import { VerificationReducer } from "@/features/auth/redux/features/Verification/VerificationSlice";
+import { ResetPasswordReducer } from "@/features/auth/redux/features/ResetPassword/resetPasswordSlice";
 
 /* ================= PROFILE ================= */
 import { ChangePasswordReducer } from "@/features/profile/redux/features/ChangePassword/ChangePasswordSlice";
@@ -28,6 +32,7 @@ export const store = configureStore({
     signin: SigninReducer,
     forgotPassword: ForgotPasswordReducer,
     verification: VerificationReducer,
+    resetPassword: ResetPasswordReducer,
     [taskSlice.reducerPath]: taskSlice.reducer,
     tasks: TasksReducer,
     [authSlice.reducerPath]: authSlice.reducer,
