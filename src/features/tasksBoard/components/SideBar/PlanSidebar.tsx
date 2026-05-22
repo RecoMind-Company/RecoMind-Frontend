@@ -18,7 +18,7 @@ function usePlanProgress(plan: Plan): number {
   const related = tasks.filter(
     (t) =>
       t.boardType === "plans" &&
-      t.project.toLowerCase().includes(plan.goal.toLowerCase().slice(0, 8))
+      t.project.toLowerCase().includes(plan.goal.toLowerCase().slice(0, 8)),
   );
   if (related.length === 0) return 0;
   const done = related.filter((t) => t.completed).length;
@@ -44,14 +44,14 @@ function PlanCard({ plan }: { plan: Plan }) {
   const durationLabel = isNaN(days)
     ? plan.duration
     : days >= 30
-    ? `${Math.round(days / 30)}mo`
-    : `${days}d`;
+      ? `${Math.round(days / 30)}mo`
+      : `${days}d`;
 
   return (
     <div className="ps-plan-card">
       <div className="ps-card-header">
         <p className="ps-card-name">{plan.goal || "Unnamed Plan"}</p>
-        <span className="ps-status-badge">Active</span>
+        <span className="ps-status-badge">{plan.status || "Unknown"}</span>
       </div>
 
       <div className="ps-card-meta">
@@ -61,9 +61,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             {plan.planType}
           </span>
         )}
-        {plan.planType && durationLabel && (
-          <span className="ps-meta-dot" />
-        )}
+        {plan.planType && durationLabel && <span className="ps-meta-dot" />}
         {durationLabel && (
           <span className="ps-meta-chip">
             <Clock size={10} />
@@ -86,10 +84,11 @@ function PlanCard({ plan }: { plan: Plan }) {
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function PlanSidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { data: plans = [], isLoading, isError } = useGetAllPlansQuery(
-    undefined,
-    { skip: !hasToken() }
-  );
+  const {
+    data: plans = [],
+    isLoading,
+    isError,
+  } = useGetAllPlansQuery(undefined, { skip: !hasToken() });
 
   return (
     <div className={`plan-sidebar${collapsed ? " ps-closed" : ""}`}>
@@ -144,12 +143,6 @@ export default function PlanSidebar() {
             plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)}
         </div>
 
-        {/* Collapsed icon strip */}
-        <div className="ps-icon-strip">
-          {plans.slice(0, 5).map((plan) => (
-            <span key={plan.id} className="ps-icon-dot" title={plan.goal} />
-          ))}
-        </div>
       </div>
     </div>
   );
