@@ -98,6 +98,15 @@ const PersonalInfoPage = () => {
     setShowCompletionBanner(!isComplete);
   }, [userData.jobTitle, userData.phone]);
 
+  const missingJobTitle = !userData.jobTitle.trim();
+  const missingPhone = !userData.phone.trim();
+  const completionPercentage =
+    missingJobTitle && missingPhone
+      ? 50
+      : missingJobTitle || missingPhone
+        ? 75
+        : 100;
+
   const handleInputChange = (
     field: keyof UserData,
     value: string | boolean,
@@ -217,7 +226,11 @@ const PersonalInfoPage = () => {
           <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
             <ProfileCompletionBanner
               userName={userData.name || "User"}
-              completionPercentage={50}
+              completionPercentage={completionPercentage}
+              missingJobTitle={missingJobTitle}
+              missingPhone={missingPhone}
+              initialJobTitle={userData.jobTitle}
+              initialPhone={userData.phone}
               onClose={() => setShowCompletionBanner(false)}
               onComplete={handleProfileCompletion}
             />
@@ -329,8 +342,8 @@ const PersonalInfoPage = () => {
             </button>
             <div className="flex flex-col  justify-between h-[93%] gap-4">
               <div className="flex flex-col gap-4">
-                <LogoutButton onClick={() => console.log("Logging out...")} />
                 <ChangePasswordButton />
+                <LogoutButton onClick={() => console.log("Logging out...")} />
               </div>
               <DeleteAccountButton />
             </div>

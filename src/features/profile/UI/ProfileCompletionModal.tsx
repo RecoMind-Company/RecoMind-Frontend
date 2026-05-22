@@ -9,25 +9,36 @@ interface ProfileCompletionModalProps {
   onComplete?:
     | ((jobTitle: string, phoneNumber: string) => Promise<void> | void)
     | undefined;
+  showJobTitle?: boolean | undefined;
+  showPhone?: boolean | undefined;
+  initialJobTitle?: string | undefined;
+  initialPhone?: string | undefined;
 }
 
 const ProfileCompletionModal = ({
   onClose,
   onComplete,
+  showJobTitle = true,
+  showPhone = true,
+  initialJobTitle = "",
+  initialPhone = "",
 }: ProfileCompletionModalProps) => {
-  const [jobTitle, setJobTitle] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [jobTitle, setJobTitle] = useState(initialJobTitle);
+  const [phoneNumber, setPhoneNumber] = useState(initialPhone);
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!jobTitle.trim() || !phoneNumber.trim()) {
+    if (
+      (showJobTitle && !jobTitle.trim()) ||
+      (showPhone && !phoneNumber.trim())
+    ) {
       toast.custom(
         (t) => (
           <div
-            className={`flex items-center gap-4 bg-[#030E21] border border-red-500/50 rounded-[24px] px-6 py-5 w-full max-w-[625px] h-[69px] transition-opacity duration-300 ${
+            className={`flex items-center gap-4 bg-[#030E21] border border-red-500/50 rounded-3xl px-6 py-5 w-full max-w-156.25 h-17.25 transition-opacity duration-300 ${
               t.visible ? "opacity-100" : "opacity-0"
             }`}
             style={{
@@ -52,7 +63,9 @@ const ProfileCompletionModal = ({
 
     try {
       if (onComplete) {
-        await onComplete(jobTitle, phoneNumber);
+        const jobTitleValue = showJobTitle ? jobTitle : initialJobTitle;
+        const phoneValue = showPhone ? phoneNumber : initialPhone;
+        await onComplete(jobTitleValue, phoneValue);
       }
       setLoading(false);
       setShowSuccess(true);
@@ -72,7 +85,7 @@ const ProfileCompletionModal = ({
   if (showSuccess) {
     return (
       <div
-        className="w-[88%] md:w-full mx-auto mt-[76px] max-w-[575px] rounded-3xl border border-[#64B883] p-8 md:p-10 bg-[#030E21] relative overflow-hidden"
+        className="w-[88%] md:w-full mx-auto mt-19 max-w-143.75 rounded-3xl border border-[#64B883] p-8 md:p-10 bg-[#030E21] relative overflow-hidden"
         style={{
           boxShadow: "0px 4px 36px 0px rgba(100, 184, 131, 0.3)",
         }}
@@ -82,7 +95,9 @@ const ProfileCompletionModal = ({
           className="absolute top-4 right-4 bg-white/5 border border-white/10 text-white w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#64B883]/30 hover:rotate-90 z-10"
           onClick={() => {
             if (onComplete) {
-              onComplete(jobTitle, phoneNumber);
+              const jobTitleValue = showJobTitle ? jobTitle : initialJobTitle;
+              const phoneValue = showPhone ? phoneNumber : initialPhone;
+              onComplete(jobTitleValue, phoneValue);
             }
             onClose();
           }}
@@ -237,41 +252,45 @@ const ProfileCompletionModal = ({
               onSubmit={handleSubmit}
               className="flex flex-col gap-5 md:gap-6"
             >
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="jobTitle"
-                  className="text-sm font-medium text-white ml-1"
-                >
-                  Job Title
-                </label>
-                <input
-                  type="text"
-                  id="jobTitle"
-                  className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-                  placeholder="e.g., Product Manager"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
+              {showJobTitle && (
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="jobTitle"
+                    className="text-sm font-medium text-white ml-1"
+                  >
+                    Job Title
+                  </label>
+                  <input
+                    type="text"
+                    id="jobTitle"
+                    className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    placeholder="e.g., Product Manager"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              )}
 
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="phoneNumber"
-                  className="text-sm font-medium text-white ml-1"
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-                  placeholder="e.g., +20 100 *** ****"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
+              {showPhone && (
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="phoneNumber"
+                    className="text-sm font-medium text-white ml-1"
+                  >
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phoneNumber"
+                    className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    placeholder="e.g., +20 100 *** ****"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"

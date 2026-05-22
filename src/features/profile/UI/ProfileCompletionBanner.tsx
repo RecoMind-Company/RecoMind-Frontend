@@ -6,6 +6,10 @@ import ProfileCompletionModal from "./ProfileCompletionModal";
 interface ProfileCompletionBannerProps {
   userName?: string | undefined;
   completionPercentage?: number | undefined;
+  missingJobTitle?: boolean | undefined;
+  missingPhone?: boolean | undefined;
+  initialJobTitle?: string | undefined;
+  initialPhone?: string | undefined;
   onClose?: (() => void) | undefined;
   onComplete?: ((jobTitle: string, phoneNumber: string) => void) | undefined;
 }
@@ -13,6 +17,10 @@ interface ProfileCompletionBannerProps {
 const ProfileCompletionBanner = ({
   userName = "Ahmed",
   completionPercentage = 50,
+  missingJobTitle = true,
+  missingPhone = true,
+  initialJobTitle = "",
+  initialPhone = "",
   onClose,
   onComplete,
 }: ProfileCompletionBannerProps) => {
@@ -261,6 +269,10 @@ const ProfileCompletionBanner = ({
       ) : (
         <div className="w-[88%] md:w-full mx-auto mt-19 max-w-143.75">
           <ProfileCompletionModal
+            showJobTitle={missingJobTitle}
+            showPhone={missingPhone}
+            initialJobTitle={initialJobTitle}
+            initialPhone={initialPhone}
             onClose={() => setShowModal(false)}
             onComplete={onComplete}
           />
