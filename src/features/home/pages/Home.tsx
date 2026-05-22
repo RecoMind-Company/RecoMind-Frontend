@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { useAvatar } from "@/context/AvatarContext";
 import userDefault from "@/assets/images/user.png";
+import { useProfile } from "@/features/profile/hooks/useProfile";
 
 import { fetchHomeData, toggleNotifications } from "../redux/Homeslice";
 
@@ -18,6 +19,7 @@ const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { avatarUrl } = useAvatar();
+  const { data: profile } = useProfile();
   const {
     userName,
     greeting,
@@ -33,9 +35,11 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchHomeData());
-  }, []);
+  }, [dispatch]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const cachedName = localStorage.getItem("profile_name") || "";
+  const displayName = profile?.fullName || cachedName || userName;
 
   if (loading) {
     return (
@@ -59,7 +63,7 @@ const Home: React.FC = () => {
           <div className="flex items-center gap-4 mb-4">
             <img
               src={avatarUrl || userDefault}
-              alt={userName}
+              alt={displayName}
               className="w-18 h-18 rounded-full object-cover"
             />
             <div>
@@ -68,7 +72,7 @@ const Home: React.FC = () => {
                 <span className="text-[#7EE3FF] ml-0.5">,</span>
               </p>
               <h1 className="text-white text-3xl font-bold mt-0.5">
-                {userName}
+                {displayName}
               </h1>
             </div>
           </div>

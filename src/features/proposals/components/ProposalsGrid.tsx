@@ -88,7 +88,7 @@ const ProposalsGrid: React.FC = () => {
             {/* Dropdown menu */}
             {dropdownOpen && (
               <div
-                className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-30 min-w-[140px]"
+                className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-30 min-w-35"
                 style={{
                   background: "#0d1b3e",
                   border: "1px solid rgba(126,227,255,0.15)",

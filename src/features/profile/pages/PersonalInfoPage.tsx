@@ -1,5 +1,5 @@
-import { useState, useEffect, ChangeEvent } from "react";
-import { Toaster } from "react-hot-toast";
+import { useState, useEffect } from "react";
+import { Toaster, toast } from "react-hot-toast";
 import ProfileAvatar from "../components/ProfileAvatar";
 import InputField from "../components/InputField";
 import LogoutButton from "../components/LogoutButton";
@@ -17,15 +17,36 @@ interface UserData {
   isProfileComplete: boolean;
 }
 
-import { useProfile } from "../hooks/useProfile";
+import { useProfile, useUpdateProfile } from "../hooks/useProfile";
+import { useAvatar } from "@/context/AvatarContext";
+
+const PROFILE_STORAGE_KEY = "profile_local";
+
+const getStoredProfile = () => {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Partial<UserData>) : {};
+  } catch {
+    return {};
+  }
+};
+
+const setStoredProfile = (data: Partial<UserData>) => {
+  const current = getStoredProfile();
+  const merged = { ...current, ...data };
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(merged));
+};
 
 const PersonalInfoPage = () => {
   const [showSettings, setShowSettings] = useState(false);
   const { data: profile, isLoading } = useProfile();
+  const { mutateAsync: updateProfile } = useUpdateProfile();
+  const { avatarUrl, setAvatarUrl } = useAvatar();
+  const [didInit, setDidInit] = useState(false);
 
   const [userData, setUserData] = useState<UserData>({
-    name: "ALi Alaa",
-    email: "ali@gmail.com",
+    name: "",
+    email: "",
     phone: "",
     jobTitle: "",
     profileImage: userB,
@@ -37,23 +58,45 @@ const PersonalInfoPage = () => {
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
   useEffect(() => {
-    if (profile) {
+    const stored = getStoredProfile();
+    if (stored.name || stored.email || stored.phone || stored.jobTitle) {
       setUserData((prev) => ({
         ...prev,
-        name: profile.fullName || prev.name,
-        email: profile.email || prev.email,
-        phone: profile.phoneNumber || prev.phone,
-        jobTitle: profile.jobTitle || prev.jobTitle,
-        profileImage: profile.imagePath || prev.profileImage,
+        name: stored.name || prev.name,
+        email: stored.email || prev.email,
+        phone: stored.phone || prev.phone,
+        jobTitle: stored.jobTitle || prev.jobTitle,
       }));
     }
-  }, [profile]);
+  }, []);
 
   useEffect(() => {
-    if (!userData.isProfileComplete && !userData.phone && !userData.jobTitle) {
-      setShowCompletionBanner(true);
+    if (profile && !didInit) {
+      const stored = getStoredProfile();
+      const isComplete = !!(profile.jobTitle && profile.phoneNumber);
+      setUserData((prev) => ({
+        ...prev,
+        name: stored.name || profile.fullName || prev.name,
+        email: stored.email || profile.email || prev.email,
+        phone: stored.phone || profile.phoneNumber || prev.phone,
+        jobTitle: stored.jobTitle || profile.jobTitle || prev.jobTitle,
+        profileImage: avatarUrl || prev.profileImage,
+        isProfileComplete: !!(stored.jobTitle || stored.phone || isComplete),
+      }));
+      setDidInit(true);
     }
-  }, [userData]);
+  }, [profile, avatarUrl, didInit]);
+
+  useEffect(() => {
+    if (avatarUrl) {
+      setUserData((prev) => ({ ...prev, profileImage: avatarUrl }));
+    }
+  }, [avatarUrl]);
+
+  useEffect(() => {
+    const isComplete = !!(userData.jobTitle && userData.phone);
+    setShowCompletionBanner(!isComplete);
+  }, [userData.jobTitle, userData.phone]);
 
   const handleInputChange = (
     field: keyof UserData,
@@ -69,22 +112,73 @@ const PersonalInfoPage = () => {
   };
 
   const handleSaveChanges = async () => {
-    console.log("Saving changes:", userData);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setHasChanges(false);
-    setResetEdit(true);
-    setTimeout(() => setResetEdit(false), 10);
-    alert("Changes saved successfully!");
+    try {
+      const payload = {
+        fullName: userData.name,
+        email: userData.email,
+        ...(userData.phone ? { phoneNumber: userData.phone } : {}),
+        ...(userData.jobTitle ? { jobTitle: userData.jobTitle } : {}),
+      };
+
+      const updated = await updateProfile(payload);
+      setUserData((prev) => ({
+        ...prev,
+        name: updated?.fullName || prev.name,
+        email: updated?.email || prev.email,
+        phone: updated?.phoneNumber || prev.phone,
+        jobTitle: updated?.jobTitle || prev.jobTitle,
+        isProfileComplete: !!(userData.jobTitle && userData.phone),
+      }));
+      setStoredProfile({
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        jobTitle: userData.jobTitle,
+      });
+      if (userData.name) {
+        localStorage.setItem("profile_name", userData.name);
+      }
+      setHasChanges(false);
+      setResetEdit(true);
+      setTimeout(() => setResetEdit(false), 10);
+      toast.success("Changes saved successfully!");
+    } catch (error) {
+      toast.error("Failed to save changes");
+    }
   };
 
-  const handleProfileCompletion = (jobTitle: string, phoneNumber: string) => {
-    setUserData((prev) => ({
-      ...prev,
-      jobTitle,
-      phone: phoneNumber,
-      isProfileComplete: true,
-    }));
-    setShowCompletionBanner(false);
+  const handleProfileCompletion = async (
+    jobTitle: string,
+    phoneNumber: string,
+  ) => {
+    try {
+      const payload = {
+        fullName: userData.name,
+        email: userData.email,
+        phoneNumber,
+        jobTitle,
+      };
+
+      await updateProfile(payload);
+      setUserData((prev) => ({
+        ...prev,
+        jobTitle,
+        phone: phoneNumber,
+        isProfileComplete: true,
+      }));
+      setStoredProfile({
+        name: userData.name,
+        email: userData.email,
+        phone: phoneNumber,
+        jobTitle,
+      });
+      setShowCompletionBanner(false);
+      if (userData.name) {
+        localStorage.setItem("profile_name", userData.name);
+      }
+    } catch (error) {
+      toast.error("Failed to save profile completion");
+    }
   };
   const popupSettings = () => {
     setShowSettings(true);
@@ -104,6 +198,7 @@ const PersonalInfoPage = () => {
               ...prev,
               profileImage: event.target?.result as string,
             }));
+            setAvatarUrl(event.target?.result as string);
             setHasChanges(true);
           }
         };
@@ -117,7 +212,7 @@ const PersonalInfoPage = () => {
     <>
       <Toaster position="top-center" />
 
-      <div className="min-h-screen p-4 mt-24 sm:px-6 md:px-8 lg:w-[907px] ml-0 lg:ml-[65px] md:pt-8 relative">
+      <div className="min-h-screen p-4 mt-24 sm:px-6 md:px-8 lg:w-226.75 ml-0 lg:ml-16.25 md:pt-8 relative">
         {showCompletionBanner && (
           <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
             <ProfileCompletionBanner
@@ -153,27 +248,25 @@ const PersonalInfoPage = () => {
               />
             </div>
 
-            {userData.isProfileComplete && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <InputField
-                  label="Job Title"
-                  value={userData.jobTitle}
-                  onChange={(newValue, resetSave) =>
-                    handleInputChange("jobTitle", newValue, resetSave)
-                  }
-                  resetEdit={resetEdit}
-                />
-                <InputField
-                  label="Phone"
-                  value={userData.phone}
-                  onChange={(newValue, resetSave) =>
-                    handleInputChange("phone", newValue, resetSave)
-                  }
-                  type="tel"
-                  resetEdit={resetEdit}
-                />
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <InputField
+                label="Job Title"
+                value={userData.jobTitle}
+                onChange={(newValue, resetSave) =>
+                  handleInputChange("jobTitle", newValue, resetSave)
+                }
+                resetEdit={resetEdit}
+              />
+              <InputField
+                label="Phone"
+                value={userData.phone}
+                onChange={(newValue, resetSave) =>
+                  handleInputChange("phone", newValue, resetSave)
+                }
+                type="tel"
+                resetEdit={resetEdit}
+              />
+            </div>
           </div>
 
           <button
@@ -189,7 +282,7 @@ const PersonalInfoPage = () => {
             Save Changes
           </button>
         </div>
-        <div className="btn_settings_container mt-6 pt-[20px] border-t border-[#222E53]">
+        <div className="btn_settings_container mt-6 pt-5 border-t border-[#222E53]">
           <button onClick={popupSettings} className="flex items-center gap-2.5">
             <svg
               width="28"
@@ -213,10 +306,10 @@ const PersonalInfoPage = () => {
           </button>
         </div>
         {showSettings && (
-          <div className="p-5 bg-[#060B1B] text-right fixed z-[999] top-0 right-0 w-[90%] max-w-md h-[100dvh] shadow-[-8px_0_30px_0px_rgba(255,255,255,0.06)]">
+          <div className="p-5 bg-[#060B1B] text-right fixed z-999 top-0 right-0 w-[90%] max-w-md h-dvh shadow-[-8px_0_30px_0px_rgba(255,255,255,0.06)]">
             <button
               onClick={() => setShowSettings(false)}
-              className="text-lg font-semibold mb-2  p-[8px] rounded-[8px]"
+              className="text-lg font-semibold mb-2  p-2 rounded-lg"
             >
               <svg
                 width="20"
