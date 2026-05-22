@@ -5,6 +5,7 @@ import type { AppDispatch, RootState } from "@/app/store";
 import { useAvatar } from "@/context/AvatarContext";
 import userDefault from "@/assets/images/user.png";
 import { useProfile } from "@/features/profile/hooks/useProfile";
+import { useNotificationContext } from "@/features/notifications/context/NotificationContext";
 
 import { fetchHomeData, toggleNotifications } from "../redux/Homeslice";
 
@@ -20,6 +21,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const { avatarUrl } = useAvatar();
   const { data: profile } = useProfile();
+  const { unreadCount } = useNotificationContext();
   const {
     userName,
     greeting,
@@ -28,8 +30,6 @@ const Home: React.FC = () => {
     weeklyPlan,
     weeklyStats,
     dailyFocusTasks,
-    notifications,
-    notificationsOpen,
     loading,
   } = useSelector((state: RootState) => state.home);
 
@@ -37,7 +37,6 @@ const Home: React.FC = () => {
     dispatch(fetchHomeData());
   }, [dispatch]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
   const cachedName = localStorage.getItem("profile_name") || "";
   const displayName = profile?.fullName || cachedName || userName;
 
