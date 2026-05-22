@@ -138,7 +138,7 @@ const Home: React.FC = () => {
             <h2 className="text-white font-bold text-lg">Daily Focus</h2>
             <button
               onClick={() => navigate("/home/tasks")}
-              className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity"
+              className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity underline"
             >
               View All
             </button>
