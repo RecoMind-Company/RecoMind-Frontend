@@ -182,8 +182,8 @@ const PersonalInfoPage = () => {
             className={`w-full py-3 mt-8 rounded-lg text-[16px] font-semibold transition-all duration-300
               ${
                 hasChanges
-                  ? "bg-[var(--Secondary)] text-[var(--Primary)] hover:opacity-90"
-                  : "bg-[#7F7F7F] text-[var(--Primary)] cursor-not-allowed"
+                  ? "bg-(--Secondary) text-(--Primary) hover:opacity-90"
+                  : "bg-[#7F7F7F] text-(--Primary) cursor-not-allowed"
               }`}
           >
             Save Changes
@@ -229,8 +229,8 @@ const PersonalInfoPage = () => {
                   d="M24.9999 24.9999L12.9999 12.9999M12.9999 12.9999L1 1M12.9999 12.9999L25 1M12.9999 12.9999L1 25"
                   stroke="#EEEEEE"
                   strokeWidth="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             </button>

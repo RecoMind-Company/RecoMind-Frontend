@@ -27,7 +27,7 @@ const Completed = () => {
 
         {/* Button */}
         <button
-          className="w-full md:w-[495px] rounded-lg py-3 font-medium text-xl bg-[var(--Secondary)] text-[var(--Primary)] hover:opacity-80 transition-all"
+          className="w-full md:w-[495px] rounded-lg py-3 font-medium text-xl bg-(--Secondary) text-(--Primary) hover:opacity-80 transition-all"
           onClick={() => {
             navigate("/home");
           }}

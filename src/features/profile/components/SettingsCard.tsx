@@ -28,9 +28,9 @@ export default function SettingsCard() {
         {/* Toggle Text */}
         <div className="flex items-center gap-2">
           {theme === "light" ? (
-            <Sun size={20} className="text-[var(--Secondary)]" />
+            <Sun size={20} className="text-(--Secondary)" />
           ) : (
-            <Moon size={20} className="text-[var(--Secondary)]" />
+            <Moon size={20} className="text-(--Secondary)" />
           )}
           <span className="font-medium text-xl">
             {theme === "light" ? "Light Mode" : "Dark Mode"}
@@ -57,7 +57,7 @@ export default function SettingsCard() {
       </div>
 
       {/* Divider */}
-      <div className="w-[90%] h-[1px] bg-[var(--Secondary)] opacity-20 mx-auto"></div>
+      <div className="w-[90%] h-[1px] bg-(--Secondary) opacity-20 mx-auto"></div>
 
       {/* Logout Button */}
       <button
