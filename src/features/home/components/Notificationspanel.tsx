@@ -1,16 +1,24 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
+import { closeNotifications } from "../redux/Homeslice";
 import {
-  closeNotifications,
-  markAllNotificationsRead,
-} from "../redux/Homeslice";
+  useDeleteNotification,
+  useMarkAsRead,
+} from "@/features/notifications/hooks/useNotifications";
+import { useNotificationContext } from "@/features/notifications/context/NotificationContext";
+import { formatNotificationDate } from "@/features/notifications/utils/formatNotificationDate";
 
 const NotificationsPanel: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { notifications, notificationsOpen } = useSelector(
-    (state: RootState) => state.home,
-  );
+  const { notificationsOpen } = useSelector((state: RootState) => state.home);
+  const { notifications, unreadCount, loading, error } =
+    useNotificationContext();
+  const { mutate: markAsRead } = useMarkAsRead();
+  const { mutate: deleteNotification } = useDeleteNotification();
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "unread" | "comments" | "tasks" | "plans"
+  >("all");
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Close on outside click
@@ -24,17 +32,31 @@ const NotificationsPanel: React.FC = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, [notificationsOpen, dispatch]);
 
-  if (!notificationsOpen) return null;
+  const filteredNotifications = useMemo(() => {
+    const list = notifications ?? [];
+    if (activeFilter === "unread") return list.filter((n) => !n.isRead);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+    const classify = (title: string) => {
+      const t = title.toLowerCase();
+      if (t.includes("comment")) return "comments";
+      if (t.includes("task")) return "tasks";
+      if (t.includes("plan")) return "plans";
+      return "all";
+    };
+
+    if (activeFilter === "all") return list;
+    return list.filter((n) => classify(n.title) === activeFilter);
+  }, [notifications, activeFilter]);
+
+  if (!notificationsOpen) return null;
 
   return (
     <div
       ref={panelRef}
-      className="absolute top-16 right-4 z-50 w-80 rounded-2xl overflow-hidden shadow-2xl"
+      className="absolute top-16 right-4 z-50 w-105 rounded-2xl overflow-hidden shadow-2xl"
       style={{
-        background: "#0a1020",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "#0b1327",
+        border: "1px solid rgba(126,227,255,0.12)",
         animation: "slideDown 0.2s ease",
       }}
     >
@@ -46,85 +68,169 @@ const NotificationsPanel: React.FC = () => {
       `}</style>
 
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
+      <div className="px-5 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <span className="text-white font-semibold text-sm">
             Notifications
           </span>
           {unreadCount > 0 && (
             <span
-              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: "#7ee3ff", color: "#060b1b" }}
             >
               {unreadCount}
             </span>
           )}
         </div>
-        <button
-          onClick={() => dispatch(markAllNotificationsRead())}
-          className="text-[#7ee3ff] text-xs hover:opacity-70 transition-opacity"
-        >
-          Mark all read
-        </button>
+
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          {(
+            [
+              { key: "all", label: "All" },
+              { key: "unread", label: "Unread" },
+              { key: "comments", label: "Comments" },
+              { key: "tasks", label: "Tasks" },
+              { key: "plans", label: "Plans" },
+            ] as const
+          ).map((pill) => {
+            const isActive = activeFilter === pill.key;
+            return (
+              <button
+                key={pill.key}
+                onClick={() => setActiveFilter(pill.key)}
+                className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
+                style={{
+                  background: isActive
+                    ? "rgba(126,227,255,0.18)"
+                    : "rgba(255,255,255,0.04)",
+                  color: isActive ? "#7ee3ff" : "#8ea0c7",
+                  border: isActive
+                    ? "1px solid rgba(126,227,255,0.3)"
+                    : "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                {pill.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* List */}
-      <div className="max-h-80 overflow-y-auto">
-        {notifications.length === 0 ? (
-          <div className="py-10 text-center text-[#7f7f7f] text-sm">
+      <div className="max-h-105 overflow-y-auto px-4 pb-4">
+        {loading && (
+          <div className="py-6 text-center text-[#7f7f7f] text-sm">
+            Loading notifications...
+          </div>
+        )}
+        {!loading && !!error && (
+          <div className="py-6 text-center text-[#7f7f7f] text-sm">
+            Failed to load notifications
+          </div>
+        )}
+        {!loading && !error && filteredNotifications.length === 0 && (
+          <div className="py-6 text-center text-[#7f7f7f] text-sm">
             No notifications
           </div>
-        ) : (
-          notifications.map((notif) => (
-            <div
-              key={notif.id}
-              className="px-5 py-4 transition-colors duration-150 hover:bg-white/2 cursor-pointer relative"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-            >
-              {/* Unread dot */}
-              {!notif.isRead && (
-                <span
-                  className="absolute top-4 right-4 w-2 h-2 rounded-full"
-                  style={{ background: "#7ee3ff" }}
-                />
-              )}
+        )}
 
-              <p className="text-[#7f7f7f] text-[10px] mb-1.5">
-                ◆ {notif.project}
-              </p>
+        {!loading &&
+          !error &&
+          filteredNotifications.map((notif) => {
+            const title = notif.title || "Notification";
+            const badgeColor = title.toLowerCase().includes("overdue")
+              ? "#ff6b6b"
+              : "#7ee3ff";
+            const badgeLabel = title.toLowerCase().includes("overdue")
+              ? "Overdue Task"
+              : title.toLowerCase().includes("plan")
+                ? "New Plan Added"
+                : "New Message";
+            const senderLabel = notif.senderId || "System";
+            const planLabel = notif.planId
+              ? `Plan ${notif.planId}`
+              : "Notification";
 
-              <div className="flex items-start gap-3">
-                {/* Avatar */}
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
-                    border: "1.5px solid rgba(126,227,255,0.2)",
-                    color: "#7ee3ff",
-                  }}
-                >
-                  {notif.sender.charAt(0)}
+            return (
+              <div
+                key={notif.id}
+                className="rounded-2xl px-4 py-4 mb-3 cursor-pointer"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(17,26,52,0.9) 0%, rgba(11,19,39,0.9) 100%)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                }}
+                onClick={() => markAsRead(notif.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-[#7f7f7f]">{planLabel}</p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[10px] font-semibold"
+                      style={{ color: badgeColor }}
+                    >
+                      {badgeLabel}
+                    </span>
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: badgeColor }}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-xs font-medium">
-                    {notif.sender}
-                  </p>
-                  <p className="text-[#7f7f7f] text-[10px] mt-0.5">
-                    {notif.time}
-                  </p>
-                  <p className="text-[#b8adad] text-xs mt-1 leading-relaxed truncate">
-                    "{notif.message}"
-                  </p>
+                <div className="flex items-start gap-3 mt-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
+                      border: "1.5px solid rgba(126,227,255,0.2)",
+                      color: "#7ee3ff",
+                    }}
+                  >
+                    {title.charAt(0)}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-semibold">
+                      {senderLabel}
+                    </p>
+                    <p className="text-[#7f7f7f] text-[10px] mt-0.5">
+                      {formatNotificationDate(notif.createdAt)}
+                    </p>
+                    <p className="text-[#b8adad] text-xs mt-1 leading-relaxed">
+                      "{notif.message}"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-3">
+                  <button
+                    className="text-[10px] text-[#7ee3ff] hover:opacity-70"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteNotification(notif.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                  {!notif.isRead && (
+                    <span
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "rgba(126,227,255,0.12)",
+                        color: "#7ee3ff",
+                        border: "1px solid rgba(126,227,255,0.2)",
+                      }}
+                    >
+                      Unread
+                    </span>
+                  )}
                 </div>
               </div>
-            </div>
-          ))
-        )}
+            );
+          })}
       </div>
     </div>
   );

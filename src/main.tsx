@@ -6,6 +6,7 @@ import App from "./App";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { AvatarProvider } from "./context/AvatarContext";
+import { NotificationProvider } from "./features/notifications/context/NotificationContext";
 
 const rootElement = document.getElementById("root");
 
@@ -27,10 +28,12 @@ const queryClient = new QueryClient({
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AvatarProvider> 
-        <App />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </AvatarProvider> 
+      <NotificationProvider>
+        <AvatarProvider>
+          <App />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </AvatarProvider>
+      </NotificationProvider>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );
