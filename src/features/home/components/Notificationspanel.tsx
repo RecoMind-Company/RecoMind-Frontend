@@ -81,7 +81,7 @@ const NotificationsPanel: React.FC = () => {
           notifications.map((notif) => (
             <div
               key={notif.id}
-              className="px-5 py-4 transition-colors duration-150 hover:bg-white/[0.02] cursor-pointer relative"
+              className="px-5 py-4 transition-colors duration-150 hover:bg-white/2 cursor-pointer relative"
               style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
             >
               {/* Unread dot */}
