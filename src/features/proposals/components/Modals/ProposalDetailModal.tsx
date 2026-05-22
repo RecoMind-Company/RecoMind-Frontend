@@ -306,16 +306,21 @@ const ProposalDetailModal: React.FC = () => {
       onClick={() => dispatch(closeProposalModal())}
     >
       <div
-        className="w-full rounded-2xl overflow-hidden flex"
+        className="w-full p-[20px] pt-[55px] relative rounded-2xl overflow-hidden flex shadow-[0_0_60px_15px_rgba(255,255,255,0.03)]"
         style={{
           maxWidth: "820px",
           maxHeight: "90vh",
           background: "#060B1B",
-          border: "1.5px solid rgba(126,227,255,0.12)",
           animation: "slideUp 0.22s ease",
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div>
+          <button className=" absolute top-[10px] right-[10px]  " onClick={() => dispatch(closeProposalModal())}><svg width="30" height="30" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M35.9999 35.9999L23.9999 23.9999M23.9999 23.9999L12 12M23.9999 23.9999L36 12M23.9999 23.9999L12 36" stroke="#EEEEEE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          </button>
+        </div>
         <style>{`
           @keyframes slideUp {
             from { opacity:0; transform:translateY(12px); }
@@ -362,13 +367,13 @@ const ProposalDetailModal: React.FC = () => {
                 {proposal.plan}
               </p>
             </div>
-            <button
+            {/* <button
               onClick={() => dispatch(closeProposalModal())}
               className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors ml-4 flex-shrink-0"
               style={{ border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <X size={14} color="#7f7f7f" />
-            </button>
+            </button> */}
           </div>
 
           {/* Rejection Feedback */}
@@ -502,9 +507,9 @@ const ProposalDetailModal: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL: COMMENTS */}
-        <div className="w-64 flex flex-col flex-shrink-0">
+        <div className="w-1/2 flex flex-col flex-shrink-0 bg-[#061022]">
           <div
-            className="flex items-center gap-2 px-5 py-5 flex-shrink-0"
+            className="flex items-center justify-end gap-2 px-5 py-5 flex-shrink-0"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           >
             <div
@@ -537,7 +542,7 @@ const ProposalDetailModal: React.FC = () => {
               </p>
             ) : (
               proposal.comments.map((c) => (
-                <div key={c.id} className="flex items-start gap-2.5">
+                <div key={c.id} className="flex items-start gap-2.5 p-[10px] bg-[#0E152A] rounded-[8px]">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
                     style={{

@@ -8,7 +8,7 @@ const MasterLayout = () => {
       <Navbar />
 
       {/* Page Content */}
-      <main className=" flex-1 overflow-x-auto">
+      <main className="p-[10px] flex-1 overflow-x-auto">
         <Outlet />
       </main>
     </div>
