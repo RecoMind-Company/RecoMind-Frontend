@@ -335,19 +335,6 @@
   50%       { opacity: 0.85; }
 }
 
-/* ---- COLLAPSED ICON STRIP ---- */
-.ps-icon-strip {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding-top: 8px;
-}
-
-.ps-closed .ps-icon-strip {
-  display: flex;
-}
-
 .ps-closed .ps-list,
 .ps-closed .ps-section-label,
 .ps-closed .ps-divider {
