@@ -193,7 +193,7 @@ const DayCell: React.FC<{
   return (
     <button
       onClick={onClick}
-      className="rounded-xl p-2 text-left max-h-[200px] h-full transition-all duration-150 w-full"
+      className="rounded-xl p-2 text-left max-h-50 h-full transition-all duration-150 w-full"
       style={{
         minHeight: "80px",
         background: isSelected
@@ -335,7 +335,6 @@ const CalendarView: React.FC = () => {
   return (
     <div
       className="flex flex-col px-4 py-6 md:px-8 pb-10"
-      style={{ maxWidth: "900px", margin: "0 auto" }}
     >
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <h1 className="text-white text-2xl font-bold">My Tasks</h1>
