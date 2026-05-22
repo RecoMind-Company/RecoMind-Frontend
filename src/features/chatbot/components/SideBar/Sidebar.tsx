@@ -418,19 +418,17 @@ function Sidebar() {
         )}
       </div>
 
-      {showSidebar && (
+      {showSidebar && chatSessions.length > 0 && (
         <div className="bottom">
-          {chatSessions.length > 0 && (
-            <div
-              onClick={handleClearHistory}
-              className="bottom-item recent-entry"
-            >
-              <button className="clear-history-btn" title="Clear all history">
-                <FaTrashAlt size={14} />
-              </button>
-              <p>Clear All History</p>
-            </div>
-          )}
+          <div
+            onClick={handleClearHistory}
+            className="bottom-item recent-entry"
+          >
+            <button className="clear-history-btn" title="Clear all history">
+              <FaTrashAlt size={14} />
+            </button>
+            <p>Clear All History</p>
+          </div>
         </div>
       )}
     </div>
