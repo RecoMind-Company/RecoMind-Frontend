@@ -56,7 +56,7 @@ const Home: React.FC = () => {
       {/* ===== HEADER ===== */}
       <div className="flex items-start justify-between mb-6 relative">
         <div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mb-4">
             <img
               src={avatarUrl || userDefault}
               alt={userName}
