@@ -26,12 +26,12 @@ export const plansSlice = createApi({
         url: "/api/Plan/GetAll",
         method: "GET",
       }),
-      // Unwrap the nested `value` wrapper and filter only Active plans
+      // Unwrap the nested `value` wrapper
       transformResponse: (response: PlanApiResponse[]) =>
         response
           .filter((item) => item.isSuccess && item.value)
           .map((item) => item.value)
-          .filter((plan) => plan.status === "Active"),
+          .filter((plan) => plan.status),
       providesTags: (result) =>
         result
           ? [
