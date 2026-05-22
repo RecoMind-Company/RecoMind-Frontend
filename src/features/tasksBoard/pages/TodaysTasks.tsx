@@ -40,7 +40,7 @@ const TodaysTasks: React.FC = () => {
     return (
       <>
         <PlanSidebar />
-        <div style={{ paddingLeft: "80px" }}>
+        <div style={{ paddingLeft: "80" }}>
           <CalendarView />
         </div>
         {showTaskModal && <TaskDetailModal />}
