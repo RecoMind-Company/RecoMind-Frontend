@@ -6,7 +6,9 @@ import { MdError } from "react-icons/md";
 
 interface ProfileCompletionModalProps {
   onClose: () => void;
-  onComplete?: ((jobTitle: string, phoneNumber: string) => void) | undefined;
+  onComplete?:
+    | ((jobTitle: string, phoneNumber: string) => Promise<void> | void)
+    | undefined;
 }
 
 const ProfileCompletionModal = ({
@@ -48,17 +50,23 @@ const ProfileCompletionModal = ({
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      if (onComplete) {
+        await onComplete(jobTitle, phoneNumber);
+      }
       setLoading(false);
       setShowSuccess(true);
 
       setTimeout(() => {
-        if (onComplete) {
-          onComplete(jobTitle, phoneNumber);
-        }
         onClose();
       }, 4000);
-    }, 1500);
+    } catch (error) {
+      setLoading(false);
+      toast.error("Failed to update profile", {
+        position: "top-center",
+        duration: 3000,
+      });
+    }
   };
 
   if (showSuccess) {
