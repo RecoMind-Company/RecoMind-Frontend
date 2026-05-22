@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import client from "@/api/client";
 
 export interface UserProfile {
@@ -12,6 +12,14 @@ export interface UserProfile {
   // Add other fields as per API response
 }
 
+export interface UpdateProfilePayload {
+  fullName: string;
+  email: string;
+  phoneNumber?: string;
+  jobTitle?: string;
+  imagePath?: string;
+}
+
 export const useProfile = () => {
   return useQuery<UserProfile>({
     queryKey: ["profile"],
@@ -21,5 +29,27 @@ export const useProfile = () => {
     },
     // Only fetch if token exists
     enabled: !!localStorage.getItem("token"),
+  });
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<UserProfile, unknown, UpdateProfilePayload>({
+    mutationFn: async (payload: UpdateProfilePayload) => {
+      const { data } = await client.put("/users/updateProfile", payload);
+      return data as UserProfile;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData<UserProfile | undefined>(["profile"], (old) => {
+        if (data && data.fullName) {
+          return data;
+        }
+        return { ...(old || {}), ...variables } as UserProfile;
+      });
+      if (variables.fullName) {
+        localStorage.setItem("profile_name", variables.fullName);
+      }
+    },
   });
 };
