@@ -14,6 +14,7 @@ import SignUp from "@/features/auth/pages/SignUp";
 import ForgotPassword from "@/features/auth/pages/ForgotPassword";
 import Verification from "@/features/auth/pages/Verification";
 import Completed from "@/features/auth/pages/Completed";
+import ResetPassword from "@/features/auth/pages/ResetPassword";
 
 import PublicRoute from "@/features/auth/Auth/PublicRoute";
 import ProtectedRoute from "@/features/auth/Auth/ProtectedRoute";
@@ -48,6 +49,7 @@ const router = createBrowserRouter(
         <Route path="signup" element={<SignUp />} />
         <Route path="forgotpassword" element={<ForgotPassword />} />
         <Route path="verification" element={<Verification />} />
+        <Route path="reset-password" element={<ResetPassword />} />
         <Route path="completed" element={<Completed />} />
         <Route path="*" element={<NotFound />} />
       </Route>
@@ -63,7 +65,7 @@ const router = createBrowserRouter(
       >
         <Route index element={<Home />} />
         <Route path="tasks" element={<TodaysTasks />} />
-         <Route path="proposals" element={<ProposalsPage />} />
+        <Route path="proposals" element={<ProposalsPage />} />
         <Route path="chatbot" element={<ChatBot />} />
         <Route path="profile" element={<PersonalInfoPage />} />
         <Route path="*" element={<NotFound />} />
