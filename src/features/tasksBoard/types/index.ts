@@ -53,3 +53,21 @@ export interface TasksState {
   loading: boolean;
   error: string | null;
 }
+
+// ================= PLAN TYPES =================
+export interface Plan {
+  id: string;
+  description: string;
+  goal: string;
+  planType: string;
+  status: string;
+  isApproved: boolean;
+  duration: string;
+}
+
+export interface PlanApiResponse {
+  value: Plan;
+  isSuccess: boolean;
+  isFailure: boolean;
+  error: string | null;
+}
