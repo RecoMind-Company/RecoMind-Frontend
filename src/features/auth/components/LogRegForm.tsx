@@ -31,7 +31,8 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
   const schema = isSignUp ? schemaRegister : schemaLogin;
 
   const [login, { isLoading: loginLoading }] = useLoginMutation();
-  const [registerMutation, { isLoading: registerLoading }] = useRegisterMutation();
+  const [registerMutation, { isLoading: registerLoading }] =
+    useRegisterMutation();
 
   const isloading = isSignUp ? registerLoading : loginLoading;
 
@@ -47,7 +48,7 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
     console.log(data);
     try {
       if (isSignUp) {
-        const res = await registerMutation(data).unwrap();
+        const res = await registerMutation({ ...data, role: "admin" }).unwrap();
         localStorage.setItem("token", res.token);
         localStorage.setItem("user", JSON.stringify(res));
         toast.success("Successfully registered!", {
@@ -76,7 +77,8 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
         navigate("/home");
       }
     } catch (error: any) {
-      const errorMessage = error?.message || (isSignUp ? "Registration failed" : "Login failed");
+      const errorMessage =
+        error?.message || (isSignUp ? "Registration failed" : "Login failed");
       toast.error(errorMessage, {
         position: "bottom-center",
         duration: 1500,
@@ -127,13 +129,13 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
           <img
             src={Ai}
             alt="RecoMind Illustration"
-            className="w-[300px] sm:w-[400px] md:w-[500px] lg:w-[547px] h-auto md:ml-12"
+            className="w-75 sm:w-100 md:w-125 lg:w-136.75 h-auto md:ml-12"
           />
         </div>
 
         {/* Right Section (Form) */}
-        <div className="flex-1 flex flex-col gap-4 w-full max-w-[550px] bg-[var(--Primary)] p-6 sm:p-10 md:px-[74px] md:py-[34px] rounded-3xl shadow-2xl">
-          <h1 className="text-4xl md:text-5xl font-normal mb-4 text-center text-[var(--Secondary)]">
+        <div className="flex-1 flex flex-col gap-4 w-full max-w-137.5 bg-(--Primary) p-6 sm:p-10 md:px-18.5 md:py-8.5 rounded-3xl shadow-2xl">
+          <h1 className="text-4xl md:text-5xl font-normal mb-4 text-center text-(--Secondary)">
             {title}
           </h1>
 
@@ -165,10 +167,10 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
           </div>
 
           {/* Divider */}
-          <div className="flex items-center gap-3 text-[var(--font_primary)] text-sm mt-4 mb-4 w-full">
-            <div className="flex-1 h-px bg-[var(--font_primary)] opacity-40"></div>
+          <div className="flex items-center gap-3 text-(--font_primary) text-sm mt-4 mb-4 w-full">
+            <div className="flex-1 h-px bg-(--font_primary) opacity-40"></div>
             <span className="whitespace-nowrap">Or You Can {title} With</span>
-            <div className="flex-1 h-px bg-[var(--font_primary)] opacity-40"></div>
+            <div className="flex-1 h-px bg-(--font_primary) opacity-40"></div>
           </div>
 
           <form
@@ -178,16 +180,16 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
             {/* Name Input (Only for Sign Up) */}
             {isSignUp && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-[var(--font_primary)] font-medium">
+                <label className="text-sm text-(--font_primary) font-medium">
                   Name
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 text-[var(--border_color)] w-5 h-5" />
+                  <Mail className="absolute left-3 top-3 text-(--border_color) w-5 h-5" />
                   <input
                     type="text"
                     placeholder="Enter Your Name"
                     {...register("fullName")}
-                    className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                    className="w-full bg-transparent border border-(--border_color) rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-(--Secondary) transition-all"
                   />
                 </div>
                 {errors.fullName && (
@@ -200,16 +202,16 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
 
             {/* Email Input */}
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-[var(--font_primary)] font-medium">
+              <label className="text-sm text-(--font_primary) font-medium">
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-[var(--border_color)] w-5 h-5" />
+                <Mail className="absolute left-3 top-3 text-(--border_color) w-5 h-5" />
                 <input
                   {...register("email")}
                   type="email"
                   placeholder="Enter Your Email"
-                  className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                  className="w-full bg-transparent border border-(--border_color) rounded-md py-2 pl-10 pr-3 focus:outline-none focus:border-(--Secondary) transition-all"
                 />
               </div>
               {errors.email && (
@@ -219,7 +221,7 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
 
             {/* Password Input */}
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-[var(--font_primary)] font-medium">
+              <label className="text-sm text-(--font_primary) font-medium">
                 Password
               </label>
               <div className="relative">
@@ -237,12 +239,12 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
                     register("password").onChange(e);
                     setPasswordValue(e.target.value);
                   }}
-                  className="w-full bg-transparent border border-[var(--border_color)] rounded-md py-2 pl-10 pr-10 focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                  className="w-full bg-transparent border border-(--border_color) rounded-md py-2 pl-10 pr-10 focus:outline-none focus:border-(--Secondary) transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-[var(--font_secondary)]"
+                  className="absolute right-3 top-3 text-(--font_secondary)"
                 >
                   {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
@@ -252,15 +254,13 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
               {passwordValue && (
                 <div
                   className={`flex items-center gap-2 mt-2 text-xs ${
-                    passwordValid
-                      ? "text-[var(--success)]"
-                      : "text-[var(--error)]"
+                    passwordValid ? "text-(--success)" : "text-(--error)"
                   }`}
                 >
                   {passwordValid ? (
-                    <CheckCircle size={16} className="mt-[2px]" />
+                    <CheckCircle size={16} className="mt-0.5" />
                   ) : (
-                    <AlertCircle size={16} className="mt-[2px]" />
+                    <AlertCircle size={16} className="mt-0.5" />
                   )}
                   <p>
                     {passwordValid
@@ -271,57 +271,16 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
               )}
             </div>
 
-            {isSignUp && (
-              <div className="flex flex-col gap-1">
-                <label className="text-sm text-[var(--font_primary)] font-medium">
-                  Role
-                </label>
-
-                <div className="flex items-center gap-4 mt-1">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      value="admin"
-                      className="h-4 w-4 accent-[var(--Secondary)]"
-                      {...register("role")}
-                    />
-                    <span className="text-sm text-[var(--font_primary)]">
-                      Admin
-                    </span>
-                  </label>
-
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      value="teamleader"
-                      className="h-4 w-4 accent-[var(--Secondary)]"
-                      {...register("role")}
-                    />
-                    <span className="text-sm text-[var(--font_primary)]">
-                      Team Leader
-                    </span>
-                  </label>
-                </div>
-
-                {errors.role && (
-                  <p className="text-red-500 text-xs">{errors.role.message}</p>
-                )}
-              </div>
-            )}
-
             {/* Remember & Forgot (Only for Log In) */}
             {!isSignUp && (
-              <div className="flex items-center justify-between text-sm text-[var(--font_primary)] flex-wrap gap-2">
+              <div className="flex items-center justify-between text-sm text-(--font_primary) flex-wrap gap-2">
                 <label className="flex items-center gap-2 font-normal text-base">
-                  <input
-                    type="checkbox"
-                    className="accent-[var(--Secondary)]"
-                  />
+                  <input type="checkbox" className="accent-(--Secondary)" />
                   Remember me
                 </label>
                 <Link
                   to="/forgotpassword"
-                  className="text-[var(--Secondary)] font-normal text-base hover:underline"
+                  className="text-(--Secondary) font-normal text-base hover:underline"
                 >
                   Forgot Password?
                 </Link>
@@ -332,7 +291,7 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
             <button
               type="submit"
               disabled={isloading}
-              className="mt-4 w-full bg-[var(--Secondary)] text-[var(--Primary)] rounded-lg py-2 font-medium text-[22px] hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="mt-4 w-full bg-(--Secondary) text-(--Primary) rounded-lg py-2 font-medium text-[22px] hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isloading ? (
                 <svg
@@ -357,13 +316,13 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
             </button>
 
             {/* Switch Between Log In / Sign Up */}
-            <div className="text-center text-sm mt-3 text-[var(--font_primary)]">
+            <div className="text-center text-sm mt-3 text-(--font_primary)">
               {isSignUp ? (
                 <>
                   Already have an account?{" "}
                   <Link
                     to="/"
-                    className="text-[var(--Secondary)] font-normal text-lg ! underline"
+                    className="text-(--Secondary) font-normal text-lg ! underline"
                   >
                     Log In
                   </Link>
@@ -373,7 +332,7 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
                   Don't have an account?{" "}
                   <Link
                     to="/signup"
-                    className="text-[var(--Secondary)] font-normal text-lg !underline"
+                    className="text-(--Secondary) font-normal text-lg underline!"
                   >
                     Sign Up
                   </Link>

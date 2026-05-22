@@ -2,11 +2,10 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
+import { useAvatar } from "@/context/AvatarContext";
+import userDefault from "@/assets/images/user.png";
 
-import {
-  fetchHomeData,
-  toggleNotifications,
-} from "../redux/Homeslice";
+import { fetchHomeData, toggleNotifications } from "../redux/Homeslice";
 
 import OverdueBanner from "../components/Overduebanner";
 import WeeklyPlanCard from "../components/Weeklyplancard";
@@ -18,6 +17,7 @@ import NotificationsPanel from "../components/Notificationspanel";
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { avatarUrl } = useAvatar();
   const {
     userName,
     greeting,
@@ -53,16 +53,27 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen px-4 py-6 md:px-8 relative">
-      
       {/* ===== HEADER ===== */}
       <div className="flex items-start justify-between mb-6 relative">
         <div>
-          <p className="text-sm" style={{ color: "#7ee3ff" }}>
-            {greeting}
-            <span className="text-[#7EE3FF] ml-0.5">,</span>
-          </p>
-          <h1 className="text-white text-3xl font-bold mt-0.5">{userName}</h1>
-          <p className="text-[#7f7f7f] text-sm mt-1">
+          <div className="flex items-center gap-4 mb-4">
+            <img
+              src={avatarUrl || userDefault}
+              alt={userName}
+              className="w-18 h-18 rounded-full object-cover"
+            />
+            <div>
+              <p className="text-sm" style={{ color: "#7ee3ff" }}>
+                {greeting}
+                <span className="text-[#7EE3FF] ml-0.5">,</span>
+              </p>
+              <h1 className="text-white text-3xl font-bold mt-0.5">
+                {userName}
+              </h1>
+            </div>
+          </div>
+          <p className="text-[#7f7f7f] text-sm mt-1 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#7ee3ff]" />
             You have {totalTasksToday} tasks to focus on today
           </p>
         </div>
@@ -70,25 +81,19 @@ const Home: React.FC = () => {
         {/* Bell Icon */}
         <button
           onClick={() => dispatch(toggleNotifications())}
-          className="relative mt-1 w-10 h-10 right-0 top-[40px] md:top-[35px] rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
-          style={{
-            background: notificationsOpen
-              ? "rgba(126,227,255,0.1)"
-              : "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
+          className="relative mt-1 w-10 h-10 right-0 top-10 md:top-8.75 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
               d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-              stroke="#eeeeee"
+              stroke="#7EE3FF"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
             <path
               d="M13.73 21a2 2 0 0 1-3.46 0"
-              stroke="#eeeeee"
+              stroke="#7EE3FF"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -96,7 +101,7 @@ const Home: React.FC = () => {
           </svg>
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+              className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
               style={{ background: "#7ee3ff", color: "#060b1b" }}
             >
               {unreadCount}
@@ -108,9 +113,12 @@ const Home: React.FC = () => {
         <NotificationsPanel />
       </div>
 
-      {/* ===== OVERDUE BANNER ===== */} 
+      {/* ===== OVERDUE BANNER ===== */}
       {overdueCount > 0 && (
-        <OverdueBanner count={overdueCount} onViewTasks={() => navigate("/home/tasks")} />
+        <OverdueBanner
+          count={overdueCount}
+          onViewTasks={() => navigate("/home/tasks")}
+        />
       )}
 
       {/* ===== WEEKLY PLAN ===== */}
@@ -118,14 +126,13 @@ const Home: React.FC = () => {
 
       {/* ===== MAIN CONTENT GRID ===== */}
       <div className="flex flex-col lg:flex-row gap-5">
-
         {/* LEFT: Daily Focus */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold text-lg">Daily Focus</h2>
-            <button 
+            <button
               onClick={() => navigate("/home/tasks")}
-              className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity"
+              className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity underline"
             >
               View All
             </button>
@@ -134,7 +141,10 @@ const Home: React.FC = () => {
           {dailyFocusTasks.length === 0 ? (
             <div
               className="rounded-xl p-8 text-center"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }}
             >
               <p className="text-[#7f7f7f] text-sm">No tasks for today 🎉</p>
             </div>

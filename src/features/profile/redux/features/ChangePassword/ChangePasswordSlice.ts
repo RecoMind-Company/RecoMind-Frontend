@@ -10,7 +10,7 @@ interface AxiosErrorShape {
     };
   };
 }
- 
+
 interface ChangePasswordState {
   isloading: boolean;
   data: object;
@@ -25,16 +25,21 @@ const initialState: ChangePasswordState = {
   error: null,
 };
 
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 export const ChangePasswordFunction = createAsyncThunk(
   "ChangePassword/changePassword",
-  async (data: unknown, thunkApi) => {
+  async (data: ChangePasswordPayload, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      console.log(data);
       const token = localStorage.getItem("token");
       const res = await axiosAuth.post("/reset-password", data, {
         headers: {
-          Authorization: `${token}`,
+          Authorization: token ? `Bearer ${token}` : "",
         },
       });
 
@@ -64,7 +69,7 @@ export const ChangePasswordFunction = createAsyncThunk(
         typeof errorobj.response.data.error === "object"
       ) {
         const allErrors = Object.values(
-          errorobj.response.data.error as Record<string, unknown[]>
+          errorobj.response.data.error as Record<string, unknown[]>,
         )
           .flat()
           .join(", ");
@@ -81,7 +86,7 @@ export const ChangePasswordFunction = createAsyncThunk(
         return rejectWithValue(errorMessage);
       }
     }
-  }
+  },
 );
 
 export const changePasswordSlice = createSlice({

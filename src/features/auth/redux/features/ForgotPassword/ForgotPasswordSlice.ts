@@ -27,12 +27,10 @@ const initialState: ForgotPasswordState = {
 
 export const ForgotPasswordFunction = createAsyncThunk(
   "ForgotPassword/forgetPassword",
-  async (data: unknown, thunkApi) => {
+  async (data: { email: string }, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      console.log(data);
-
-      const res = await axiosAuth.post("/forget-password", { email: data });
+      const res = await axiosAuth.post("/forget-password", data);
 
       if (res.status === 200) {
         toast.success(res.data.message || "Reset email sent successfully!", {
@@ -44,11 +42,10 @@ export const ForgotPasswordFunction = createAsyncThunk(
             width: "fit-content",
           },
         });
-        setTimeout(() => {
-          window.location.href = "/verification";
-        }, 1500);
         return res.data;
       }
+
+      return rejectWithValue("Failed to send reset email");
     } catch (error) {
       const errorobj = error as AxiosErrorShape;
       const errorMessage =
@@ -63,7 +60,7 @@ export const ForgotPasswordFunction = createAsyncThunk(
         typeof errorobj.response.data.error === "object"
       ) {
         const allErrors = Object.values(
-          errorobj.response.data.error as Record<string, unknown[]>
+          errorobj.response.data.error as Record<string, unknown[]>,
         )
           .flat()
           .join(", ");
@@ -80,7 +77,7 @@ export const ForgotPasswordFunction = createAsyncThunk(
         return rejectWithValue(errorMessage);
       }
     }
-  }
+  },
 );
 
 export const forgotPasswordSlice = createSlice({

@@ -45,7 +45,7 @@ const TodaysTasks: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[100dvh] py-6 md:px-8 overflow-x-hidden">
+    <div className="flex flex-col min-h-dvh py-6 md:px-8 overflow-x-hidden">
       {/* ===== PAGE HEADER ===== */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>

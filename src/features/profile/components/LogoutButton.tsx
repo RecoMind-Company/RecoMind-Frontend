@@ -27,7 +27,7 @@ const LogoutButton = ({ onClick }: LogoutButtonProps) => {
     });
 
     // Redirect to sign in
-    navigate("/signin");
+    navigate("/");
   };
 
   return (

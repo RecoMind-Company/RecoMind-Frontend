@@ -3,7 +3,7 @@ import Navbar from "../UI/Navbar";
 
 const MasterLayout = () => {
   return (
-    <div className="flex bg-[var(--Primary)] min-h-[100dvh] p-4">
+    <div className="flex bg-(--Primary) min-h-dvh">
       {/* Navbar */}
       <Navbar />
 

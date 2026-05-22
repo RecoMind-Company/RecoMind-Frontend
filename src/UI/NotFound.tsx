@@ -5,7 +5,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--BG_gradient)] text-[var(--font_primary)] font-garet px-4">
-      <h1 className="text-9xl font-bold tracking-wider drop-shadow-lg text-[var(--Secondary)] animate-pulse">
+      <h1 className="text-9xl font-bold tracking-wider drop-shadow-lg text-(--Secondary) animate-pulse">
         404
       </h1>
 
@@ -15,12 +15,12 @@ const NotFound = () => {
 
       <button
         onClick={() => navigate("/")}
-        className="mt-8 px-6 py-3 rounded-xl bg-[var(--Secondary)] text-[var(--Primary)] font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
+        className="mt-8 px-6 py-3 rounded-xl bg-(--Secondary) text-(--Primary) font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
       >
         Go Home
       </button>
 
-      <div className="mt-12 w-32 h-[2px] bg-[var(--Secondary)] rounded-full opacity-50"></div>
+      <div className="mt-12 w-32 h-[2px] bg-(--Secondary) rounded-full opacity-50"></div>
     </div>
   );
 };
