@@ -1,5 +1,7 @@
 import React from "react";
 import type { Task } from "../redux/Homeslice";
+import task_dot from "../../../assets/images/task_dot.png";
+import { Clock } from "lucide-react";
 
 interface TaskCardProps {
   task: Task;
@@ -43,7 +45,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="rounded-xl p-4 mb-3 cursor-pointer transition-all duration-200 hover:translate-y-[-1px]"
+      className="rounded-xl p-4 mb-3 cursor-pointer transition-all duration-200 hover:-translate-y-px"
       style={{
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.06)",
@@ -53,8 +55,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
         <div className="flex-1">
           {/* Project label */}
           <div className="flex items-center gap-1.5 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: config.dot }} />
-            <span className="text-[10px]" style={{ color: config.dot }}>
+            <img src={task_dot} alt="Task dot" className="w-1.5 h-1.5 rounded-full" />
+            <span className="text-[10px]" style={{ color: "#2C7088" }}>
               {task.project}
             </span>
           </div>
@@ -64,7 +66,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
 
           {/* Due date */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[#df5d5d] text-xs">⏰</span>
+            <span className="text-[#df5d5d]"><Clock size={18} /></span>
             <span
               className="text-xs"
               style={{ color: task.status === "overdue" ? "#df5d5d" : "#7f7f7f" }}
@@ -93,7 +95,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
 
         {/* Status badge */}
         <span
-          className="text-[10px] font-medium px-2.5 py-1 rounded-full ml-3 flex-shrink-0"
+          className="text-[10px] font-medium px-2.5 py-1 rounded-full ml-3 shrink-0"
           style={{
             background: config.bg,
             color: config.color,
