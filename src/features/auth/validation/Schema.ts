@@ -10,7 +10,7 @@ export const schemaRegister = yup.object({
     .required("Email is Required")
     .matches(
       /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-      "Enter Vaild Mail extext@test.com"
+      "Enter Vaild Mail extext@test.com",
     ),
   password: yup
     .string()
@@ -30,4 +30,22 @@ export const schemaLogin = yup.object({
     .required("Password is Required")
     .min(5, "Password should be at least 5 characters")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter"),
+});
+
+export const schemaForgotPassword = yup.object({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Enter a valid email"),
+});
+
+export const schemaResetPassword = yup.object({
+  newPassword: yup
+    .string()
+    .required("New password is required")
+    .min(8, "Password must be at least 8 characters"),
+  confirmNewPassword: yup
+    .string()
+    .required("Confirm password is required")
+    .oneOf([yup.ref("newPassword")], "Passwords do not match"),
 });
