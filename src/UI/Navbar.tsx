@@ -47,8 +47,8 @@ const Navbar = () => {
         className={`md:hidden fixed top-4 right-4 z-60 p-2 rounded-md transition-all duration-300
           ${
             isOpen
-              ? "bg-[var(--Secondary)] text-[var(--Primary)]"
-              : "bg-[var(--Primary)] text-white border border-[var(--Secondary)]"
+              ? "bg-(--Secondary) text-(--Primary)"
+              : "bg-(--Primary) text-white border border-[var(--Secondary)]"
           }`}
       >
         {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -361,7 +361,7 @@ const Navbar = () => {
                           item.image
                             ? "bg-transparent"
                             : isActive
-                              ? "bg-[var(--Secondary)]"
+                              ? "bg-(--Secondary)"
                               : "bg-transparent hover:bg-[#0f1629]"
                         }`}
                     >
@@ -382,7 +382,7 @@ const Navbar = () => {
                             size={30}
                             strokeWidth={1.7}
                             className={`transition-all duration-300 ${
-                              isActive ? "text-[var(--Primary)]" : "text-white"
+                              isActive ? "text-(--Primary)" : "text-white"
                             }`}
                           />
                         )
