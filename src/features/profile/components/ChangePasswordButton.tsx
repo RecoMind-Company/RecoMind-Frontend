@@ -1,7 +1,10 @@
 import { KeyRound, Eye, EyeOff, X, AlertCircle } from "lucide-react";
 import { useState, FormEvent } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { ChangePasswordFunction, resetState } from "../redux/features/ChangePassword/ChangePasswordSlice";
+import {
+  ChangePasswordFunction,
+  resetState,
+} from "../redux/features/ChangePassword/ChangePasswordSlice";
 import { toast } from "react-hot-toast";
 
 const ChangePasswordButton = () => {
@@ -35,7 +38,11 @@ const ChangePasswordButton = () => {
     }
 
     const resultAction = await dispatch(
-      ChangePasswordFunction({ oldPassword, newPassword })
+      ChangePasswordFunction({
+        oldPassword,
+        newPassword,
+        confirmNewPassword: confirmPassword,
+      }),
     );
 
     if (ChangePasswordFunction.fulfilled.match(resultAction)) {
@@ -85,7 +92,7 @@ const ChangePasswordButton = () => {
                       type={showOld ? "text" : "password"}
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
-                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-(--Secondary) transition-all"
                       placeholder="Enter old password"
                     />
                     <button
@@ -107,7 +114,7 @@ const ChangePasswordButton = () => {
                       type={showNew ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-(--Secondary) transition-all"
                       placeholder="Enter new password"
                     />
                     <button
@@ -129,7 +136,7 @@ const ChangePasswordButton = () => {
                       type={showConfirm ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--Secondary)] transition-all"
+                      className="w-full bg-[#252d3d] border border-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-(--Secondary) transition-all"
                       placeholder="Confirm new password"
                     />
                     <button
@@ -142,20 +149,22 @@ const ChangePasswordButton = () => {
                   </div>
                 </div>
 
-                {newPassword && confirmPassword && newPassword !== confirmPassword && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm ml-1">
-                    <AlertCircle size={14} />
-                    <span>Passwords do not match</span>
-                  </div>
-                )}
+                {newPassword &&
+                  confirmPassword &&
+                  newPassword !== confirmPassword && (
+                    <div className="flex items-center gap-2 text-red-500 text-sm ml-1">
+                      <AlertCircle size={14} />
+                      <span>Passwords do not match</span>
+                    </div>
+                  )}
 
                 <button
                   type="submit"
                   disabled={isloading}
-                  className="w-full py-4 bg-[var(--Secondary)] text-[var(--Primary)] rounded-xl font-bold text-lg hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center"
+                  className="w-full py-4 bg-(--Secondary) text-(--Primary) rounded-xl font-bold text-lg hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center"
                 >
                   {isloading ? (
-                    <div className="w-6 h-6 border-2 border-[var(--Primary)] border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-(--Primary) border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     "Update Password"
                   )}
