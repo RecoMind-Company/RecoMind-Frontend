@@ -2,6 +2,7 @@ import {
   taskSlice,
   TasksReducer,
 } from "./../features/tasksBoard/redux/tasksSlice";
+import { plansSlice } from "./../features/tasksBoard/redux/plansSlice";
 import { authSlice } from "./../features/auth/redux/authApi";
 import { configureStore } from "@reduxjs/toolkit";
 
@@ -35,6 +36,7 @@ export const store = configureStore({
     resetPassword: ResetPasswordReducer,
     [taskSlice.reducerPath]: taskSlice.reducer,
     tasks: TasksReducer,
+    [plansSlice.reducerPath]: plansSlice.reducer,
     [authSlice.reducerPath]: authSlice.reducer,
 
     changePassword: ChangePasswordReducer,
@@ -45,7 +47,11 @@ export const store = configureStore({
     proposals: ProposalsReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(taskSlice.middleware, authSlice.middleware),
+    getDefaultMiddleware().concat(
+      taskSlice.middleware,
+      plansSlice.middleware,
+      authSlice.middleware,
+    ),
 });
 
 /* ================= TYPES ================= */

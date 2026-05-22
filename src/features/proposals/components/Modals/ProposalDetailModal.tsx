@@ -306,7 +306,7 @@ const ProposalDetailModal: React.FC = () => {
       onClick={() => dispatch(closeProposalModal())}
     >
       <div
-        className="w-full p-[20px] relative rounded-2xl overflow-hidden flex shadow-[0_0_60px_15px_rgba(255,255,255,0.03)]"
+        className="w-full p-[20px] pt-[55px] relative rounded-2xl overflow-hidden flex shadow-[0_0_60px_15px_rgba(255,255,255,0.03)]"
         style={{
           maxWidth: "820px",
           maxHeight: "90vh",
@@ -507,7 +507,7 @@ const ProposalDetailModal: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL: COMMENTS */}
-        <div className="w-64 flex flex-col flex-shrink-0 bg-[#061022]">
+        <div className="w-1/2 flex flex-col flex-shrink-0 bg-[#061022]">
           <div
             className="flex items-center justify-end gap-2 px-5 py-5 flex-shrink-0"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
