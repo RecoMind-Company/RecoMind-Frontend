@@ -18,24 +18,22 @@ const OverdueBanner: React.FC<OverdueBannerProps> = ({ count, onViewTasks }) => 
       <div className="flex items-center gap-3">
         <div>
           <p
-            className="text-[#df5d5d]"
+            className="text-[#df5d5d] text-lg md:text-2xl"
             style={{
               fontWeight: 500,
-              fontSize: "24px",
               lineHeight: "28px",
               letterSpacing: "0px",
             }}
           >
             <span className="inline-flex items-center mr-2">
-              <AlertCircle size={20} className="text-[#df5d5d]" />
+              <AlertCircle size={18} className="text-[#df5d5d]" />
             </span>
             {count} Tasks are overdue
           </p>
           <p
-            className="mt-0.5"
+            className="mt-0.5 text-xs md:text-lg"
             style={{
               fontWeight: 400,
-              fontSize: "14px",
               lineHeight: "20px",
               letterSpacing: "0px",
               color: "#CBCBCB",
@@ -47,7 +45,7 @@ const OverdueBanner: React.FC<OverdueBannerProps> = ({ count, onViewTasks }) => 
       </div>
       <button
         onClick={onViewTasks}
-        className="px-4 py-3 rounded-[14px] text-lg font-medium text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+        className="p-2 md:px-4 md:py-3 rounded-[14px] text-xs md:text-lg font-medium text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
         style={{
           backgroundColor: "#454A55A6"
         }}
