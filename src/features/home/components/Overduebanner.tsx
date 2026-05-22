@@ -12,7 +12,7 @@ const OverdueBanner: React.FC<OverdueBannerProps> = ({ count, onViewTasks }) => 
       className="flex items-center justify-between rounded-xl px-5 py-4 mb-5"
       style={{
         background:
-          "radial-gradient(303.7% 3274.22% at 100% 25.96%, rgba(82, 5, 5, 0.4) 0%, rgba(20, 26, 43, 0.4) 100%)",
+          "radial-gradient(125% 3274.22% at 100% 25.96%, rgba(82, 5, 5, 0.4) 0%, rgba(20, 26, 43, 0.4) 100%)",
       }}
     >
       <div className="flex items-center gap-3">
