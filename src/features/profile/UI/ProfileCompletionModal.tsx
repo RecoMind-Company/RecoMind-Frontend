@@ -151,7 +151,7 @@ const ProfileCompletionModal = ({
           {/* Progress Bar */}
           <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden animate-[fadeInUp_0.6s_ease-out_0.4s_both]">
             <div
-              className="h-full bg-gradient-to-r from-[#64B883] to-[#7EE3FF] rounded-full animate-[progressFill_1.5s_ease-out_0.5s_both]"
+              className="h-full bg-linear-to-r from-[#64B883] to-[#7EE3FF] rounded-full animate-[progressFill_1.5s_ease-out_0.5s_both]"
               style={{ width: "100%" }}
             ></div>
           </div>
@@ -224,14 +224,14 @@ const ProfileCompletionModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-[4px] z-40"
+        className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40"
         style={{ backdropFilter: "blur(4px)" }}
         onClick={onClose}
       ></div>
 
-      <div className="fixed inset-0 flex items-start justify-center z-50 pt-[76px] px-4 pointer-events-none">
+      <div className="fixed inset-0 flex items-start justify-center z-50 pt-19 px-4 pointer-events-none">
         <div
-          className="w-[88%] md:w-full max-w-[575px] rounded-3xl border border-[#7EE3FF]/30 p-8 md:p-10 bg-[#030E21] relative pointer-events-auto"
+          className="w-[88%] md:w-full max-w-143.75 rounded-3xl border border-[#7EE3FF]/30 p-8 md:p-10 bg-[#030E21] relative pointer-events-auto"
           style={{
             boxShadow: "0px 4px 36px 0px #ACACAC40",
           }}
@@ -263,7 +263,7 @@ const ProfileCompletionModal = ({
                   <input
                     type="text"
                     id="jobTitle"
-                    className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="bg-white/3 border border-[#7EE3FF]/30 rounded-xl px-4 md:px-4.5 py-3 md:py-3.5 text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="e.g., Product Manager"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
@@ -283,7 +283,7 @@ const ProfileCompletionModal = ({
                   <input
                     type="tel"
                     id="phoneNumber"
-                    className="bg-white/[0.03] border border-[#7EE3FF]/30 rounded-xl px-4 md:px-[18px] py-3 md:py-[14px] text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="bg-white/3 border border-[#7EE3FF]/30 rounded-xl px-4 md:px-4.5 py-3 md:py-3.5 text-sm md:text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:bg-white/5 focus:border-[#7EE3FF] focus:shadow-[0_0_0_3px_rgba(126,227,255,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="e.g., +20 100 *** ****"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
