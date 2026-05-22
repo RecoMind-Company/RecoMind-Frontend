@@ -1,14 +1,32 @@
 import React, { useState } from "react";
-import { X, Clock, Calendar, MessageSquare, CornerDownLeft } from "lucide-react";
+import {
+  X,
+  Clock,
+  Calendar,
+  MessageSquare,
+  CornerDownLeft,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { closeTaskModal, localToggleComplete } from "../../redux/tasksSlice";
 import { addComment } from "../../redux/tasksSlice";
 
 const priorityConfig = {
-  HIGH:   { color: "#df5d5d", bg: "rgba(223,93,93,0.15)",   border: "rgba(223,93,93,0.3)" },
-  MEDIUM: { color: "#e8a838", bg: "rgba(232,168,56,0.15)",  border: "rgba(232,168,56,0.3)" },
-  LOW:    { color: "#7ee3ff", bg: "rgba(126,227,255,0.10)", border: "rgba(126,227,255,0.2)" },
+  HIGH: {
+    color: "#df5d5d",
+    bg: "rgba(223,93,93,0.15)",
+    border: "rgba(223,93,93,0.3)",
+  },
+  MEDIUM: {
+    color: "#e8a838",
+    bg: "rgba(232,168,56,0.15)",
+    border: "rgba(232,168,56,0.3)",
+  },
+  LOW: {
+    color: "#7ee3ff",
+    bg: "rgba(126,227,255,0.10)",
+    border: "rgba(126,227,255,0.2)",
+  },
 };
 
 const TaskDetailModal: React.FC = () => {
@@ -73,25 +91,33 @@ const TaskDetailModal: React.FC = () => {
               {freshTask.status === "review"
                 ? "Review/Done"
                 : freshTask.status === "done"
-                ? "Done"
-                : freshTask.status === "todo"
-                ? "To-Do"
-                : "ToDo"}
+                  ? "Done"
+                  : freshTask.status === "todo"
+                    ? "To-Do"
+                    : "ToDo"}
             </p>
 
             {/* Title with checkbox */}
             <div className="flex items-start gap-3 mb-4">
               <button
                 onClick={() => dispatch(localToggleComplete(freshTask.id))}
-                className="flex-shrink-0 mt-1 w-5 h-5 rounded flex items-center justify-center transition-all duration-200"
+                className="shrink-0 mt-1 w-5 h-5 rounded flex items-center justify-center transition-all duration-200"
                 style={{
-                  border: isCompleted ? "none" : "1.5px solid rgba(255,255,255,0.3)",
+                  border: isCompleted
+                    ? "none"
+                    : "1.5px solid rgba(255,255,255,0.3)",
                   background: isCompleted ? "#7ee3ff" : "transparent",
                 }}
               >
                 {isCompleted && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="#060b1b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M1 4L3.5 6.5L9 1"
+                      stroke="#060b1b"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 )}
               </button>
@@ -110,25 +136,38 @@ const TaskDetailModal: React.FC = () => {
             <div className="flex items-center gap-2 flex-wrap mb-4">
               <div
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
               >
-                {freshTask.status === "review" || freshTask.status === "done" ? (
+                {freshTask.status === "review" ||
+                freshTask.status === "done" ? (
                   <Calendar size={11} color="#7f7f7f" />
                 ) : (
                   <Clock size={11} color="#7f7f7f" />
                 )}
-                <span className="text-[11px] text-[#b8adad]">{freshTask.dueDateDisplay}</span>
+                <span className="text-[11px] text-[#b8adad]">
+                  {freshTask.dueDateDisplay}
+                </span>
               </div>
               {(["HIGH", "MEDIUM", "LOW"] as const).map((pr) => (
                 <span
                   key={pr}
                   className="text-[10px] font-semibold px-2.5 py-1 rounded-lg"
                   style={{
-                    background: freshTask.priority === pr ? priorityConfig[pr].bg : "rgba(255,255,255,0.04)",
-                    color: freshTask.priority === pr ? priorityConfig[pr].color : "#7f7f7f",
-                    border: freshTask.priority === pr
-                      ? `1px solid ${priorityConfig[pr].border}`
-                      : "1px solid rgba(255,255,255,0.06)",
+                    background:
+                      freshTask.priority === pr
+                        ? priorityConfig[pr].bg
+                        : "rgba(255,255,255,0.04)",
+                    color:
+                      freshTask.priority === pr
+                        ? priorityConfig[pr].color
+                        : "#7f7f7f",
+                    border:
+                      freshTask.priority === pr
+                        ? `1px solid ${priorityConfig[pr].border}`
+                        : "1px solid rgba(255,255,255,0.06)",
                   }}
                 >
                   {pr}
@@ -139,7 +178,11 @@ const TaskDetailModal: React.FC = () => {
             {/* Project tag */}
             <span
               className="inline-flex items-center gap-1 text-[10px] px-2.5 py-1 rounded-full mb-5"
-              style={{ background: "rgba(126,227,255,0.08)", color: "#7ee3ff", border: "1px solid rgba(126,227,255,0.15)" }}
+              style={{
+                background: "rgba(126,227,255,0.08)",
+                color: "#7ee3ff",
+                border: "1px solid rgba(126,227,255,0.15)",
+              }}
             >
               ◆ {freshTask.project}
             </span>
@@ -147,18 +190,27 @@ const TaskDetailModal: React.FC = () => {
             {/* Description */}
             {freshTask.description && (
               <div className="mb-5">
-                <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold mb-2">Task Description</p>
-                <p className="text-[#b8adad] text-sm leading-relaxed">{freshTask.description}</p>
+                <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold mb-2">
+                  Task Description
+                </p>
+                <p className="text-[#b8adad] text-sm leading-relaxed">
+                  {freshTask.description}
+                </p>
               </div>
             )}
 
             {/* Members */}
             {freshTask.assignees.length > 0 && (
               <div>
-                <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold mb-3">Members</p>
+                <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold mb-3">
+                  Members
+                </p>
                 <div className="space-y-2">
                   {freshTask.assignees.map((member, i) => (
-                    <div key={member.id + i} className="flex items-center gap-2.5">
+                    <div
+                      key={member.id + i}
+                      className="flex items-center gap-2.5"
+                    >
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
                         style={{
@@ -168,7 +220,9 @@ const TaskDetailModal: React.FC = () => {
                       >
                         {member.name.charAt(0)}
                       </div>
-                      <span className="text-[#b8adad] text-sm">{member.name}</span>
+                      <span className="text-[#b8adad] text-sm">
+                        {member.name}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -180,7 +234,9 @@ const TaskDetailModal: React.FC = () => {
           <div className="w-64 flex flex-col p-5">
             {/* Comments tab button */}
             <button
-              onClick={() => setActiveTab(activeTab === "comments" ? "details" : "comments")}
+              onClick={() =>
+                setActiveTab(activeTab === "comments" ? "details" : "comments")
+              }
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-5 self-end transition-all"
               style={{
                 background: "rgba(255,255,255,0.05)",
@@ -203,17 +259,23 @@ const TaskDetailModal: React.FC = () => {
             </button>
 
             {/* Comments list */}
-            <div className="flex-1 overflow-y-auto space-y-4 mb-3" style={{ scrollbarWidth: "none" }}>
+            <div
+              className="flex-1 overflow-y-auto space-y-4 mb-3"
+              style={{ scrollbarWidth: "none" }}
+            >
               {freshTask.comments.length === 0 ? (
-                <p className="text-[#7f7f7f] text-xs text-center mt-8">No comments yet</p>
+                <p className="text-[#7f7f7f] text-xs text-center mt-8">
+                  No comments yet
+                </p>
               ) : (
                 freshTask.comments.map((comment) => (
                   <div key={comment.id}>
                     <div className="flex items-start gap-2.5">
                       <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                         style={{
-                          background: "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
+                          background:
+                            "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
                           border: "1.5px solid rgba(126,227,255,0.15)",
                           color: "#7ee3ff",
                         }}
@@ -222,10 +284,16 @@ const TaskDetailModal: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2 mb-0.5">
-                          <p className="text-white text-xs font-semibold">{comment.author}</p>
-                          <p className="text-[#7f7f7f] text-[9px]">{comment.time}</p>
+                          <p className="text-white text-xs font-semibold">
+                            {comment.author}
+                          </p>
+                          <p className="text-[#7f7f7f] text-[9px]">
+                            {comment.time}
+                          </p>
                         </div>
-                        <p className="text-[#b8adad] text-xs leading-relaxed">{comment.text}</p>
+                        <p className="text-[#b8adad] text-xs leading-relaxed">
+                          {comment.text}
+                        </p>
                         <button className="text-[#7ee3ff] text-[10px] mt-1 flex items-center gap-1 hover:opacity-70 transition-opacity">
                           <CornerDownLeft size={9} />
                           Reply

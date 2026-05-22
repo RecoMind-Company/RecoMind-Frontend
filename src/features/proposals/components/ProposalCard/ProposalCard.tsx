@@ -91,7 +91,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
           )}
         </h3>
         <span
-          className="text-[10px] font-semibold px-2 py-0.5 rounded-md flex-shrink-0"
+          className="text-[10px] font-semibold px-2 py-0.5 rounded-md shrink-0"
           style={{
             background: s.bg,
             color: s.color,
@@ -157,7 +157,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
             }}
           >
             <div
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0"
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0"
               style={{
                 background: "linear-gradient(135deg, #2a4a7f, #1a3060)",
                 color: "#7ee3ff",
