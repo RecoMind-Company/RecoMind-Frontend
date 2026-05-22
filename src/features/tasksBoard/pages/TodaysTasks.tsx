@@ -93,41 +93,57 @@ const TodaysTasks: React.FC = () => {
         className="flex items-center justify-between mb-5"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
       >
-        <div className="flex items-center">
-          {([
-            { board: "plans" as BoardType,    icon: <Target size={13} />, label: "Plans Board" },
-            { board: "personal" as BoardType, icon: <User   size={13} />, label: "Personal Board" },
-          ]).map(({ board, icon, label }) => (
+        <div className="flex items-center justify-around w-full">
+
+          {/* Plans Board Tab */}
+          <button
+            onClick={() => dispatch(setActiveBoard("plans" as BoardType))}
+            className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative"
+            style={{ color: activeBoard === "plans" ? "#7ee3ff" : "#7f7f7f" }}
+          >
+            <Target size={13} />
+            Plans Board
+            {activeBoard === "plans" && (
+              <span
+                className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                style={{ background: "#7ee3ff" }}
+              />
+            )}
+          </button>
+
+          {/* Personal Board Tab + Add Task Button */}
+          <div className="flex items-center gap-2 relative">
             <button
-              key={board}
-              onClick={() => dispatch(setActiveBoard(board))}
+              onClick={() => dispatch(setActiveBoard("personal" as BoardType))}
               className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative"
-              style={{ color: activeBoard === board ? "#7ee3ff" : "#7f7f7f" }}
+              style={{ color: activeBoard === "personal" ? "#7ee3ff" : "#7f7f7f" }}
             >
-              {icon}
-              {label}
-              {activeBoard === board && (
+              <User size={13} />
+              Personal Board
+              {activeBoard === "personal" && (
                 <span
                   className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
                   style={{ background: "#7ee3ff" }}
                 />
               )}
             </button>
-          ))}
-        </div>
 
-        {activeBoard === "personal" && (
-          <button
-            onClick={() => dispatch(openAddTaskModal())}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
-              color: "#060b1b",
-            }}
-          >
-            <Plus size={14} />
-          </button>
-        )}
+            {activeBoard === "personal" && (
+              <button
+                onClick={() => dispatch(openAddTaskModal())}
+                className="flex items-center gap-2 px-4 py-2 rounded-[8px] text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
+                  color: "#060b1b",
+                }}
+              >
+                <Plus size={14} />
+              <span className="hidden md:block">Add Task</span>
+              </button>
+            )}
+          </div>
+
+        </div>
       </div>
 
       {/* ===== KANBAN ===== */}
