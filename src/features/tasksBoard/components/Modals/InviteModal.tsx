@@ -22,7 +22,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
 
   const toggle = (id: string) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -45,20 +45,27 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4"
+        <div
+          className="flex items-center justify-between px-5 py-4"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <span className="text-white font-semibold text-sm">Invite Team Member</span>
-          <button onClick={() => dispatch(closeInviteModal())}
-            className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors">
+          <span className="text-white font-semibold text-sm">
+            Invite Team Member
+          </span>
+          <button
+            onClick={() => dispatch(closeInviteModal())}
+            className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors"
+          >
             <X size={14} color="#7f7f7f" />
           </button>
         </div>
 
         {/* Members list */}
-        <div className="p-4 space-y-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-[#7EE3FF]
+        <div
+          className="p-4 space-y-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-[#7EE3FF]
             scrollbar-track-transparent
-            scrollbar-thumb-rounded-full">
+            scrollbar-thumb-rounded-full"
+        >
           {MOCK_MEMBERS.map((member, i) => {
             const isSelected = selected.includes(member.id + i);
             const uniqueId = member.id + i;
@@ -68,31 +75,48 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
                 onClick={() => toggle(uniqueId)}
                 className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-150"
                 style={{
-                  background: isSelected ? "rgba(126,227,255,0.06)" : "rgba(255,255,255,0.03)",
-                  border: isSelected ? "1px solid rgba(126,227,255,0.2)" : "1px solid rgba(255,255,255,0.06)",
+                  background: isSelected
+                    ? "rgba(126,227,255,0.06)"
+                    : "rgba(255,255,255,0.03)",
+                  border: isSelected
+                    ? "1px solid rgba(126,227,255,0.2)"
+                    : "1px solid rgba(255,255,255,0.06)",
                 }}
               >
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                  style={{ background: `hsl(${(i * 70 + 200) % 360}, 45%, 35%)`, color: "#eeeeee" }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                  style={{
+                    background: `hsl(${(i * 70 + 200) % 360}, 45%, 35%)`,
+                    color: "#eeeeee",
+                  }}
                 >
                   {member.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{member.name}</p>
+                  <p className="text-white text-sm font-medium truncate">
+                    {member.name}
+                  </p>
                   <p className="text-[#7f7f7f] text-xs">{member.role}</p>
                 </div>
                 {/* Checkbox */}
                 <div
-                  className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
+                  className="w-5 h-5 rounded flex items-center justify-center shrink-0"
                   style={{
-                    border: isSelected ? "none" : "1.5px solid rgba(255,255,255,0.2)",
+                    border: isSelected
+                      ? "none"
+                      : "1.5px solid rgba(255,255,255,0.2)",
                     background: isSelected ? "#7ee3ff" : "transparent",
                   }}
                 >
                   {isSelected && (
                     <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="#060b1b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M1 4L3.5 6.5L9 1"
+                        stroke="#060b1b"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   )}
                 </div>
@@ -107,7 +131,10 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
             onClick={handleAdd}
             disabled={selected.length === 0}
             className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)", color: "#060b1b" }}
+            style={{
+              background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
+              color: "#060b1b",
+            }}
           >
             Add ({selected.length})
           </button>
