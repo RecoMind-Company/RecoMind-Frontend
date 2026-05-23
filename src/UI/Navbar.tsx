@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, LayoutDashboard, Bot, Menu, X, LucideIcon } from "lucide-react";
+import {
+  Home,
+  LayoutDashboard,
+  Bot,
+  Menu,
+  X,
+  FilePenLine,
+  LucideIcon,
+} from "lucide-react";
 import { useAvatar } from "../context/AvatarContext";
 import userDefault from "../assets/images/user.png";
 
@@ -26,7 +34,7 @@ const Navbar = () => {
     },
     {
       id: "proposals",
-      icon: Home,
+      icon: FilePenLine,
       label: "Proposals",
       path: "/home/proposals",
     },
@@ -48,7 +56,7 @@ const Navbar = () => {
           ${
             isOpen
               ? "bg-(--Secondary) text-(--Primary)"
-              : "bg-(--Primary) text-white border border-[var(--Secondary)]"
+              : "bg-(--Primary) text-white border border-(--Secondary)"
           }`}
       >
         {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -372,7 +380,7 @@ const Navbar = () => {
                           className={`w-10 h-10 rounded-full object-cover transition-all duration-300
                             ${
                               isActive
-                                ? "border-2 border-[var(--Secondary)]"
+                                ? "border-2 border-(--Secondary)"
                                 : "border-2 border-transparent"
                             }`}
                         />
@@ -388,7 +396,7 @@ const Navbar = () => {
                         )
                       )}
                     </div>
-                    <span className="text-[var(--font_primary)] text-xs md:text-base mt-1">
+                    <span className="text-(--font_primary) text-xs md:text-base mt-1">
                       {item.label}
                     </span>
                   </>
@@ -401,7 +409,7 @@ const Navbar = () => {
         {isOpen && (
           <div
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-black/40 z-[40] md:hidden transition-opacity duration-300"
+            className="fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-300"
           />
         )}
       </div>
