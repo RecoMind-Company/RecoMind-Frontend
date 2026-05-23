@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { axiosaccount } from "../../../config";
+import { deleteUser } from "@/api/endpoints/user.api";
 import toast from "react-hot-toast";
 
 interface AxiosErrorShape {
@@ -30,19 +30,13 @@ export const DeleteAccountFunction = createAsyncThunk(
   async (id: string, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      const token = localStorage.getItem("token");
+      const data = await deleteUser(id);
 
-      const res = await axiosaccount.delete(`/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res.status === 200) {
+      if (data) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        toast.success(res.data.message || "Account deleted successfully!", {
+        toast.success(data.message || "Account deleted successfully!", {
           position: "bottom-center",
           duration: 1500,
           style: {
@@ -51,7 +45,7 @@ export const DeleteAccountFunction = createAsyncThunk(
             width: "fit-content",
           },
         });
-        return res.data;
+        return data;
       }
     } catch (error) {
       const errorobj = error as AxiosErrorShape;
@@ -68,7 +62,7 @@ export const DeleteAccountFunction = createAsyncThunk(
       });
       return rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 export const deleteAccountSlice = createSlice({
