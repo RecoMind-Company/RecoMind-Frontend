@@ -17,7 +17,7 @@ export const schemaRegister = yup.object({
     .required("Password is Required")
     .min(5, "Password should be at least 5 characters")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter"),
-  role: yup.string().required("Role is Required"),
+  role: yup.string().notRequired(),
 });
 
 export const schemaLogin = yup.object({

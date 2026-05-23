@@ -5,7 +5,7 @@ import {
   type UnreadCountResponse,
 } from "@/services/notification.service";
 
-const POLL_INTERVAL_MS = 10000;
+const POLL_INTERVAL_MS = 30000;
 const hasToken = () => !!localStorage.getItem("token");
 
 export const useNotifications = () =>
@@ -22,8 +22,8 @@ export const useReadNotifications = () =>
     queryKey: ["notifications", "read"],
     queryFn: notificationService.getReadNotifications,
     enabled: hasToken(),
-    refetchInterval: POLL_INTERVAL_MS,
-    refetchIntervalInBackground: true,
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
   });
 
 export const useUnreadNotifications = () =>
@@ -31,8 +31,8 @@ export const useUnreadNotifications = () =>
     queryKey: ["notifications", "unread"],
     queryFn: notificationService.getUnreadNotifications,
     enabled: hasToken(),
-    refetchInterval: POLL_INTERVAL_MS,
-    refetchIntervalInBackground: true,
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
   });
 
 export const useUnreadCount = () =>

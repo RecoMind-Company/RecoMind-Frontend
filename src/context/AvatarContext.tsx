@@ -11,7 +11,7 @@ const AvatarContext = createContext<AvatarContextType | null>(null);
 
 export const AvatarProvider = ({ children }: { children: React.ReactNode }) => {
   const [avatarUrl, setAvatarUrlState] = useState<string>(
-    localStorage.getItem(STORAGE_KEY) || ""
+    localStorage.getItem(STORAGE_KEY) || "",
   );
 
   const setAvatarUrl = (url: string) => {

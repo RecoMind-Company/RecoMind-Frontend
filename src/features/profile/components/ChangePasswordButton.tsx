@@ -66,15 +66,15 @@ const ChangePasswordButton = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#060B1B] w-full max-w-md rounded-2xl border border-gray-700 shadow-2xl relative">
+          <div className="bg-[#060B1B] w-full md:max-w-xl rounded-2xl border border-gray-700 shadow-2xl relative">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute right-4 top-4 text-gray-400 hover:text-white transition-all"
+              className="absolute right-2 top-3 text-gray-400 hover:text-white transition-all"
             >
               <X size={24} />
             </button>
 
-            <div className="p-8">
+            <div className="p-8 md:p-12">
               <h3 className="text-2xl font-bold text-white mb-2">
                 Change Password
               </h3>
