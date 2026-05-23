@@ -24,6 +24,7 @@ const TodaysTasks: React.FC = () => {
     viewMode,
     showAddTaskModal,
     showTaskModal,
+    selectedDate,
     loading,
   } = useSelector((s: RootState) => s.tasks);
 
@@ -70,15 +71,16 @@ const TodaysTasks: React.FC = () => {
         {/* ===== PAGE HEADER ===== */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
           <div>
-            <h1 className="text-white text-2xl font-bold">
-              Today's Tasks
-            </h1>
+            <h1 className="text-white text-2xl font-bold">Today's Tasks</h1>
 
             <p className="text-[#7f7f7f] text-sm mt-0.5">
-              {new Date().toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
+              {new Date(selectedDate + "T12:00:00").toLocaleDateString(
+                "en-US",
+                {
+                  month: "long",
+                  year: "numeric",
+                },
+              )}
             </p>
           </div>
 
@@ -108,14 +110,9 @@ const TodaysTasks: React.FC = () => {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200"
                 style={{
                   background:
-                    viewMode === mode
-                      ? "rgba(126,227,255,0.1)"
-                      : "transparent",
+                    viewMode === mode ? "rgba(126,227,255,0.1)" : "transparent",
 
-                  color:
-                    viewMode === mode
-                      ? "#7ee3ff"
-                      : "#7f7f7f",
+                  color: viewMode === mode ? "#7ee3ff" : "#7f7f7f",
 
                   border:
                     viewMode === mode
@@ -143,21 +140,14 @@ const TodaysTasks: React.FC = () => {
           <div className="flex items-center justify-around w-full">
             {/* Plans Board */}
             <button
-              onClick={() =>
-                dispatch(setActiveBoard("plans" as BoardType))
-              }
+              onClick={() => dispatch(setActiveBoard("plans" as BoardType))}
               className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative"
               style={{
-                color:
-                  activeBoard === "plans"
-                    ? "#7ee3ff"
-                    : "#7f7f7f",
+                color: activeBoard === "plans" ? "#7ee3ff" : "#7f7f7f",
               }}
             >
               <Target size={13} />
-
               Plans Board
-
               {activeBoard === "plans" && (
                 <span
                   className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
@@ -174,16 +164,11 @@ const TodaysTasks: React.FC = () => {
                 }
                 className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative"
                 style={{
-                  color:
-                    activeBoard === "personal"
-                      ? "#7ee3ff"
-                      : "#7f7f7f",
+                  color: activeBoard === "personal" ? "#7ee3ff" : "#7f7f7f",
                 }}
               >
                 <User size={13} />
-
                 Personal Board
-
                 {activeBoard === "personal" && (
                   <span
                     className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
@@ -205,9 +190,7 @@ const TodaysTasks: React.FC = () => {
                 >
                   <Plus size={14} />
 
-                  <span className="hidden md:block">
-                    Add Task
-                  </span>
+                  <span className="hidden md:block">Add Task</span>
                 </button>
               )}
             </div>

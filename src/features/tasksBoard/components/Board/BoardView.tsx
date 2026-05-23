@@ -23,9 +23,7 @@ const PERSONAL_COLUMNS: {
 ];
 
 const BoardView: React.FC = () => {
-  const { activeBoard, selectedDate } = useSelector(
-    (s: RootState) => s.tasks,
-  );
+  const { activeBoard, selectedDate } = useSelector((s: RootState) => s.tasks);
   const { data: apiTasks, isLoading } = useGetAllTasksQuery("");
 
   const columns = activeBoard === "plans" ? PLANS_COLUMNS : PERSONAL_COLUMNS;
@@ -52,19 +50,28 @@ const BoardView: React.FC = () => {
       status,
       priority: "MEDIUM" as const,
       dueDate: apiTask.deadLine,
-      dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
       boardType: activeBoard,
       completed: apiTask.status === "completed",
       isLate: isOverdue,
       lateDisplay: isOverdue ? "Overdue" : undefined,
-      assignees: apiTask.userAssignedQuests?.map((userId: string) => ({ id: userId, name: `User ${userId}`, role: "Member" })) || [],
+      assignees:
+        apiTask.userAssignedQuests?.map((userId: string) => ({
+          id: userId,
+          name: `User ${userId}`,
+          role: "Member",
+        })) || [],
       comments: [],
     } as Task;
   });
 
   const boardTasks = transformedTasks.filter((t: Task) => {
     if (t.boardType !== activeBoard) return false;
-    return true;
+    const taskISO = new Date(t.dueDate).toISOString().split("T")[0];
+    return taskISO === selectedDate;
   });
 
   if (isLoading) return <div className="text-white p-4">Loading tasks...</div>;

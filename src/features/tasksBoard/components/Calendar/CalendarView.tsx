@@ -7,7 +7,9 @@ import {
   setCalendarSelectedDate,
   setCalendarMonth,
   setViewMode,
+  setSelectedDate,
 } from "../../redux/tasksSlice";
+import { useGetAllTasksQuery } from "../../redux/tasksSlice";
 
 const toISO = (d: Date) => d.toISOString().split("T")[0] ?? d.toISOString();
 
@@ -54,9 +56,24 @@ const StatsRow: React.FC<{ tasks: Task[] }> = ({ tasks }) => {
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const cards = [
-    { label: "Total Tasks", value: total, sub: "This month", accent: "#eeeeee" },
-    { label: "Completed", value: completed, sub: `${pct}% done`, accent: "#64b883" },
-    { label: "Overdue", value: overdue, sub: "Need attention", accent: "#df5d5d" },
+    {
+      label: "Total Tasks",
+      value: total,
+      sub: "This month",
+      accent: "#eeeeee",
+    },
+    {
+      label: "Completed",
+      value: completed,
+      sub: `${pct}% done`,
+      accent: "#64b883",
+    },
+    {
+      label: "Overdue",
+      value: overdue,
+      sub: "Need attention",
+      accent: "#df5d5d",
+    },
     { label: "To-Do", value: todo, sub: "Active now", accent: "#7ee3ff" },
   ];
 
@@ -211,7 +228,10 @@ const DayCell: React.FC<{
     >
       <div className="flex items-center gap-1 mb-1.5">
         {isToday && (
-          <span className="text-[9px] font-semibold" style={{ color: "#7ee3ff" }}>
+          <span
+            className="text-[9px] font-semibold"
+            style={{ color: "#7ee3ff" }}
+          >
             Today
           </span>
         )}
@@ -259,9 +279,52 @@ const DayCell: React.FC<{
 
 const CalendarView: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { tasks, calendarSelectedDate, calendarMonth } = useSelector(
+  const { activeBoard, calendarSelectedDate, calendarMonth } = useSelector(
     (s: RootState) => s.tasks,
   );
+  const { data: apiTasks } = useGetAllTasksQuery("");
+
+  const transformedTasks = useMemo(() => {
+    return (apiTasks || []).map((apiTask: any) => {
+      const now = new Date();
+      const deadline = new Date(apiTask.deadLine);
+      const isOverdue = deadline < now && apiTask.status !== "completed";
+
+      let status: Task["status"] = "todo";
+      if (apiTask.status === "completed") {
+        status = activeBoard === "plans" ? "review" : "done";
+      } else if (isOverdue) {
+        status = "overdue";
+      } else if (apiTask.status === "active") {
+        status = "todo";
+      }
+
+      return {
+        id: apiTask.questId,
+        title: apiTask.title,
+        description: apiTask.description || "",
+        project: "Project",
+        status,
+        priority: "MEDIUM" as const,
+        dueDate: apiTask.deadLine,
+        dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        boardType: activeBoard,
+        completed: apiTask.status === "completed",
+        isLate: isOverdue,
+        lateDisplay: isOverdue ? "Overdue" : undefined,
+        assignees:
+          apiTask.userAssignedQuests?.map((userId: string) => ({
+            id: userId,
+            name: `User ${userId}`,
+            role: "Member",
+          })) || [],
+        comments: [],
+      } as Task;
+    });
+  }, [apiTasks, activeBoard]);
 
   const { year, month } = useMemo(
     () => parseMonth(calendarMonth),
@@ -299,11 +362,11 @@ const CalendarView: React.FC = () => {
   }, [year, month]);
 
   const monthTasks = useMemo(() => {
-    return tasks.filter((t) => {
+    return transformedTasks.filter((t: Task) => {
       const d = new Date(t.dueDate);
       return d.getFullYear() === year && d.getMonth() === month;
     });
-  }, [tasks, year, month]);
+  }, [transformedTasks, year, month]);
 
   const goToPrevMonth = () => {
     const d = new Date(year, month - 1, 1);
@@ -333,9 +396,7 @@ const CalendarView: React.FC = () => {
   const DAY_HEADERS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   return (
-    <div
-      className="flex flex-col px-4 py-6 md:px-8 pb-10"
-    >
+    <div className="flex flex-col px-4 py-6 md:px-8 pb-10">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <h1 className="text-white text-2xl font-bold">My Tasks</h1>
 
@@ -347,8 +408,16 @@ const CalendarView: React.FC = () => {
           }}
         >
           {[
-            { mode: "board" as const, icon: <LayoutGrid size={13} />, label: "Board" },
-            { mode: "calendar" as const, icon: <Calendar size={13} />, label: "Calendar" },
+            {
+              mode: "board" as const,
+              icon: <LayoutGrid size={13} />,
+              label: "Board",
+            },
+            {
+              mode: "calendar" as const,
+              icon: <Calendar size={13} />,
+              label: "Calendar",
+            },
           ].map(({ mode, icon, label }) => (
             <button
               key={mode}
@@ -394,7 +463,7 @@ const CalendarView: React.FC = () => {
       <StatsRow tasks={monthTasks} />
 
       {calendarSelectedDate && (
-        <DayTasksPanel date={calendarSelectedDate} tasks={tasks} />
+        <DayTasksPanel date={calendarSelectedDate} tasks={transformedTasks} />
       )}
 
       {/* Scrollable wrapper على الموبايل فقط */}
@@ -428,36 +497,41 @@ const CalendarView: React.FC = () => {
                 className="grid grid-cols-7 gap-px"
                 style={{ background: "rgba(255,255,255,0.03)" }}
               >
-                {gridDays.slice(rowIdx * 7, rowIdx * 7 + 7).map((cell, colIdx) => {
-                  const isoDate = cell.date ? toISO(cell.date) : "";
-                  const dayTasks = cell.date ? getTasksForDate(tasks, isoDate) : [];
-                  const isToday = isoDate === todayISO;
-                  const isSelected = isoDate === calendarSelectedDate;
+                {gridDays
+                  .slice(rowIdx * 7, rowIdx * 7 + 7)
+                  .map((cell, colIdx) => {
+                    const isoDate = cell.date ? toISO(cell.date) : "";
+                    const dayTasks = cell.date
+                      ? getTasksForDate(transformedTasks, isoDate)
+                      : [];
+                    const isToday = isoDate === todayISO;
+                    const isSelected = isoDate === calendarSelectedDate;
 
-                  return (
-                    <div
-                      key={colIdx}
-                      className="p-1"
-                      style={{ background: "rgba(6,11,27,0.6)" }}
-                    >
-                      <DayCell
-                        date={cell.date}
-                        isCurrentMonth={cell.isCurrentMonth}
-                        tasks={dayTasks}
-                        isToday={isToday}
-                        isSelected={isSelected}
-                        onClick={() => {
-                          if (!cell.date) return;
-                          if (isSelected) {
-                            dispatch(setCalendarSelectedDate(null));
-                          } else {
-                            dispatch(setCalendarSelectedDate(isoDate));
-                          }
-                        }}
-                      />
-                    </div>
-                  );
-                })}
+                    return (
+                      <div
+                        key={colIdx}
+                        className="p-1"
+                        style={{ background: "rgba(6,11,27,0.6)" }}
+                      >
+                        <DayCell
+                          date={cell.date}
+                          isCurrentMonth={cell.isCurrentMonth}
+                          tasks={dayTasks}
+                          isToday={isToday}
+                          isSelected={isSelected}
+                          onClick={() => {
+                            if (!cell.date) return;
+                            if (isSelected) {
+                              dispatch(setCalendarSelectedDate(null));
+                            } else {
+                              dispatch(setCalendarSelectedDate(isoDate));
+                              dispatch(setSelectedDate(isoDate));
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
               </div>
             ))}
           </div>
