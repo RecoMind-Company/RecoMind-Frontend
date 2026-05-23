@@ -2,7 +2,11 @@ import React, { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
-import { setSelectedDate } from "../../redux/tasksSlice";
+import {
+  setCalendarMonth,
+  setCalendarSelectedDate,
+  setSelectedDate,
+} from "../../redux/tasksSlice";
 
 const DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -12,42 +16,55 @@ const DateNavigator: React.FC = () => {
 
   const selected = useMemo(() => new Date(selectedDate), [selectedDate]);
 
-  // Get the start of the week (Monday-based)
-  const weekStart = useMemo(() => {
-    const d = new Date(selected);
-    const day = d.getDay(); // 0=Sun
-    const diff = (day === 0 ? -6 : 1) - day; // Monday = 0
-    d.setDate(d.getDate() + diff);
-    return d;
-  }, [selected]);
-
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
+      const d = new Date(selected);
+      d.setDate(selected.getDate() + i - 3);
       return d;
     });
-  }, [weekStart]);
+  }, [selected]);
 
   const today = new Date().toISOString().split("T")[0]!;
 
   const handlePrev = () => {
     const d = new Date(selected);
     d.setDate(d.getDate() - 7);
-    dispatch(setSelectedDate(d.toISOString().split("T")[0]!));
+    const iso = d.toISOString().split("T")[0]!;
+    dispatch(setSelectedDate(iso));
+    dispatch(setCalendarSelectedDate(iso));
+    dispatch(
+      setCalendarMonth(
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      ),
+    );
   };
 
   const handleNext = () => {
     const d = new Date(selected);
     d.setDate(d.getDate() + 7);
-    dispatch(setSelectedDate(d.toISOString().split("T")[0]!));
+    const iso = d.toISOString().split("T")[0]!;
+    dispatch(setSelectedDate(iso));
+    dispatch(setCalendarSelectedDate(iso));
+    dispatch(
+      setCalendarMonth(
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      ),
+    );
   };
 
-  const monthYear = selected.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const setDateSelection = (iso: string) => {
+    dispatch(setSelectedDate(iso));
+    dispatch(setCalendarSelectedDate(iso));
+    const d = new Date(iso + "T12:00:00");
+    dispatch(
+      setCalendarMonth(
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      ),
+    );
+  };
 
   return (
     <div className="mb-5">
-
       {/* Week strip */}
       <div className="flex items-center gap-1.5">
         <button
@@ -69,8 +86,8 @@ const DateNavigator: React.FC = () => {
             return (
               <button
                 key={iso}
-                onClick={() => dispatch(setSelectedDate(iso))}
-                className="flex flex-col items-center justify-center rounded-xl transition-all duration-200 hover:bg-white/[0.06]"
+                onClick={() => setDateSelection(iso)}
+                className="flex flex-col items-center justify-center rounded-xl transition-all duration-200 hover:bg-white/6"
                 style={{
                   minWidth: "44px",
                   padding: "8px 6px",
