@@ -22,9 +22,20 @@ import { useAvatar } from "@/context/AvatarContext";
 
 const PROFILE_STORAGE_KEY = "profile_local";
 
+const getProfileStorageKey = () => {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
+    return storedUser.email
+      ? `${PROFILE_STORAGE_KEY}:${storedUser.email}`
+      : PROFILE_STORAGE_KEY;
+  } catch {
+    return PROFILE_STORAGE_KEY;
+  }
+};
+
 const getStoredProfile = () => {
   try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    const raw = localStorage.getItem(getProfileStorageKey());
     return raw ? (JSON.parse(raw) as Partial<UserData>) : {};
   } catch {
     return {};
@@ -34,10 +45,13 @@ const getStoredProfile = () => {
 const setStoredProfile = (data: Partial<UserData>) => {
   const current = getStoredProfile();
   const merged = { ...current, ...data };
-  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(merged));
+  localStorage.setItem(getProfileStorageKey(), JSON.stringify(merged));
 };
 
 const PersonalInfoPage = () => {
+  const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
+  const currentUserEmail = storedUser.email || "";
+
   const [showSettings, setShowSettings] = useState(false);
   const { data: profile, isLoading } = useProfile();
   const { mutateAsync: updateProfile } = useUpdateProfile();
@@ -56,6 +70,18 @@ const PersonalInfoPage = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [resetEdit, setResetEdit] = useState(false);
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
+
+  useEffect(() => {
+    setDidInit(false);
+    setUserData({
+      name: "",
+      email: "",
+      phone: "",
+      jobTitle: "",
+      profileImage: userB,
+      isProfileComplete: false,
+    });
+  }, [currentUserEmail]);
 
   useEffect(() => {
     const stored = getStoredProfile();
@@ -94,18 +120,25 @@ const PersonalInfoPage = () => {
   }, [avatarUrl]);
 
   useEffect(() => {
-    const isComplete = !!(userData.jobTitle && userData.phone);
+    const isComplete = !!(
+      userData.name &&
+      userData.email &&
+      userData.jobTitle &&
+      userData.phone
+    );
     setShowCompletionBanner(!isComplete);
-  }, [userData.jobTitle, userData.phone]);
+  }, [userData.name, userData.email, userData.jobTitle, userData.phone]);
 
+  const missingName = !userData.name.trim();
+  const missingEmail = !userData.email.trim();
   const missingJobTitle = !userData.jobTitle.trim();
   const missingPhone = !userData.phone.trim();
+
   const completionPercentage =
-    missingJobTitle && missingPhone
-      ? 50
-      : missingJobTitle || missingPhone
-        ? 75
-        : 100;
+    (missingName ? 0 : 25) +
+    (missingEmail ? 0 : 25) +
+    (missingJobTitle ? 0 : 25) +
+    (missingPhone ? 0 : 25);
 
   const handleInputChange = (
     field: keyof UserData,
