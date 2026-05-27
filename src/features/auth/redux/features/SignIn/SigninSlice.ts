@@ -30,7 +30,7 @@ export const LoginFunction = createAsyncThunk(
     const { rejectWithValue } = thunkApi;
     try {
       // Use the auth API endpoint
-      const response = await fetch("https://api.recomind.site/api/Authentication/login", {
+      const response = await fetch("https://auth-svc:8011/api/Authentication/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
