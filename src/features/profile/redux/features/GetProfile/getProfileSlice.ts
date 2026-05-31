@@ -38,9 +38,9 @@ export const GetprofileFunction = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-
+      console.log("Profile Data:", res.data);
       return res.data; // SUCCESS
     } catch (error) {
       const errorobj = error as AxiosErrorShape;
@@ -58,7 +58,7 @@ export const GetprofileFunction = createAsyncThunk(
 
       return rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 // ============ Slice ============

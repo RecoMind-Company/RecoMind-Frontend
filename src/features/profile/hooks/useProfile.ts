@@ -20,6 +20,37 @@ export interface UpdateProfilePayload {
   imagePath?: string;
 }
 
+type StoredAuthUser = Record<string, unknown> & {
+  name?: string;
+  fullName?: string;
+  email?: string;
+};
+
+const syncStoredUserProfile = (profile: UserProfile) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    const currentUser = JSON.parse(
+      localStorage.getItem("user") ?? "{}",
+    ) as StoredAuthUser;
+    const nextName =
+      profile.fullName || currentUser.fullName || currentUser.name;
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...currentUser,
+        ...profile,
+        name: nextName,
+        fullName: nextName,
+      }),
+    );
+    localStorage.removeItem("profile_name");
+  } catch {
+    // Ignore malformed storage and continue with the in-memory cache update.
+  }
+};
+
 export const useProfile = () => {
   return useQuery<UserProfile>({
     queryKey: ["profile"],
@@ -47,9 +78,11 @@ export const useUpdateProfile = () => {
         }
         return { ...(old || {}), ...variables } as UserProfile;
       });
-      if (variables.fullName) {
-        localStorage.setItem("profile_name", variables.fullName);
-      }
+      syncStoredUserProfile(
+        data?.fullName
+          ? data
+          : { ...(variables as UserProfile), fullName: variables.fullName },
+      );
     },
   });
 };
