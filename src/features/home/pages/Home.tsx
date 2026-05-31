@@ -22,7 +22,13 @@ const Home: React.FC = () => {
   const { avatarUrl } = useAvatar();
   const { data: profile } = useProfile();
   const { unreadCount } = useNotificationContext();
-  const [userName_1, setUserName_1] = React.useState<string>("");
+  const storedUser = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") ?? "{}");
+    } catch {
+      return {};
+    }
+  }, []);
   const {
     userName,
     greeting,
@@ -38,16 +44,8 @@ const Home: React.FC = () => {
     dispatch(fetchHomeData());
   }, [dispatch]);
 
-  // const displayName = profile?.fullName ?? userName;
-  useEffect(() => {
-    setUserName_1(localStorage.getItem("user"));
-    if (profile?.fullName) {
-      localStorage.setItem("profile_name", profile.fullName);
-    }
-  }, [profile]);
-
   const displayName =
-    profile?.fullName || localStorage.getItem("profile_name") || "User";
+    profile?.fullName || storedUser.fullName || storedUser.name || "User";
 
   if (loading) {
     return (

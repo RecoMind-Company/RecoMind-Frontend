@@ -22,7 +22,11 @@ import { useAvatar } from "@/context/AvatarContext";
 
 const PROFILE_STORAGE_KEY = "profile_local";
 
-const getProfileStorageKey = () => {
+const getProfileStorageKey = (email?: string) => {
+  if (email) {
+    return `${PROFILE_STORAGE_KEY}:${email}`;
+  }
+
   try {
     const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
     return storedUser.email
@@ -33,19 +37,40 @@ const getProfileStorageKey = () => {
   }
 };
 
-const getStoredProfile = () => {
+const getStoredProfile = (email?: string) => {
   try {
-    const raw = localStorage.getItem(getProfileStorageKey());
+    const raw = localStorage.getItem(getProfileStorageKey(email));
     return raw ? (JSON.parse(raw) as Partial<UserData>) : {};
   } catch {
     return {};
   }
 };
 
-const setStoredProfile = (data: Partial<UserData>) => {
-  const current = getStoredProfile();
+const clearLegacyProfileKeys = (activeKey: string) => {
+  const keysToRemove: string[] = [];
+
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (
+      key &&
+      (key === PROFILE_STORAGE_KEY ||
+        key.startsWith(`${PROFILE_STORAGE_KEY}:`)) &&
+      key !== activeKey
+    ) {
+      keysToRemove.push(key);
+    }
+  }
+
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+};
+
+const setStoredProfile = (data: Partial<UserData>, email?: string) => {
+  const activeKey = getProfileStorageKey(email);
+  const current = getStoredProfile(email);
   const merged = { ...current, ...data };
-  localStorage.setItem(getProfileStorageKey(), JSON.stringify(merged));
+  localStorage.setItem(activeKey, JSON.stringify(merged));
+  clearLegacyProfileKeys(activeKey);
+  localStorage.removeItem("profile_name");
 };
 
 const PersonalInfoPage = () => {
@@ -171,15 +196,15 @@ const PersonalInfoPage = () => {
         jobTitle: updated?.jobTitle || prev.jobTitle,
         isProfileComplete: !!(userData.jobTitle && userData.phone),
       }));
-      setStoredProfile({
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        jobTitle: userData.jobTitle,
-      });
-      if (userData.name) {
-        localStorage.setItem("profile_name", userData.name);
-      }
+      setStoredProfile(
+        {
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          jobTitle: userData.jobTitle,
+        },
+        updated?.email || userData.email,
+      );
       setHasChanges(false);
       setResetEdit(true);
       setTimeout(() => setResetEdit(false), 10);
@@ -208,16 +233,16 @@ const PersonalInfoPage = () => {
         phone: phoneNumber,
         isProfileComplete: true,
       }));
-      setStoredProfile({
-        name: userData.name,
-        email: userData.email,
-        phone: phoneNumber,
-        jobTitle,
-      });
+      setStoredProfile(
+        {
+          name: userData.name,
+          email: userData.email,
+          phone: phoneNumber,
+          jobTitle,
+        },
+        userData.email,
+      );
       setShowCompletionBanner(false);
-      if (userData.name) {
-        localStorage.setItem("profile_name", userData.name);
-      }
     } catch (error) {
       toast.error("Failed to save profile completion");
     }
