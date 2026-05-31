@@ -30,13 +30,16 @@ export const LoginFunction = createAsyncThunk(
     const { rejectWithValue } = thunkApi;
     try {
       // Use the auth API endpoint
-      const response = await fetch("https://auth-svc:8011/api/Authentication/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://auth-svc:8011/api/Authentication/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         },
-        body: JSON.stringify(data),
-      });
+      );
 
       const res = await response.json();
 
@@ -74,7 +77,7 @@ export const LoginFunction = createAsyncThunk(
       });
       return rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 export const signinSlice = createSlice({
