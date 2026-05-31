@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { useAvatar } from "@/context/AvatarContext";
 import userDefault from "@/assets/images/user.png";
+import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useNotificationContext } from "@/features/notifications/context/NotificationContext";
-import { selectProfileName } from "@/features/profile/redux/features/GetProfile/getProfileSlice";
 
 import { fetchHomeData, toggleNotifications } from "../redux/Homeslice";
 
@@ -20,9 +20,11 @@ const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { avatarUrl } = useAvatar();
+  const { data: profile } = useProfile();
   const { unreadCount } = useNotificationContext();
-  const displayName = useSelector(selectProfileName);
+  const [userName_1, setUserName_1] = React.useState<string>("");
   const {
+    userName,
     greeting,
     totalTasksToday,
     overdueCount,
@@ -35,6 +37,17 @@ const Home: React.FC = () => {
   useEffect(() => {
     dispatch(fetchHomeData());
   }, [dispatch]);
+
+  // const displayName = profile?.fullName ?? userName;
+  useEffect(() => {
+    setUserName_1(localStorage.getItem("user"));
+    if (profile?.fullName) {
+      localStorage.setItem("profile_name", profile.fullName);
+    }
+  }, [profile]);
+
+  const displayName =
+    profile?.fullName || localStorage.getItem("profile_name") || "User";
 
   if (loading) {
     return (

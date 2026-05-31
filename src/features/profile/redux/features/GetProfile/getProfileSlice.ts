@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
-import type { RootState } from "@/app/store";
 
 interface AxiosErrorShape {
   response?: {
@@ -14,16 +13,9 @@ interface AxiosErrorShape {
 
 interface GetProfileState {
   isloading: boolean;
-  data: ProfileData;
+  data: object;
   success: boolean;
   error: string | null;
-}
-
-interface ProfileData {
-  fullName?: string;
-  name?: string;
-  email?: string;
-  [key: string]: unknown;
 }
 
 const initialState: GetProfileState = {
@@ -86,7 +78,7 @@ export const getprofile = createSlice({
       })
       .addCase(GetprofileFunction.fulfilled, (state, action) => {
         state.isloading = false;
-        state.data = action.payload as ProfileData;
+        state.data = action.payload as object;
         state.success = true;
         state.error = null;
       })
@@ -100,16 +92,4 @@ export const getprofile = createSlice({
 });
 
 export const { resetState } = getprofile.actions;
-
-export const selectProfileName = (state: RootState) => {
-  const profile = state.getprofile.data;
-  if (typeof profile.fullName === "string" && profile.fullName.trim()) {
-    return profile.fullName;
-  }
-  if (typeof profile.name === "string" && profile.name.trim()) {
-    return profile.name;
-  }
-  return "User";
-};
-
 export const GetProfileReducer = getprofile.reducer;
