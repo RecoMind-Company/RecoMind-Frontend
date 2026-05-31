@@ -2,6 +2,8 @@ import { useState } from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import ProfileCompletionModal from "./ProfileCompletionModal";
+import { useAppSelector } from "@/app/hooks";
+import { selectProfileName } from "@/features/profile/redux/features/GetProfile/getProfileSlice";
 
 interface ProfileCompletionBannerProps {
   userName?: string | undefined;
@@ -26,6 +28,7 @@ const ProfileCompletionBanner = ({
 }: ProfileCompletionBannerProps) => {
   const [showModal, setShowModal] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const profileName = useAppSelector(selectProfileName);
 
   const handleClose = () => {
     setIsVisible(false);
@@ -37,6 +40,8 @@ const ProfileCompletionBanner = ({
   if (!isVisible) {
     return null;
   }
+
+  const displayName = profileName || userName || "User";
 
   return (
     <>
@@ -252,7 +257,7 @@ const ProfileCompletionBanner = ({
             <div className="flex items-end flex-col justify-between gap-4 md:gap-2">
               <div className="status">
                 <p className="text-sm md:text-lg font-normal text-white leading-relaxed m-0 md:mr-16">
-                  Hi {userName}, your profile is {completionPercentage}%
+                  Hi {displayName}, your profile is {completionPercentage}%
                   complete
                 </p>
               </div>

@@ -19,6 +19,11 @@ interface UserData {
 
 import { useProfile, useUpdateProfile } from "../hooks/useProfile";
 import { useAvatar } from "@/context/AvatarContext";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import {
+  GetprofileFunction,
+  selectProfileName,
+} from "../redux/features/GetProfile/getProfileSlice";
 
 const PROFILE_STORAGE_KEY = "profile_local";
 
@@ -49,6 +54,8 @@ const setStoredProfile = (data: Partial<UserData>) => {
 };
 
 const PersonalInfoPage = () => {
+  const dispatch = useAppDispatch();
+  const profileName = useAppSelector(selectProfileName);
   const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
   const currentUserEmail = storedUser.email || "";
 
@@ -100,9 +107,10 @@ const PersonalInfoPage = () => {
     if (profile && !didInit) {
       const stored = getStoredProfile();
       const isComplete = !!(profile.jobTitle && profile.phoneNumber);
+      const sliceName = profileName !== "User" ? profileName : "";
       setUserData((prev) => ({
         ...prev,
-        name: stored.name || profile.fullName || prev.name,
+        name: sliceName || stored.name || profile.fullName || prev.name,
         email: stored.email || profile.email || prev.email,
         phone: stored.phone || profile.phoneNumber || prev.phone,
         jobTitle: stored.jobTitle || profile.jobTitle || prev.jobTitle,
@@ -111,7 +119,17 @@ const PersonalInfoPage = () => {
       }));
       setDidInit(true);
     }
-  }, [profile, avatarUrl, didInit]);
+  }, [profile, avatarUrl, didInit, profileName]);
+
+  useEffect(() => {
+    if (hasChanges || profileName === "User") {
+      return;
+    }
+
+    setUserData((prev) =>
+      prev.name === profileName ? prev : { ...prev, name: profileName },
+    );
+  }, [profileName, hasChanges]);
 
   useEffect(() => {
     if (avatarUrl) {
@@ -163,6 +181,7 @@ const PersonalInfoPage = () => {
       };
 
       const updated = await updateProfile(payload);
+      dispatch(GetprofileFunction());
       setUserData((prev) => ({
         ...prev,
         name: updated?.fullName || prev.name,
@@ -202,6 +221,7 @@ const PersonalInfoPage = () => {
       };
 
       await updateProfile(payload);
+      dispatch(GetprofileFunction());
       setUserData((prev) => ({
         ...prev,
         jobTitle,
