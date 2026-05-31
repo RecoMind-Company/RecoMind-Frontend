@@ -64,6 +64,14 @@ const clearLegacyProfileKeys = (activeKey: string) => {
   keysToRemove.forEach((key) => localStorage.removeItem(key));
 };
 
+const getStoredAuthUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") ?? "{}");
+  } catch {
+    return {};
+  }
+};
+
 const setStoredProfile = (data: Partial<UserData>, email?: string) => {
   const activeKey = getProfileStorageKey(email);
   const current = getStoredProfile(email);
@@ -74,7 +82,7 @@ const setStoredProfile = (data: Partial<UserData>, email?: string) => {
 };
 
 const PersonalInfoPage = () => {
-  const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
+  const storedUser = getStoredAuthUser();
   const currentUserEmail = storedUser.email || "";
 
   const [showSettings, setShowSettings] = useState(false);
@@ -84,8 +92,8 @@ const PersonalInfoPage = () => {
   const [didInit, setDidInit] = useState(false);
 
   const [userData, setUserData] = useState<UserData>({
-    name: "",
-    email: "",
+    name: storedUser.fullName || storedUser.name || "",
+    email: storedUser.email || "",
     phone: "",
     jobTitle: "",
     profileImage: userB,
@@ -99,8 +107,8 @@ const PersonalInfoPage = () => {
   useEffect(() => {
     setDidInit(false);
     setUserData({
-      name: "",
-      email: "",
+      name: storedUser.fullName || storedUser.name || "",
+      email: storedUser.email || "",
       phone: "",
       jobTitle: "",
       profileImage: userB,
@@ -113,13 +121,14 @@ const PersonalInfoPage = () => {
     if (stored.name || stored.email || stored.phone || stored.jobTitle) {
       setUserData((prev) => ({
         ...prev,
-        name: stored.name || prev.name,
+        name:
+          stored.name || storedUser.fullName || storedUser.name || prev.name,
         email: stored.email || prev.email,
         phone: stored.phone || prev.phone,
         jobTitle: stored.jobTitle || prev.jobTitle,
       }));
     }
-  }, []);
+  }, [storedUser.fullName, storedUser.name]);
 
   useEffect(() => {
     if (profile && !didInit) {
@@ -127,7 +136,12 @@ const PersonalInfoPage = () => {
       const isComplete = !!(profile.jobTitle && profile.phoneNumber);
       setUserData((prev) => ({
         ...prev,
-        name: stored.name || profile.fullName || prev.name,
+        name:
+          stored.name ||
+          storedUser.fullName ||
+          storedUser.name ||
+          profile.fullName ||
+          prev.name,
         email: stored.email || profile.email || prev.email,
         phone: stored.phone || profile.phoneNumber || prev.phone,
         jobTitle: stored.jobTitle || profile.jobTitle || prev.jobTitle,
