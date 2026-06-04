@@ -62,7 +62,9 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 py-6 md:px-8 relative">
+    
+    <div className="px-4 py-6 md:px-8 relative">
+      {/* <div className="min-h-screen px-4 py-6 md:px-8 relative"> */}
       {/* ===== HEADER ===== */}
       <div className="flex items-start justify-between mb-6 relative">
         <div>
