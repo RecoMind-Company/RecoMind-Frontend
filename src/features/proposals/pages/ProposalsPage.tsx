@@ -29,8 +29,11 @@ const ProposalsPage: React.FC = () => {
   }
 
   return (
+    //     <div
+    //   className="min-h-screen px-4 py-8 md:px-10 relative"
+    // >
     <div
-      className="min-h-screen px-4 py-8 md:px-10 relative"
+      className="px-4 py-8 md:px-10 relative"
     >
       {/* Plan input */}
       <PlanInputBox />

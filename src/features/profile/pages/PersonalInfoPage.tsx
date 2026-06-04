@@ -292,8 +292,9 @@ const PersonalInfoPage = () => {
   return (
     <>
       <Toaster position="top-center" />
+      {/* <div className="min-h-screen p-4 mt-24 sm:px-6 md:px-8 lg:w-226.75 ml-0 lg:ml-16.25 md:pt-8 relative"> */}
 
-      <div className="min-h-screen p-4 mt-24 sm:px-6 md:px-8 lg:w-226.75 ml-0 lg:ml-16.25 md:pt-8 relative">
+      <div className="p-4 mt-24 sm:px-6 md:px-8 lg:w-226.75 ml-0 lg:ml-16.25 md:pt-8 relative">
         {showCompletionBanner && (
           <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
             <ProfileCompletionBanner

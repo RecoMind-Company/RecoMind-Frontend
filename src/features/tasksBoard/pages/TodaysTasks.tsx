@@ -64,8 +64,13 @@ const TodaysTasks: React.FC = () => {
     <>
       <PlanSidebar />
 
-      <div
+      {/* <div
         className="flex flex-col min-h-dvh py-6 md:px-8 overflow-x-hidden"
+        style={{ paddingLeft: "80px" }}
+      > */}
+
+      <div
+        className="flex flex-col py-6 md:px-8 overflow-x-hidden"
         style={{ paddingLeft: "80px" }}
       >
         {/* ===== PAGE HEADER ===== */}
