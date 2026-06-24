@@ -17,7 +17,7 @@ interface IAddTaskInputs {
   title: string;
   description?: string;
   startDate: string;
-  // deadLine: string;
+   deadLine: string;
   priority: TaskPriority;
 }
 
@@ -43,7 +43,7 @@ const AddTaskModal: React.FC = () => {
         description: data.description ?? "",
         status: 0,                                              // عدّل حسب الـ API
         startDate: new Date(data.startDate).toISOString(),
-        // deadLine: new Date(data.deadLine).toISOString(),
+        deadLine: new Date(data.deadLine).toISOString(),
       }).unwrap();
 
       console.log("Task created successfully:", res);
@@ -158,8 +158,8 @@ const AddTaskModal: React.FC = () => {
                 {errors.startDate && <p style={errorStyle}>{errors.startDate.message}</p>}
               </div>
 
-              {/* Deadline */}
-              {/* <div className="flex-1">
+            
+               <div className="flex-1">
                 <label style={labelStyle}>Deadline</label>
                 <div className="relative">
                   <input
@@ -179,7 +179,7 @@ const AddTaskModal: React.FC = () => {
                   />
                 </div>
                 {errors.deadLine && <p style={errorStyle}>{errors.deadLine.message}</p>}
-              </div> */}
+              </div>
                           {/* Priority */}
             <div>
               <label style={labelStyle}>Priority</label>

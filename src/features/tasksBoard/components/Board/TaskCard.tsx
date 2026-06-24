@@ -89,6 +89,25 @@ const TaskCard: React.FC<TaskCardProps> = ({
         ◆ {task.project}
       </p>
 
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span
+          className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+          style={{
+            background:
+              task.boardType === "personal"
+                ? "rgba(126,227,255,0.08)"
+                : "rgba(255,255,255,0.06)",
+            color: task.boardType === "personal" ? "#7ee3ff" : "#eeeeee",
+            border:
+              task.boardType === "personal"
+                ? "1px solid rgba(126,227,255,0.2)"
+                : "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          {task.boardType === "personal" ? "Personal Board" : "Plans Board"}
+        </span>
+      </div>
+
       {/* Title row with checkbox */}
       <div className="flex items-start gap-2">
         {/* Checkbox */}
