@@ -29,8 +29,8 @@ export interface Task {
   priority: TaskPriority;
   dueDate: string; // ISO string — full date used for calendar matching
   dueDateDisplay: string; // "Due in 6h" | "Feb 28" etc.
-  isLate?: boolean;
-  lateDisplay?: string; // "6 hours Late"
+  isLate: boolean | undefined;
+  lateDisplay: string | undefined;
   assignees: TeamMember[];
   comments: Comment[];
   boardType: BoardType;

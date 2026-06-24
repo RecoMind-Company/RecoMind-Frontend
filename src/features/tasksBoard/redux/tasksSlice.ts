@@ -822,6 +822,22 @@ export const taskSlice = createApi({
             ]
           : [{ type: "Task", id: "LIST" }],
     }),
+    getAllTasksPersonal: builder.query({
+      query: () => ({
+        url: "/api/user-tasks/user-tasks",
+        method: "GET",
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }: { id: string }) => ({
+                type: "Task" as const,
+                id,
+              })),
+              { type: "Task", id: "LIST" },
+            ]
+          : [{ type: "Task", id: "LIST" }],
+    }),
   }),
 });
-export const { useAddTaskMutation, useGetAllTasksQuery } = taskSlice;
+export const { useAddTaskMutation, useGetAllTasksQuery , useGetAllTasksPersonalQuery } = taskSlice;
