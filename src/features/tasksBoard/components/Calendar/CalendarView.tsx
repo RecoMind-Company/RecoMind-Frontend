@@ -2,14 +2,17 @@ import React, { useMemo } from "react";
 import { ChevronLeft, ChevronRight, LayoutGrid, Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
-import type { Task } from "../../types";
+import type { BoardType, Task } from "../../types";
 import {
   setCalendarSelectedDate,
   setCalendarMonth,
   setViewMode,
   setSelectedDate,
 } from "../../redux/tasksSlice";
-import { useGetAllTasksQuery } from "../../redux/tasksSlice";
+import {
+  useGetAllTasksQuery,
+  useGetAllTasksPersonalQuery,
+} from "../../redux/tasksSlice";
 
 const toISO = (d: Date) => d.toISOString().split("T")[0] ?? d.toISOString();
 
@@ -25,6 +28,46 @@ const parseMonth = (m: string) => {
 
 const getTasksForDate = (tasks: Task[], iso: string) =>
   tasks.filter((t) => toISO(new Date(t.dueDate)) === iso);
+
+const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
+  const now = new Date();
+  const deadline = new Date(apiTask.deadLine);
+  const isOverdue = deadline < now && apiTask.status !== "completed";
+
+  let status: Task["status"] = "todo";
+  if (apiTask.status === "completed") {
+    status = boardType === "plans" ? "review" : "done";
+  } else if (isOverdue) {
+    status = "overdue";
+  } else if (apiTask.status === "active") {
+    status = "todo";
+  }
+
+  return {
+    id: apiTask.questId,
+    title: apiTask.title,
+    description: apiTask.description || "",
+    project: "Project",
+    status,
+    priority: "MEDIUM" as const,
+    dueDate: apiTask.deadLine,
+    dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    }),
+    boardType,
+    completed: apiTask.status === "completed",
+    isLate: isOverdue,
+    lateDisplay: isOverdue ? "Overdue" : undefined,
+    assignees:
+      apiTask.userAssignedQuests?.map((userId: string) => ({
+        id: userId,
+        name: `User ${userId}`,
+        role: "Member",
+      })) || [],
+    comments: [],
+  };
+};
 
 const todayISO = toISO(new Date());
 
@@ -171,18 +214,22 @@ const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
               >
                 {task.title}
               </span>
-              {task.boardType === "personal" && (
-                <span
-                  className="text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0"
-                  style={{
-                    background: "rgba(126,227,255,0.08)",
-                    color: "#7ee3ff",
-                    border: "1px solid rgba(126,227,255,0.2)",
-                  }}
-                >
-                  Personal
-                </span>
-              )}
+              <span
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                style={{
+                  background:
+                    task.boardType === "personal"
+                      ? "rgba(126,227,255,0.08)"
+                      : "rgba(255,255,255,0.06)",
+                  color: task.boardType === "personal" ? "#7ee3ff" : "#eeeeee",
+                  border:
+                    task.boardType === "personal"
+                      ? "1px solid rgba(126,227,255,0.2)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                {task.boardType === "personal" ? "Personal" : "Plans"}
+              </span>
             </div>
           ))
         )}
@@ -279,52 +326,22 @@ const DayCell: React.FC<{
 
 const CalendarView: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { activeBoard, calendarSelectedDate, calendarMonth } = useSelector(
+  const { calendarSelectedDate, calendarMonth } = useSelector(
     (s: RootState) => s.tasks,
   );
-  const { data: apiTasks } = useGetAllTasksQuery("");
+  const { data: plansTasks } = useGetAllTasksQuery("");
+  const { data: personalTasks } = useGetAllTasksPersonalQuery("");
 
   const transformedTasks = useMemo(() => {
-    return (apiTasks || []).map((apiTask: any) => {
-      const now = new Date();
-      const deadline = new Date(apiTask.deadLine);
-      const isOverdue = deadline < now && apiTask.status !== "completed";
-
-      let status: Task["status"] = "todo";
-      if (apiTask.status === "completed") {
-        status = activeBoard === "plans" ? "review" : "done";
-      } else if (isOverdue) {
-        status = "overdue";
-      } else if (apiTask.status === "active") {
-        status = "todo";
-      }
-
-      return {
-        id: apiTask.questId,
-        title: apiTask.title,
-        description: apiTask.description || "",
-        project: "Project",
-        status,
-        priority: "MEDIUM" as const,
-        dueDate: apiTask.deadLine,
-        dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        }),
-        boardType: activeBoard,
-        completed: apiTask.status === "completed",
-        isLate: isOverdue,
-        lateDisplay: isOverdue ? "Overdue" : undefined,
-        assignees:
-          apiTask.userAssignedQuests?.map((userId: string) => ({
-            id: userId,
-            name: `User ${userId}`,
-            role: "Member",
-          })) || [],
-        comments: [],
-      } as Task;
-    });
-  }, [apiTasks, activeBoard]);
+    return [
+      ...(plansTasks || []).map((apiTask: any) =>
+        transformApiTask(apiTask, "plans"),
+      ),
+      ...(personalTasks || []).map((apiTask: any) =>
+        transformApiTask(apiTask, "personal"),
+      ),
+    ];
+  }, [plansTasks, personalTasks]);
 
   const { year, month } = useMemo(
     () => parseMonth(calendarMonth),
@@ -395,6 +412,8 @@ const CalendarView: React.FC = () => {
 
   const DAY_HEADERS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
+  console.log("plansTasks", plansTasks);
+  console.log("personalTasks", personalTasks);
   return (
     <div className="flex flex-col px-4 py-6 md:px-8 pb-10">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">

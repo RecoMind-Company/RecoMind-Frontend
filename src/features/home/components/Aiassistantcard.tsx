@@ -12,7 +12,7 @@ const AIAssistantCard: React.FC = () => {
         background: "linear-gradient(180deg, rgba(126, 227, 255, 0.125) 0%, rgba(42, 58, 90, 0.34) 100%)",
         border: "1px solid rgba(126,227,255,0.15)",
       }}
-    >
+    > 
       <div className="flex items-center gap-2 mb-3">
         <div
           className="flex items-center justify-center"
