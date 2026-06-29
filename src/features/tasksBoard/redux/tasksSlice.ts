@@ -800,7 +800,7 @@ export const taskSlice = createApi({
   endpoints: (builder) => ({
     addTask: builder.mutation({
       query: (data) => ({
-        url: "/api/tasks/plan-1/add-task",
+        url: "/api/tasks/personal",
         method: "POST",
         body: data,
       }),
