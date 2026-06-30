@@ -43,35 +43,35 @@ const AddTaskModal: React.FC = () => {
     defaultValues: { priority: "HIGH" },
   });
 
-    const onSubmit: SubmitHandler<IAddTaskInputs> = async (data) => {
-      try {
-        const userIdsPayload = assignees.length > 0 
-          ? assignees.map(member => member.id)
-          : ["user-1"];
-        const apiPayload = {
-          questDto: {
-            title: data.title,
-            description: data.description ?? "",
-            status: 0,
-            priority: priorityMap[data.priority],
-            startDate: new Date(data.startDate).toISOString(),
-            deadLine: new Date(data.deadLine).toISOString(),
-            moduleId: "string", 
-            planId: "string"    
-          },
-          userIds: userIdsPayload
-        };
-        console.log("Payload",apiPayload)
+  const onSubmit: SubmitHandler<IAddTaskInputs> = async (data) => {
+  try {
+    const userIdsPayload = assignees.length > 0 
+      ? assignees.map(member => member.id)
+      : ["user-1"];
 
-        // 3. إرسال الطلب (Mutation)
-        const res = await addTask(apiPayload).unwrap();
-
-        console.log("Task created successfully:", res);
-        dispatch(closeAddTaskModal());
-      } catch (err) {
-        console.error("Failed to create task:", err);
-      }
+    const apiPayload = {
+      title: data.title,
+      description: data.description ?? "",
+      status: 0,
+      priority: priorityMap[data.priority],
+      startDate: new Date(data.startDate).toISOString(),
+      deadLine: new Date(data.deadLine).toISOString(),
+      moduleId: "string", 
+      planId: "string",
+      userIds: userIdsPayload
     };
+
+    console.log("Payload Sent to API:", apiPayload);
+
+    // إرسال الطلب (Mutation)
+    const res = await addTask(apiPayload).unwrap();
+
+    console.log("Task created successfully:", res);
+    dispatch(closeAddTaskModal());
+  } catch (err) {
+    console.error("Failed to create task:", err);
+  }
+};
 
   const handleInviteConfirm = (members: TeamMember[]) => {
     setAssignees((prev) => [...prev, ...members]);
