@@ -9,7 +9,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { closeTaskModal, localToggleComplete } from "../../redux/tasksSlice";
-import { addComment } from "../../redux/tasksSlice";
+// 👇 استيراد الـ Hook الجديد لجلب الكومنتات بجانب Mutation الإضافة
+import { useAddTaskCommentMutation, useGetTaskCommentsQuery } from "../../redux/tasksSlice"; 
 
 const priorityConfig = {
   HIGH: {
@@ -29,6 +30,17 @@ const priorityConfig = {
   },
 };
 
+// واجهة برمجية لتعريف شكل الكومنت القادم من الـ API الخاص بك
+interface ApiComment {
+  id: string;
+  userComment: string;
+  userId: string;
+  questId: string;
+  createdAt: string;
+  updatedAt: string | null;
+  isUpdated: boolean;
+}
+
 const TaskDetailModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const task = useSelector((s: RootState) => s.tasks.selectedTask);
@@ -36,23 +48,47 @@ const TaskDetailModal: React.FC = () => {
   const [commentText, setCommentText] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "comments">("details");
 
+  const [addTaskComment, { isLoading: isAddingComment }] = useAddTaskCommentMutation();
+
   if (!task) return null;
 
-  // Get fresh task from store (so comments update reactively)
+  // Get fresh task from store
   const freshTask = allTasks.find((t) => t.id === task.id) || task;
-  const p = priorityConfig[freshTask.priority];
+  const p = priorityConfig[freshTask.priority as keyof typeof priorityConfig] || priorityConfig.LOW;
   const isCompleted = freshTask.completed;
 
-  const handleComment = () => {
-    if (!commentText.trim()) return;
-    dispatch(addComment({ taskId: freshTask.id, text: commentText }));
-    setCommentText("");
+  // 👇 استدعاء الكومنتات من السيرفر مباشرة وتتبع حالة التحميل
+  const { data: serverComments = [], isLoading: isLoadingComments } = useGetTaskCommentsQuery(freshTask.id);
+
+  const handleComment = async () => {
+    if (!commentText.trim() || isAddingComment) return;
+
+    try {
+      await addTaskComment({
+        questId: freshTask.id,
+        userComment: commentText,
+      }).unwrap();
+
+      setCommentText("");
+    } catch (err) {
+      console.error("Failed to submit comment:", err);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleComment();
+    }
+  };
+
+  // دالة مساعدة لتنسيق الوقت القادم من السيرفر بشكل مبسط
+  const formatTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return "";
     }
   };
 
@@ -200,7 +236,7 @@ const TaskDetailModal: React.FC = () => {
             )}
 
             {/* Members */}
-            {freshTask.assignees.length > 0 && (
+            {freshTask.assignees && freshTask.assignees.length > 0 && (
               <div>
                 <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold mb-3">
                   Members
@@ -248,12 +284,13 @@ const TaskDetailModal: React.FC = () => {
             >
               <MessageSquare size={13} />
               Comments
-              {freshTask.comments.length > 0 && (
+              {/* 👇 عرض عدد الكومنتات القادمة من السيرفر مباشرة */}
+              {serverComments.length > 0 && (
                 <span
                   className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
                   style={{ background: "#7ee3ff", color: "#060b1b" }}
                 >
-                  {freshTask.comments.length}
+                  {serverComments.length}
                 </span>
               )}
             </button>
@@ -263,12 +300,17 @@ const TaskDetailModal: React.FC = () => {
               className="flex-1 overflow-y-auto space-y-4 mb-3"
               style={{ scrollbarWidth: "none" }}
             >
-              {freshTask.comments.length === 0 ? (
+              {isLoadingComments ? (
+                <p className="text-[#7f7f7f] text-xs text-center mt-8">
+                  Loading comments...
+                </p>
+              ) : serverComments.length === 0 ? (
                 <p className="text-[#7f7f7f] text-xs text-center mt-8">
                   No comments yet
                 </p>
               ) : (
-                freshTask.comments.map((comment) => (
+                // 👇 عرض الكومنتات القادمة من السيرفر بناءً على هيكل بيانات الـ API المرفق
+                serverComments.map((comment: ApiComment) => (
                   <div key={comment.id}>
                     <div className="flex items-start gap-2.5">
                       <div
@@ -280,19 +322,19 @@ const TaskDetailModal: React.FC = () => {
                           color: "#7ee3ff",
                         }}
                       >
-                        {comment.author.charAt(0)}
+                        {comment.userId?.charAt(0).toUpperCase() || "U"}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2 mb-0.5">
-                          <p className="text-white text-xs font-semibold">
-                            {comment.author}
+                          <p className="text-white text-xs font-semibold truncate max-w-[80px]">
+                            {comment.userId} {/* يعرض الـ userId كإسم كاتب للكومنت حالياً */}
                           </p>
                           <p className="text-[#7f7f7f] text-[9px]">
-                            {comment.time}
+                            {formatTime(comment.createdAt)}
                           </p>
                         </div>
-                        <p className="text-[#b8adad] text-xs leading-relaxed">
-                          {comment.text}
+                        <p className="text-[#b8adad] text-xs leading-relaxed break-words">
+                          {comment.userComment} {/* نص الكومنت من الـ backend */}
                         </p>
                         <button className="text-[#7ee3ff] text-[10px] mt-1 flex items-center gap-1 hover:opacity-70 transition-opacity">
                           <CornerDownLeft size={9} />
@@ -318,14 +360,15 @@ const TaskDetailModal: React.FC = () => {
                   fontSize: "11px",
                   outline: "none",
                 }}
-                placeholder="Enter Your Comment Here..."
+                placeholder={isAddingComment ? "Posting comment..." : "Enter Your Comment Here..."}
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={handleKeyDown}
+                disabled={isAddingComment} 
               />
               <button
                 onClick={handleComment}
-                disabled={!commentText.trim()}
+                disabled={!commentText.trim() || isAddingComment}
                 className="absolute right-2 top-1/2 -translate-y-1/2 disabled:opacity-30 transition-opacity"
               >
                 <CornerDownLeft size={13} color="#7ee3ff" />

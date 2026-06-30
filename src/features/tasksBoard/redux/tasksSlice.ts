@@ -784,7 +784,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const taskSlice = createApi({
   reducerPath: "task",
-  tagTypes: ["Task"],
+  tagTypes: ["Task", "Comment"], 
   refetchOnReconnect: true,
   refetchOnMountOrArgChange: true,
   baseQuery: fetchBaseQuery({
@@ -808,7 +808,7 @@ export const taskSlice = createApi({
     }),
     getAllTasks: builder.query({
       query: () => ({
-        url: "/api/tasks/plan-1/tasks",
+        url: "/api/tasks/plan-1/all?moduleId=string",
         method: "GET",
       }),
       providesTags: (result) =>
@@ -838,6 +838,34 @@ export const taskSlice = createApi({
             ]
           : [{ type: "Task", id: "LIST" }],
     }),
+    
+    getTaskComments: builder.query({
+      query: (questId: string) => ({
+        url: `/api/TaskComment/${questId}/task-all`,
+        method: "GET",
+      }),
+      providesTags: (result, error, questId) => [{ type: "Comment", id: questId }],
+    }),
+
+    addTaskComment: builder.mutation({
+      query: ({ questId, userComment }: { questId: string; userComment: string }) => ({
+        url: `/api/TaskComment/${questId}/add-task`,
+        method: "POST",
+        body: { userComment },
+      }),
+      invalidatesTags: (result, error, { questId }) => [
+        { type: "Task", id: questId },
+        { type: "Task", id: "LIST" },
+        { type: "Comment", id: questId } 
+      ],
+    }),
   }),
 });
-export const { useAddTaskMutation, useGetAllTasksQuery , useGetAllTasksPersonalQuery } = taskSlice;
+
+export const { 
+  useAddTaskMutation, 
+  useGetAllTasksQuery, 
+  useGetAllTasksPersonalQuery, 
+  useAddTaskCommentMutation,
+  useGetTaskCommentsQuery 
+} = taskSlice;
