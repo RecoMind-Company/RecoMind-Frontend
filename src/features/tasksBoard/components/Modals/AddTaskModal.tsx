@@ -41,7 +41,7 @@ const AddTaskModal: React.FC = () => {
     formState: { errors },
   } = useForm<IAddTaskInputs>({
     defaultValues: { priority: "HIGH" },
-  });
+  }); 
 
   const onSubmit: SubmitHandler<IAddTaskInputs> = async (data) => {
   try {
