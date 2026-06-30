@@ -27,10 +27,11 @@ export interface Task {
   project: string;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate: string; // ISO string — full date used for calendar matching
-  dueDateDisplay: string; // "Due in 6h" | "Feb 28" etc.
-  isLate: boolean | undefined;
-  lateDisplay: string | undefined;
+  dueDate: string; 
+  dueDateDisplay: string; 
+  // Change these two lines:
+  isLate?: boolean | undefined;       // equivalent to: boolean | undefined
+  lateDisplay?: string | undefined;   // equivalent to: string | undefined
   assignees: TeamMember[];
   comments: Comment[];
   boardType: BoardType;
