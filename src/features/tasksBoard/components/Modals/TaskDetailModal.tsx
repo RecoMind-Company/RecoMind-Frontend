@@ -46,7 +46,7 @@ const TaskDetailModal: React.FC = () => {
   const task = useSelector((s: RootState) => s.tasks.selectedTask);
   const allTasks = useSelector((s: RootState) => s.tasks.tasks);
   const [commentText, setCommentText] = useState("");
-  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(true);
 
   const [addTaskComment, { isLoading: isAddingComment }] = useAddTaskCommentMutation();
 
@@ -380,7 +380,7 @@ const TaskDetailModal: React.FC = () => {
                                   {formatTime(comment.createdAt)}
                                 </p>
                               </div>
-                              <p className="text-[#b8adad] text-xs leading-relaxed break-words">
+                              <p className="text-[#b8adad] text-xs leading-relaxed wrap-break-word">
                                 {comment.userComment}
                               </p>
                               <button className="text-[#7ee3ff] text-[10px] mt-1 flex items-center gap-1 hover:opacity-70 transition-opacity">

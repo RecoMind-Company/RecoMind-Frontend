@@ -75,7 +75,7 @@ const DateNavigator: React.FC = () => {
           <ChevronLeft size={50} color="#EFEFEF" />
         </button>
 
-        <div className="flex gap-1.5 justify-center">
+        <div className="flex gap-4 justify-center">
           {weekDays.map((day) => {
             const iso = toLocalISODate(day);
             const isToday = iso === today;
