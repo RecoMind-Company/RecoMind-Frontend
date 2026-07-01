@@ -18,7 +18,7 @@ const thisMonth = (day: number, hour = 12) => {
 };
 
 const today = new Date();
-const todayISO = today.toISOString().split("T")[0] ?? today.toISOString();
+const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
 // ================= MOCK DATA =================
 const mockMembers: TeamMember[] = [

@@ -27,8 +27,9 @@ export interface Task {
   project: string;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate: string; 
-  dueDateDisplay: string; 
+  startDate?: string;
+  dueDate: string;
+  dueDateDisplay: string;
   // Change these two lines:
   isLate?: boolean | undefined;       // equivalent to: boolean | undefined
   lateDisplay?: string | undefined;   // equivalent to: string | undefined

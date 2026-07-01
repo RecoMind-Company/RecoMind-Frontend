@@ -13,8 +13,9 @@ import {
   useGetAllTasksQuery,
   useGetAllTasksPersonalQuery,
 } from "../../redux/tasksSlice";
+import { toLocalISODate } from "../../utils/dateUtils";
 
-const toISO = (d: Date) => d.toISOString().split("T")[0] ?? d.toISOString();
+const toISO = (d: Date) => toLocalISODate(d);
 
 const parseMonth = (m: string) => {
   const parts = m.split("-");
@@ -27,7 +28,15 @@ const parseMonth = (m: string) => {
 };
 
 const getTasksForDate = (tasks: Task[], iso: string) =>
-  tasks.filter((t) => toISO(new Date(t.dueDate)) === iso);
+  tasks.filter((t) => {
+    const due = toISO(new Date(t.dueDate));
+    if (due === iso) return true;
+    if (t.startDate) {
+      const start = toISO(new Date(t.startDate));
+      return start <= iso && iso <= due;
+    }
+    return false;
+  });
 
 const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
   const now = new Date();
@@ -50,6 +59,7 @@ const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
     project: "Project",
     status,
     priority: "MEDIUM" as const,
+    startDate: apiTask.startDate,
     dueDate: apiTask.deadLine,
     dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
       month: "short",
