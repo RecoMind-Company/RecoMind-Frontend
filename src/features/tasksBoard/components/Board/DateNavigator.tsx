@@ -67,16 +67,15 @@ const DateNavigator: React.FC = () => {
   return (
     <div className="mb-5">
       {/* Week strip */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-center gap-1.5">
         <button
           onClick={handlePrev}
-          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+          className="w-15 h-15 flex items-center justify-center transition-all hover:bg-white/10"
         >
-          <ChevronLeft size={14} color="#7f7f7f" />
+          <ChevronLeft size={30} color="#EFEFEF" />
         </button>
 
-        <div className="flex flex-1 gap-1.5 justify-center">
+        <div className="flex gap-1.5 justify-center">
           {weekDays.map((day) => {
             const iso = toLocalISODate(day);
             const isToday = iso === today;
@@ -94,16 +93,16 @@ const DateNavigator: React.FC = () => {
                   padding: "8px 6px",
 
                   background: isSelected
-                    ? "#0E152A"
+                    ? "#141A2B"
                     : isToday
                       ? "rgba(255,255,255,0.05)"
-                      : "transparent",
+                      : "#141A2B",
 
                   border: isSelected
                     ? "1.5px solid rgba(126,227,255,0.5)"
                     : isToday
                       ? "1px solid #7EE3FF"
-                      : "1px solid rgba(255,255,255,0.06)",
+                      : "",
 
                   boxShadow: isSelected
                     ? "0 0 18px rgba(126,227,255,0.40)"
@@ -131,10 +130,9 @@ const DateNavigator: React.FC = () => {
 
         <button
           onClick={handleNext}
-          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+          className="w-15 h-15 flex items-center justify-center transition-all hover:bg-white/10"
         >
-          <ChevronRight size={14} color="#7f7f7f" />
+          <ChevronRight size={30} color="#EFEFEF" />
         </button>
       </div>
     </div>

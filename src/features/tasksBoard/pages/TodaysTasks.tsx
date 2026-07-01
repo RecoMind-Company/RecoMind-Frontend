@@ -146,7 +146,7 @@ const TodaysTasks: React.FC = () => {
             {/* Plans Board */}
             <button
               onClick={() => dispatch(setActiveBoard("plans" as BoardType))}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative"
+              className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative justify-center w-1/2"
               style={{
                 color: activeBoard === "plans" ? "#7ee3ff" : "#7f7f7f",
               }}
@@ -162,12 +162,12 @@ const TodaysTasks: React.FC = () => {
             </button>
 
             {/* Personal Board + Add Task */}
-            <div className="flex items-center gap-2 relative">
+            <div className="flex items-center gap-2 relative w-1/2 justify-center">
               <button
                 onClick={() =>
                   dispatch(setActiveBoard("personal" as BoardType))
                 }
-                className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 relative"
+                className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-200 justify-center"
                 style={{
                   color: activeBoard === "personal" ? "#7ee3ff" : "#7f7f7f",
                 }}
