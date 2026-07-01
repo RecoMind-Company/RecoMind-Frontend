@@ -67,12 +67,12 @@ const DateNavigator: React.FC = () => {
   return (
     <div className="mb-5">
       {/* Week strip */}
-      <div className="flex items-center justify-center gap-1.5">
+      <div className="flex items-center justify-center gap-6">
         <button
           onClick={handlePrev}
           className="w-15 h-15 flex items-center justify-center transition-all hover:bg-white/10"
         >
-          <ChevronLeft size={30} color="#EFEFEF" />
+          <ChevronLeft size={50} color="#EFEFEF" />
         </button>
 
         <div className="flex gap-1.5 justify-center">
@@ -89,7 +89,8 @@ const DateNavigator: React.FC = () => {
                 onClick={() => setDateSelection(iso)}
                 className="flex flex-col items-center justify-center rounded-xl transition-all duration-200 hover:bg-white/6"
                 style={{
-                  minWidth: "44px",
+                  minWidth: "60px",
+                  height: "75px",
                   padding: "8px 6px",
 
                   background: isSelected
@@ -112,14 +113,14 @@ const DateNavigator: React.FC = () => {
                 }}
               >
                 <span
-                  className="text-[9px] font-semibold mb-1"
-                  style={{ color: isSelected ? "#7ee3ff" : "#7f7f7f" }}
+                  className="text-sm font-semibold mb-1"
+                  style={{ color: isSelected ? "#7ee3ff" : "#BEBEBE", fontFamily: "sans-serif" }}
                 >
                   {isToday ? "TODAY" : dayName}
                 </span>
                 <span
-                  className="text-sm font-bold"
-                  style={{ color: isSelected ? "#7ee3ff" : "#eeeeee" }}
+                  className="text-x1 font-bold"
+                  style={{ color: isSelected ? "#7ee3ff" : "#BEBEBE", fontFamily: "sans-serif" }}
                 >
                   {dayNum}
                 </span>
@@ -132,7 +133,7 @@ const DateNavigator: React.FC = () => {
           onClick={handleNext}
           className="w-15 h-15 flex items-center justify-center transition-all hover:bg-white/10"
         >
-          <ChevronRight size={30} color="#EFEFEF" />
+          <ChevronRight size={50} color="#EFEFEF" />
         </button>
       </div>
     </div>
