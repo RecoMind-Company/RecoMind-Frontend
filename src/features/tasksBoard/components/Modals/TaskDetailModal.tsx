@@ -9,8 +9,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { closeTaskModal, localToggleComplete } from "../../redux/tasksSlice";
-// 👇 استيراد الـ Hook الجديد لجلب الكومنتات بجانب Mutation الإضافة
 import { useAddTaskCommentMutation, useGetTaskCommentsQuery } from "../../redux/tasksSlice"; 
+import CommentIcon from "../../../../assets/images/comments-line_svgrepo.com.png";
 
 const priorityConfig = {
   HIGH: {
@@ -99,7 +99,7 @@ const TaskDetailModal: React.FC = () => {
       onClick={() => dispatch(closeTaskModal())}
     >
       <div
-        className="w-full max-w-2xl rounded-2xl overflow-hidden"
+        className="w-full max-w-3xl lg:h-[400px] rounded-2xl overflow-hidden"
         style={{
           background: "#060B1B",
           border: "1.5px solid rgba(126,227,255,0.15)",
@@ -267,7 +267,12 @@ const TaskDetailModal: React.FC = () => {
           </div>
 
           {/* ===== RIGHT PANEL: COMMENTS ===== */}
-          <div className="w-64 flex flex-col p-5">
+          <div
+            className="w-64 flex flex-col p-5"
+            style={{
+              background: "#061022",
+            }}
+          >
             {/* Comments tab button */}
             <button
               onClick={() =>
@@ -277,14 +282,13 @@ const TaskDetailModal: React.FC = () => {
               style={{
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.1)",
-                color: "#eeeeee",
+                color: "var(--Secondary)",
                 fontSize: "12px",
                 fontWeight: 600,
               }}
             >
-              <MessageSquare size={13} />
+              <img src={CommentIcon} alt="Comment" className="w-4 h-4" />
               Comments
-              {/* 👇 عرض عدد الكومنتات القادمة من السيرفر مباشرة */}
               {serverComments.length > 0 && (
                 <span
                   className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
@@ -309,7 +313,6 @@ const TaskDetailModal: React.FC = () => {
                   No comments yet
                 </p>
               ) : (
-                // 👇 عرض الكومنتات القادمة من السيرفر بناءً على هيكل بيانات الـ API المرفق
                 serverComments.map((comment: ApiComment) => (
                   <div key={comment.id}>
                     <div className="flex items-start gap-2.5">
