@@ -70,9 +70,6 @@ const NotificationsPanel: React.FC = () => {
       {/* Header */}
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-white font-semibold text-sm">
-            Notifications
-          </span>
           {unreadCount > 0 && (
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full"
@@ -83,7 +80,7 @@ const NotificationsPanel: React.FC = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
+        <div className="flex items-center gap-2 mt-3 flex-wrap justify-end">
           {(
             [
               { key: "all", label: "All" },
@@ -203,30 +200,6 @@ const NotificationsPanel: React.FC = () => {
                       "{notif.message}"
                     </p>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-3">
-                  <button
-                    className="text-[10px] text-[#7ee3ff] hover:opacity-70"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteNotification(notif.id);
-                    }}
-                  >
-                    Delete
-                  </button>
-                  {!notif.isRead && (
-                    <span
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: "rgba(126,227,255,0.12)",
-                        color: "#7ee3ff",
-                        border: "1px solid rgba(126,227,255,0.2)",
-                      }}
-                    >
-                      Unread
-                    </span>
-                  )}
                 </div>
               </div>
             );
