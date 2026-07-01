@@ -51,7 +51,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const handleCardClick = () => {
     dispatch(openTaskModal(task));
   };
-
+  
   return (
     <div
       draggable
