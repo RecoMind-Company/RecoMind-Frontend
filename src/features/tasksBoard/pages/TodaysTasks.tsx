@@ -76,7 +76,8 @@ const TodaysTasks: React.FC = () => {
         {/* ===== PAGE HEADER ===== */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
           <div>
-            <h1 className="text-white text-2xl font-bold">Today's Tasks</h1>
+            <h1 className="text-white text-2xl font-bold"
+            style={{ fontFamily: "sans-serif" }}>Today's Tasks</h1>
 
             <p className="text-[#7f7f7f] text-sm mt-0.5">
               {new Date(selectedDate + "T12:00:00").toLocaleDateString(
@@ -185,11 +186,11 @@ const TodaysTasks: React.FC = () => {
               {activeBoard === "personal" && (
                 <button
                   onClick={() => dispatch(openAddTaskModal())}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     background:
                       "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
-
+                    fontFamily: "sans-serif",
                     color: "#060b1b",
                   }}
                 >
