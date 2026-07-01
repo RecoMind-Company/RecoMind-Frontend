@@ -81,7 +81,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
     >
       {/* Title + status */}
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-white font-bold text-sm leading-snug">
+        <h3 className="text-white font-bold text-[20px] leading-snug">
           {proposal.title}
           {s.dot && (
             <span
@@ -91,11 +91,9 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
           )}
         </h3>
         <span
-          className="text-[10px] font-semibold px-2 py-0.5 rounded-md shrink-0"
+          className="text-[14px] font-semibold px-2 py-0.5 rounded-md shrink-0"
           style={{
-            background: s.bg,
             color: s.color,
-            border: `1px solid ${s.border}`,
           }}
         >
           {s.label}
@@ -110,8 +108,8 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
         Description
       </p>
       <p
-        className="text-xs leading-relaxed mb-3 line-clamp-3"
-        style={{ color: "#b8adad" }}
+        className="text-base leading-relaxed mb-3 line-clamp-3"
+        style={{ color: "#CBCBCB" }}
       >
         {proposal.description}
       </p>
@@ -120,12 +118,12 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
       {proposal.status === "accepted" && (
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px]" style={{ color: "#7f7f7f" }}>
+            <span className="text-base" style={{ color: "#CCCCCC" }}>
               Progress
             </span>
             <span
-              className="text-[10px] font-bold"
-              style={{ color: "#7ee3ff" }}
+              className="text-base font-bold"
+              style={{ color: "#EEEEEE" }}
             >
               {proposal.progress}%
             </span>
@@ -165,7 +163,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
             >
               {avatarInitial}
             </div>
-            <p className="text-[10px] truncate" style={{ color: "#7f7f7f" }}>
+            <p className="text-base truncate" style={{ color: "#EFEFEF" }}>
               {"message" in firstComment
                 ? firstComment.message
                 : firstComment.text}
