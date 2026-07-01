@@ -55,7 +55,8 @@ const ProposalsGrid: React.FC = () => {
     <div>
       {/* Section header */}
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-white font-bold text-base">
+        <h2 className="text-white font-bold text-[28px]"
+        style={{fontFamily: "sans-serif"}}>
           {isDraftsView ? "Your Drafts" : "Your Proposals"}
         </h2>
 
@@ -64,7 +65,7 @@ const ProposalsGrid: React.FC = () => {
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setDropdownOpen((o) => !o)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all"
               style={{
                 background: !isDraftsView
                   ? "rgba(126,227,255,0.08)"
@@ -142,7 +143,7 @@ const ProposalsGrid: React.FC = () => {
             onClick={() =>
               dispatch(setActiveFilter(isDraftsView ? "all" : "draft"))
             }
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+            className="px-5 py-2 rounded-full text-xs font-semibold transition-all"
             style={{
               background: isDraftsView
                 ? "rgba(184,173,173,0.1)"

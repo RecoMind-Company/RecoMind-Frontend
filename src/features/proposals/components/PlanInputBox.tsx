@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { setPlanInput, startValidation } from "../redux/proposalsSlice";
+import { px } from "framer-motion";
 
 const PlanInputBox: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -35,14 +36,14 @@ const PlanInputBox: React.FC = () => {
 
       {/* Input container */}
       <div
-        className="rounded-2xl transition-all duration-300 overflow-hidden"
+        className="rounded-2xl transition-all duration-300 overflow-hidden w-[90%] mx-auto"
         style={{
-          background: "rgba(255,255,255,0.03)",
           border: `1.5px solid ${isInputExpanded || isValidating ? "rgba(126,227,255,0.35)" : "rgba(255,255,255,0.09)"}`,
-          boxShadow:
-            isInputExpanded || isValidating
-              ? "0 0 24px rgba(126,227,255,0.07)"
-              : "none",
+          // boxShadow:
+          //   isInputExpanded || isValidating
+          //     ? "0 0 24px rgba(126,227,255,0.07)"
+          //     : "none",
+              boxShadow: "0px -7px 24px 0px #87E7FF59",
         }}
       >
         {/* Textarea */}
@@ -94,13 +95,12 @@ const PlanInputBox: React.FC = () => {
             <button
               onClick={handleValidate}
               disabled={isValidating || !planInput.trim()}
-              className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl text-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2"
               style={{
-                background: isValidating
-                  ? "rgba(126,227,255,0.1)"
-                  : "rgba(126,227,255,0.12)",
-                color: "#7ee3ff",
-                border: "1px solid rgba(126,227,255,0.25)",
+                color: "#060B1B",
+                border: "1px solid rgba(126, 227, 255, 0.25)",
+                boxShadow:"4px 4px 12px 0px #FFFFFF40",
+                background: "linear-gradient(132.93deg, #7EE3FF 41.33%, #E7E7E7 95.12%)",
               }}
             >
               {isValidating ? (
