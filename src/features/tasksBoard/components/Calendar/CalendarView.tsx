@@ -137,17 +137,17 @@ const StatsRow: React.FC<{ tasks: Task[] }> = ({ tasks }) => {
           key={c.label}
           className="rounded-xl p-4"
           style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "#141A2B",
+            border: "1px solid #7EE3FF40",
           }}
         >
-          <p className="text-xs font-semibold mb-1" style={{ color: c.accent }}>
+          <p className="text-xl font-semibold mb-1" style={{ color: c.accent , fontFamily: "sans-serif" }}>
             {c.label}
           </p>
           <p className="text-2xl font-bold text-white leading-none mb-1">
             {c.value}
           </p>
-          <p className="text-[11px]" style={{ color: "#7f7f7f" }}>
+          <p className="text-[14px]" style={{ color: "#7f7f7f" }}>
             {c.sub}
           </p>
         </div>
@@ -208,7 +208,7 @@ const DayTasksPanel: React.FC<{ date: string | null; tasks: Task[] }> = ({
           dayTasks.map((task) => (
             <div
               key={task.id}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl"
+              className="flex items-center gap-3 px-4 py-3 rounded-[4px]"
               style={{
                 background: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.06)",
@@ -270,6 +270,7 @@ const DayCell: React.FC<{
       className="rounded-xl p-2 text-left max-h-50 h-full transition-all duration-150 w-full"
       style={{
         minHeight: "80px",
+        opacity: isCurrentMonth ? 1 : 0.35,
         background: isSelected
           ? "rgba(126,227,255,0.06)"
           : isToday
@@ -283,7 +284,15 @@ const DayCell: React.FC<{
         cursor: "pointer",
       }}
     >
-      <div className="flex items-center gap-1 mb-1.5">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span
+          className="text-sm font-bold"
+          style={{
+            color: isSelected ? "#7ee3ff" : "#eeeeee",
+          }}
+        >
+          {date.getDate()}
+        </span>
         {isToday && (
           <span
             className="text-[9px] font-semibold"
@@ -292,18 +301,6 @@ const DayCell: React.FC<{
             Today
           </span>
         )}
-        <span
-          className="text-xs font-semibold ml-auto"
-          style={{
-            color: isCurrentMonth
-              ? isSelected
-                ? "#7ee3ff"
-                : "#eeeeee"
-              : "#7f7f7f4a",
-          }}
-        >
-          {date.getDate()}
-        </span>
       </div>
 
       <div className="space-y-1">
@@ -473,20 +470,18 @@ const CalendarView: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={goToPrevMonth}
-          className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+          className="w-15 h-15 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
         >
-          <ChevronLeft size={16} color="#7f7f7f" />
+          <ChevronLeft size={50} color="#EFEFEF" />
         </button>
 
-        <h2 className="text-white text-lg font-bold">{monthLabel}</h2>
+        <h2 className="text-white text-2xl font-bold" style={{fontFamily: "sans-serif"}}>{monthLabel}</h2>
 
         <button
           onClick={goToNextMonth}
-          className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
-          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+          className="w-15 h-15 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
         >
-          <ChevronRight size={16} color="#7f7f7f" />
+          <ChevronRight size={50} color="#EFEFEF" />
         </button>
       </div>
 

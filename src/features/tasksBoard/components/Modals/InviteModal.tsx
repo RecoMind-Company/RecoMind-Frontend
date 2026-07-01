@@ -45,7 +45,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      className="fixed inset-0 z-60 flex items-center justify-center p-4"
       style={{
         background: "rgba(6,11,27,0.85)",
         backdropFilter: "blur(8px)",
