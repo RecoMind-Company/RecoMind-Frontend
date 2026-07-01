@@ -62,33 +62,6 @@ const PlanInputBox: React.FC = () => {
           }}
         />
 
-        {/* Validation steps (shown during validating) */}
-        {isValidating && (
-          <div
-            className="px-5 pb-3 space-y-1.5 text-xs"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            {validationSteps.map((step, i) => (
-              <div key={i} className="flex items-center gap-2">
-                {step.done ? (
-                  <span style={{ color: "#64b883" }}>✓</span>
-                ) : (
-                  <span
-                    className="inline-block w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
-                    style={{
-                      borderColor: "#7ee3ff",
-                      borderTopColor: "transparent",
-                    }}
-                  />
-                )}
-                <span style={{ color: step.done ? "#64b883" : "#b8adad" }}>
-                  {step.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Start Validating button — shown when expanded */}
         {(isInputExpanded || isValidating) && (
           <div className="px-4 pb-4 pt-1">
@@ -118,6 +91,33 @@ const PlanInputBox: React.FC = () => {
                 "Start Validating"
               )}
             </button>
+          </div>
+        )}
+
+        {/* Validation steps — shown below button during validating */}
+        {isValidating && (
+          <div
+            className="px-5 pb-4 space-y-1.5 text-xs"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            {validationSteps.map((step, i) => (
+              <div key={i} className="flex items-center gap-2">
+                {step.done ? (
+                  <span style={{ color: "#64b883" }}>✓</span>
+                ) : (
+                  <span
+                    className="inline-block w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
+                    style={{
+                      borderColor: "#7ee3ff",
+                      borderTopColor: "transparent",
+                    }}
+                  />
+                )}
+                <span style={{ color: step.done ? "#64b883" : "#b8adad" }}>
+                  {step.label}
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </div>

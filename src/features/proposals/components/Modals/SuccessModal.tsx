@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import { closeSuccessModal } from "../../redux/proposalsSlice";
+import sendApproval from "../../../../assets/images/send_approval.png"
+import doneApproval from "../../../../assets/images/doneApproval.png"
+
 
 const SuccessModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,7 +24,7 @@ const SuccessModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center"
+      className="fixed inset-0 z-60 flex items-center justify-center"
       style={{
         background:
           "linear-gradient(135deg, #060b1b 0%, #0a1628 60%, #060e20 100%)",
@@ -72,252 +75,12 @@ const SuccessModal: React.FC = () => {
           /* ====== SAVED ====== */
           <>
             <div className="robot-anim glow-pulse mb-8">
-              <svg width="160" height="180" viewBox="0 0 160 200" fill="none">
-                {/* Head */}
-                <rect
-                  x="50"
-                  y="30"
-                  width="60"
-                  height="52"
-                  rx="10"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                  fill="rgba(126,227,255,0.04)"
-                />
-                {/* Antenna */}
-                <line
-                  x1="80"
-                  y1="30"
-                  x2="80"
-                  y2="14"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="80"
-                  cy="10"
-                  r="5"
-                  fill="#7ee3ff"
-                  style={{ filter: "drop-shadow(0 0 6px #7ee3ff)" }}
-                />
-                {/* Eyes */}
-                <circle
-                  cx="67"
-                  cy="52"
-                  r="9"
-                  fill="none"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                />
-                <circle
-                  cx="67"
-                  cy="52"
-                  r="4"
-                  fill="#7ee3ff"
-                  style={{ filter: "drop-shadow(0 0 4px #7ee3ff)" }}
-                />
-                <circle
-                  cx="93"
-                  cy="52"
-                  r="9"
-                  fill="none"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                />
-                <circle
-                  cx="93"
-                  cy="52"
-                  r="4"
-                  fill="#7ee3ff"
-                  style={{ filter: "drop-shadow(0 0 4px #7ee3ff)" }}
-                />
-                {/* Smile */}
-                <path
-                  d="M66 68 Q80 78 94 68"
-                  stroke="#7ee3ff"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                {/* Neck */}
-                <rect
-                  x="74"
-                  y="82"
-                  width="12"
-                  height="8"
-                  rx="2"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.5"
-                  fill="none"
-                />
-                {/* Body */}
-                <rect
-                  x="38"
-                  y="90"
-                  width="84"
-                  height="64"
-                  rx="12"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                  fill="rgba(126,227,255,0.04)"
-                />
-                {/* Chest panel */}
-                <rect
-                  x="60"
-                  y="104"
-                  width="40"
-                  height="28"
-                  rx="6"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.5"
-                  fill="rgba(126,227,255,0.08)"
-                />
-                <circle
-                  cx="70"
-                  cy="118"
-                  r="4"
-                  fill="#7ee3ff"
-                  style={{ opacity: 0.6 }}
-                />
-                <circle cx="80" cy="118" r="4" fill="#7ee3ff" />
-                <circle
-                  cx="90"
-                  cy="118"
-                  r="4"
-                  fill="#7ee3ff"
-                  style={{ opacity: 0.6 }}
-                />
-                {/* Left arm */}
-                <line
-                  x1="38"
-                  y1="102"
-                  x2="20"
-                  y2="120"
-                  stroke="#7ee3ff"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="20"
-                  y1="120"
-                  x2="14"
-                  y2="138"
-                  stroke="#7ee3ff"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {/* Left thumb up */}
-                <path
-                  d="M10 148 Q8 143 11 139 Q15 135 17 140 L20 138 Q22 134 21 148 Z"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.8"
-                  fill="rgba(126,227,255,0.1)"
-                />
-                <line
-                  x1="14"
-                  y1="141"
-                  x2="14"
-                  y2="148"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.2"
-                />
-                <line
-                  x1="17"
-                  y1="141"
-                  x2="17"
-                  y2="148"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.2"
-                />
-                {/* Right arm */}
-                <line
-                  x1="122"
-                  y1="102"
-                  x2="140"
-                  y2="120"
-                  stroke="#7ee3ff"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="140"
-                  y1="120"
-                  x2="146"
-                  y2="138"
-                  stroke="#7ee3ff"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {/* Right thumb up */}
-                <path
-                  d="M150 148 Q152 143 149 139 Q145 135 143 140 L140 138 Q138 134 139 148 Z"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.8"
-                  fill="rgba(126,227,255,0.1)"
-                />
-                <line
-                  x1="146"
-                  y1="141"
-                  x2="146"
-                  y2="148"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.2"
-                />
-                <line
-                  x1="143"
-                  y1="141"
-                  x2="143"
-                  y2="148"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.2"
-                />
-                {/* Legs */}
-                <rect
-                  x="55"
-                  y="154"
-                  width="20"
-                  height="32"
-                  rx="8"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                  fill="rgba(126,227,255,0.04)"
-                />
-                <rect
-                  x="85"
-                  y="154"
-                  width="20"
-                  height="32"
-                  rx="8"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                  fill="rgba(126,227,255,0.04)"
-                />
-                {/* Feet */}
-                <ellipse
-                  cx="65"
-                  cy="187"
-                  rx="16"
-                  ry="6"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.5"
-                  fill="rgba(126,227,255,0.06)"
-                />
-                <ellipse
-                  cx="95"
-                  cy="187"
-                  rx="16"
-                  ry="6"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.5"
-                  fill="rgba(126,227,255,0.06)"
-                />
-              </svg>
+              <img src={doneApproval} alt="Done Approval" />
             </div>
 
             <h2
-              className="text-anim text-3xl font-bold"
-              style={{ color: "#7ee3ff" }}
+              className="text-anim text-4xl font-bold"
+              style={{ color: "#7EE3FF" , fontFamily: " sans-serif"}}
             >
               Saved Successfully
             </h2>
@@ -326,10 +89,11 @@ const SuccessModal: React.FC = () => {
           /* ====== SENT ====== */
           <>
             <h2
-              className="text-3xl font-bold mb-10"
+              className="text-[32px] font-bold mb-10"
               style={{
-                color: "#7ee3ff",
+                color: "#7EE3FF",
                 animation: "floatUp 0.5s ease 0.1s both",
+                fontFamily: " sans-serif",
               }}
             >
               Sent Successfully
@@ -345,36 +109,7 @@ const SuccessModal: React.FC = () => {
                   filter: "blur(6px)",
                 }}
               />
-              <svg
-                width="140"
-                height="120"
-                viewBox="0 0 140 120"
-                fill="none"
-                className="glow-pulse"
-              >
-                {/* Paper plane */}
-                <path
-                  d="M10 60 L130 20 L90 110 L62 76 Z"
-                  stroke="#7ee3ff"
-                  strokeWidth="2.5"
-                  strokeLinejoin="round"
-                  fill="rgba(126,227,255,0.07)"
-                />
-                <path
-                  d="M62 76 L130 20"
-                  stroke="#7ee3ff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M62 76 L68 96 L78 84"
-                  stroke="#7ee3ff"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="rgba(126,227,255,0.05)"
-                />
-              </svg>
+              <img src={sendApproval} alt="Send Approval" />
               {/* Check badge */}
               <div
                 className="absolute bottom-[-8px] right-[-8px] w-12 h-12 rounded-full flex items-center justify-center"
@@ -398,10 +133,11 @@ const SuccessModal: React.FC = () => {
             </div>
 
             <p
-              className="text-xl font-semibold"
+              className="text-[32px] font-semibold"
               style={{
-                color: "#b8adad",
+                color: "#7EE3FF",
                 animation: "floatUp 0.5s ease 0.6s both",
+                fontFamily: " sans-serif",
               }}
             >
               Awaiting Acceptance

@@ -196,80 +196,77 @@ const ProposalDetailModal: React.FC = () => {
   }
 
   // ========================================================
-  // VALIDATION REPORT VIEW — full width, no sidebar
+  // VALIDATION REPORT VIEW — FULL PAGE
   // (pending = just validated, not yet saved/sent)
   // ========================================================
   if (isPending) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex flex-col overflow-y-auto"
         style={{
-          background: "rgba(6,11,27,0.9)",
-          backdropFilter: "blur(12px)",
+          background: "#060B1B",
+          animation: "fadeIn 0.3s ease",
         }}
-        onClick={() => dispatch(closeProposalModal())}
       >
-        <div
-          className="w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col"
-          style={{
-            background: "#060B1B",
-            border: "1.5px solid rgba(126,227,255,0.15)",
-            maxHeight: "88vh",
-            animation: "slideUp 0.22s ease",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <style>{`
-            @keyframes slideUp {
-              from { opacity:0; transform:translateY(14px); }
-              to   { opacity:1; transform:translateY(0); }
-            }
-            .scroll-thin::-webkit-scrollbar { width:3px; }
-            .scroll-thin::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:4px; }
-          `}</style>
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+          }
+          @media (min-width: 768px) {
+            .proposal-fullpage-content { padding-left: 188px !important; }
+            .proposal-fullpage-bar { padding-left: 188px !important; }
+          }
+        `}</style>
 
-          {/* Input bar */}
+        {/* Content */}
+        <div className="proposal-fullpage-content flex-1 px-6 py-8 pb-4">
+          {/* Plan input bar */}
           <div
-            className="px-6 py-4"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+            className="w-full px-4 py-3 rounded-xl text-sm mb-6"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "#b8adad",
+            }}
           >
-            <div
-              className="w-full px-4 py-2.5 rounded-xl text-sm"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#7f7f7f",
-              }}
-            >
-              {proposal.plan || "Open A new Branch"}
-            </div>
+            {proposal.plan || "Open A new Branch"}
           </div>
+
+          {/* Report title */}
+          <h3 className="text-white font-bold text-xl mb-4">
+            The Validation Report
+          </h3>
 
           {/* Report content */}
-          <div className="flex-1 overflow-y-auto scroll-thin px-6 py-5">
-            <h3 className="text-white font-bold text-xl mb-4">
-              The Validation Report
-            </h3>
-            <div
-              className="text-sm leading-relaxed whitespace-pre-line"
-              style={{ color: "#b8adad" }}
-            >
-              {proposal.validationReport}
-            </div>
-          </div>
-
-          {/* Save / Send */}
           <div
-            className="flex gap-3 px-6 py-4 shrink-0"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            className="text-base leading-relaxed whitespace-pre-line"
+            style={{ color: "#EFEFEF" }}
           >
+            {proposal.validationReport}
+          </div>
+        </div>
+
+        {/* Bottom action bar — full width, sits right after content */}
+        <div
+          className="proposal-fullpage-bar shrink-0 px-6 py-4"
+          style={{
+            background: "rgba(6,11,27,0.95)",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div className="flex gap-1.5">
             <button
               onClick={() => dispatch(saveDraft(proposal))}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              className="rounded-md text-sm font-semibold flex items-center justify-center gap-1.5 transition-all hover:opacity-90"
               style={{
-                background: "rgba(255,255,255,0.05)",
-                color: "#eeeeee",
-                border: "1px solid rgba(255,255,255,0.1)",
+                width: "50%",
+                height: "52px",
+                padding: "10px",
+                borderRadius: "6px",
+                background: "#7EE3FF",
+                color: "#060b1b",
+                border: "none",
               }}
             >
               <Save size={13} />
@@ -277,10 +274,15 @@ const ProposalDetailModal: React.FC = () => {
             </button>
             <button
               onClick={() => dispatch(sendForApproval(proposal))}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              className="rounded-md text-sm font-semibold flex items-center justify-center gap-1.5 transition-all hover:opacity-90"
               style={{
-                background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
+                width: "50%",
+                height: "52px",
+                padding: "10px",
+                borderRadius: "6px",
+                background: "#7EE3FF",
                 color: "#060b1b",
+                border: "none",
               }}
             >
               <Send size={13} />
