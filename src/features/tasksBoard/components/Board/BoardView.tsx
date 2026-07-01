@@ -28,15 +28,17 @@ const PERSONAL_COLUMNS: {
 
 const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
   const now = new Date();
-  const deadline = new Date(apiTask.deadLine);
-  const isOverdue = deadline < now && apiTask.status !== "completed";
+  const deadlineStr = apiTask.deadLine || apiTask.deadline || apiTask.dueDate;
+  const startStr = apiTask.startDate || apiTask.start;
+  const deadline = new Date(deadlineStr);
+  const isOverdue = deadlineStr && deadline < now && apiTask.status !== "completed";
 
   let status: TaskStatus = "todo";
   if (apiTask.status === "completed") {
     status = boardType === "plans" ? "review" : "done";
   } else if (isOverdue) {
     status = "overdue";
-  } else if (apiTask.status === "active") {
+  } else if (apiTask.status === "active" || apiTask.status === "to_do") {
     status = "todo";
   }
 
@@ -51,12 +53,14 @@ const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
     project: "Project",
     status,
     priority: "MEDIUM" as const,
-    startDate: apiTask.startDate,
-    dueDate: apiTask.deadLine,
-    dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    }),
+    startDate: startStr,
+    dueDate: deadlineStr,
+    dueDateDisplay: deadlineStr
+      ? new Date(deadlineStr).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })
+      : "—",
     boardType,
     completed: apiTask.status === "completed",
     ...lateTaskFields,
@@ -94,10 +98,12 @@ const BoardView: React.FC = () => {
         const taskStartISO = task.startDate
           ? toLocalISODate(new Date(task.startDate))
           : null;
-        const taskDueISO = toLocalISODate(new Date(task.dueDate));
-        if (taskStartISO && taskStartISO <= selectedDate && selectedDate <= taskDueISO)
-          return true;
-        return taskDueISO === selectedDate;
+        const taskDueISO = task.dueDate
+          ? toLocalISODate(new Date(task.dueDate))
+          : null;
+        const matchesStart = taskStartISO && taskStartISO === selectedDate;
+        const matchesDue = taskDueISO && taskDueISO === selectedDate;
+        return Boolean(matchesStart || matchesDue);
       }),
     [transformedTasks, activeBoard, selectedDate],
   );
