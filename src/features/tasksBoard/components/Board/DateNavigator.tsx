@@ -7,6 +7,7 @@ import {
   setCalendarSelectedDate,
   setSelectedDate,
 } from "../../redux/tasksSlice";
+import { toLocalISODate } from "../../utils/dateUtils";
 
 const DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -24,12 +25,12 @@ const DateNavigator: React.FC = () => {
     });
   }, [selected]);
 
-  const today = new Date().toISOString().split("T")[0]!;
+  const today = toLocalISODate(new Date());
 
   const handlePrev = () => {
     const d = new Date(selected);
     d.setDate(d.getDate() - 7);
-    const iso = d.toISOString().split("T")[0]!;
+    const iso = toLocalISODate(d);
     dispatch(setSelectedDate(iso));
     dispatch(setCalendarSelectedDate(iso));
     dispatch(
@@ -42,7 +43,7 @@ const DateNavigator: React.FC = () => {
   const handleNext = () => {
     const d = new Date(selected);
     d.setDate(d.getDate() + 7);
-    const iso = d.toISOString().split("T")[0]!;
+    const iso = toLocalISODate(d);
     dispatch(setSelectedDate(iso));
     dispatch(setCalendarSelectedDate(iso));
     dispatch(
@@ -77,7 +78,7 @@ const DateNavigator: React.FC = () => {
 
         <div className="flex flex-1 gap-1.5 justify-center">
           {weekDays.map((day) => {
-            const iso = day.toISOString().split("T")[0]!;
+            const iso = toLocalISODate(day);
             const isToday = iso === today;
             const isSelected = iso === selectedDate;
             const dayName = DAY_LABELS[day.getDay()];

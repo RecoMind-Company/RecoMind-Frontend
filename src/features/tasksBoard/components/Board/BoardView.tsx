@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 import type { BoardType, TaskStatus, Task } from "../../types";
 import KanbanColumn from "./KanbanColumn";
+import { toLocalISODate } from "../../utils/dateUtils";
 import {
   useGetAllTasksQuery,
   useGetAllTasksPersonalQuery,
@@ -50,6 +51,7 @@ const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
     project: "Project",
     status,
     priority: "MEDIUM" as const,
+    startDate: apiTask.startDate,
     dueDate: apiTask.deadLine,
     dueDateDisplay: new Date(apiTask.deadLine).toLocaleDateString("en-US", {
       month: "short",
@@ -89,8 +91,13 @@ const BoardView: React.FC = () => {
     () =>
       transformedTasks.filter((task: Task) => {
         if (task.boardType !== activeBoard) return false;
-        const taskISO = new Date(task.dueDate).toISOString().split("T")[0];
-        return taskISO === selectedDate;
+        const taskStartISO = task.startDate
+          ? toLocalISODate(new Date(task.startDate))
+          : null;
+        const taskDueISO = toLocalISODate(new Date(task.dueDate));
+        if (taskStartISO && taskStartISO <= selectedDate && selectedDate <= taskDueISO)
+          return true;
+        return taskDueISO === selectedDate;
       }),
     [transformedTasks, activeBoard, selectedDate],
   );
