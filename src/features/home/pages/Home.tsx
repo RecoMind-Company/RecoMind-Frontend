@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
@@ -8,6 +8,11 @@ import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useNotificationContext } from "@/features/notifications/context/NotificationContext";
 
 import { fetchHomeData, toggleNotifications } from "../redux/Homeslice";
+import {
+  useGetAllTasksQuery,
+  useGetAllTasksPersonalQuery,
+} from "@/features/tasksBoard/redux/tasksSlice";
+import { toLocalISODate } from "@/features/tasksBoard/utils/dateUtils";
 
 import OverdueBanner from "../components/Overduebanner";
 import WeeklyPlanCard from "../components/Weeklyplancard";
@@ -15,6 +20,8 @@ import TaskCard from "../components/Taskcard";
 import ThisWeekStats from "../components/Thisweekstats";
 import AIAssistantCard from "../components/Aiassistantcard";
 import NotificationsPanel from "../components/Notificationspanel";
+
+const todayISOStr = toLocalISODate(new Date());
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -32,13 +39,61 @@ const Home: React.FC = () => {
   const {
     userName,
     greeting,
-    totalTasksToday,
-    overdueCount,
     weeklyPlan,
     weeklyStats,
-    dailyFocusTasks,
     loading,
   } = useSelector((state: RootState) => state.home);
+
+  const { data: plansTasks } = useGetAllTasksQuery("");
+  const { data: personalTasks } = useGetAllTasksPersonalQuery("");
+
+  const todayTasks = useMemo(() => {
+    const allApiTasks = [...(plansTasks || []), ...(personalTasks || [])];
+
+    return allApiTasks
+      .filter((apiTask: any) => {
+        const startStr = apiTask.startDate || apiTask.start;
+        const dueStr = apiTask.deadLine || apiTask.deadline || apiTask.dueDate;
+        const startISO = startStr ? toLocalISODate(new Date(startStr)) : null;
+        const dueISO = dueStr ? toLocalISODate(new Date(dueStr)) : null;
+        return startISO === todayISOStr || dueISO === todayISOStr;
+      })
+      .map((apiTask: any) => {
+        const now = new Date();
+        const dueStr = apiTask.deadLine || apiTask.deadline || apiTask.dueDate;
+        const isOverdue = dueStr && new Date(dueStr) < now && apiTask.status !== "completed";
+
+        let status: "overdue" | "in-progress" | "todo" | "completed" = "todo";
+        if (apiTask.status === "completed") {
+          status = "completed";
+        } else if (isOverdue) {
+          status = "overdue";
+        } else if (apiTask.status === "active" || apiTask.status === "to_do") {
+          status = "in-progress";
+        }
+
+        return {
+          id: apiTask.questId,
+          title: apiTask.title,
+          project: apiTask.project || "Task",
+          dueDate: dueStr
+            ? new Date(dueStr).toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "—",
+          status,
+          assignees:
+            apiTask.userAssignedQuests?.map((_: string, i: number) =>
+              String.fromCharCode(65 + i),
+            ) || [],
+        };
+      });
+  }, [plansTasks, personalTasks]);
+
+  const overdueCount = todayTasks.filter((t) => t.status === "overdue").length;
 
   useEffect(() => {
     dispatch(fetchHomeData());
@@ -86,7 +141,7 @@ const Home: React.FC = () => {
           </div>
           <p className="text-[#7f7f7f] text-sm mt-1 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#7ee3ff]" />
-            You have {totalTasksToday} tasks to focus on today
+            You have {todayTasks.length} tasks to focus on today
           </p>
         </div>
 
@@ -150,7 +205,7 @@ const Home: React.FC = () => {
             </button>
           </div>
 
-          {dailyFocusTasks.length === 0 ? (
+          {todayTasks.length === 0 ? (
             <div
               className="rounded-xl p-8 text-center"
               style={{
@@ -161,7 +216,7 @@ const Home: React.FC = () => {
               <p className="text-[#7f7f7f] text-sm">No tasks for today 🎉</p>
             </div>
           ) : (
-            dailyFocusTasks.map((task) => (
+            todayTasks.map((task) => (
               <TaskCard key={task.id} task={task} />
             ))
           )}
