@@ -427,7 +427,8 @@ const CalendarView: React.FC = () => {
   return (
     <div className="flex flex-col px-4 py-6 md:px-8 pb-10">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <h1 className="text-white text-2xl font-bold">My Tasks</h1>
+        <h1 className="text-white text-2xl font-bold"
+        style={{fontFamily: "sans-serif"}}>My Tasks</h1>
 
         <div
           className="flex items-center rounded-xl p-1 gap-1"

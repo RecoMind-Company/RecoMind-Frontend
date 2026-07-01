@@ -3,13 +3,13 @@ import {
   X,
   Clock,
   Calendar,
-  MessageSquare,
   CornerDownLeft,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { AnimatePresence, motion } from "framer-motion";
 import type { AppDispatch, RootState } from "@/app/store";
 import { closeTaskModal, localToggleComplete } from "../../redux/tasksSlice";
-import { useAddTaskCommentMutation, useGetTaskCommentsQuery } from "../../redux/tasksSlice"; 
+import { useAddTaskCommentMutation, useGetTaskCommentsQuery } from "../../redux/tasksSlice";
 import CommentIcon from "../../../../assets/images/comments-line_svgrepo.com.png";
 
 const priorityConfig = {
@@ -46,7 +46,7 @@ const TaskDetailModal: React.FC = () => {
   const task = useSelector((s: RootState) => s.tasks.selectedTask);
   const allTasks = useSelector((s: RootState) => s.tasks.tasks);
   const [commentText, setCommentText] = useState("");
-  const [activeTab, setActiveTab] = useState<"details" | "comments">("details");
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   const [addTaskComment, { isLoading: isAddingComment }] = useAddTaskCommentMutation();
 
@@ -99,7 +99,7 @@ const TaskDetailModal: React.FC = () => {
       onClick={() => dispatch(closeTaskModal())}
     >
       <div
-        className="w-full max-w-3xl lg:h-[400px] rounded-2xl overflow-hidden"
+        className="w-full max-w-2xl lg:max-w-4xl lg:h-[500px] rounded-2xl overflow-hidden flex flex-col"
         style={{
           background: "#060B1B",
           border: "1.5px solid rgba(126,227,255,0.15)",
@@ -107,20 +107,65 @@ const TaskDetailModal: React.FC = () => {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close */}
-        <button
-          onClick={() => dispatch(closeTaskModal())}
-          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors"
-          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+        {/* ===== MODAL HEADER ===== */}
+        <div
+          className="flex items-center justify-between px-5 py-3 shrink-0"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <X size={14} color="#7f7f7f" />
-        </button>
+          <span className="text-[#7f7f7f] text-[10px] uppercase tracking-[0.18em] font-semibold">
+            Task Details
+          </span>
+          <div className="flex items-center gap-2">
+            {/* Comment toggle icon */}
+            <button
+              onClick={() => setCommentsOpen((v) => !v)}
+              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors relative"
+              style={{
+                border: commentsOpen
+                  ? "1px solid rgba(126,227,255,0.3)"
+                  : "1px solid rgba(255,255,255,0.08)",
+                background: commentsOpen
+                  ? "rgba(126,227,255,0.08)"
+                  : "transparent",
+              }}
+            >
+              <img
+                src={CommentIcon}
+                alt="Comments"
+                className="w-4 h-4"
+                style={{
+                  filter: commentsOpen
+                    ? "brightness(0) saturate(100%) invert(71%) sepia(38%) saturate(2759%) hue-rotate(157deg) brightness(101%) contrast(91%)"
+                    : "none",
+                  opacity: commentsOpen ? 1 : 0.6,
+                }}
+              />
+              {serverComments.length > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center"
+                  style={{ background: "#7ee3ff", color: "#060b1b" }}
+                >
+                  {serverComments.length}
+                </span>
+              )}
+            </button>
+            {/* Close button */}
+            <button
+              onClick={() => dispatch(closeTaskModal())}
+              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors"
+              style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <X size={14} color="#7f7f7f" />
+            </button>
+          </div>
+        </div>
 
-        <div className="flex h-full" style={{ maxHeight: "88vh" }}>
+        {/* ===== MODAL BODY ===== */}
+        <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
           {/* ===== LEFT PANEL ===== */}
           <div
             className="flex-1 p-6 overflow-y-auto"
-            style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ borderRight: commentsOpen ? "1px solid rgba(255,255,255,0.06)" : "none" }}
           >
             {/* Column label */}
             <p className="text-[#7f7f7f] text-xs font-semibold uppercase tracking-wider mb-4">
@@ -266,118 +311,124 @@ const TaskDetailModal: React.FC = () => {
             )}
           </div>
 
-          {/* ===== RIGHT PANEL: COMMENTS ===== */}
-          <div
-            className="w-64 flex flex-col p-5"
-            style={{
-              background: "#061022",
-            }}
-          >
-            {/* Comments tab button */}
-            <button
-              onClick={() =>
-                setActiveTab(activeTab === "comments" ? "details" : "comments")
-              }
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-5 self-end transition-all"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "var(--Secondary)",
-                fontSize: "12px",
-                fontWeight: 600,
-              }}
-            >
-              <img src={CommentIcon} alt="Comment" className="w-4 h-4" />
-              Comments
-              {serverComments.length > 0 && (
-                <span
-                  className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "#7ee3ff", color: "#060b1b" }}
-                >
-                  {serverComments.length}
-                </span>
-              )}
-            </button>
-
-            {/* Comments list */}
-            <div
-              className="flex-1 overflow-y-auto space-y-4 mb-3"
-              style={{ scrollbarWidth: "none" }}
-            >
-              {isLoadingComments ? (
-                <p className="text-[#7f7f7f] text-xs text-center mt-8">
-                  Loading comments...
-                </p>
-              ) : serverComments.length === 0 ? (
-                <p className="text-[#7f7f7f] text-xs text-center mt-8">
-                  No comments yet
-                </p>
-              ) : (
-                serverComments.map((comment: ApiComment) => (
-                  <div key={comment.id}>
-                    <div className="flex items-start gap-2.5">
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
-                          border: "1.5px solid rgba(126,227,255,0.15)",
-                          color: "#7ee3ff",
-                        }}
-                      >
-                        {comment.userId?.charAt(0).toUpperCase() || "U"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2 mb-0.5">
-                          <p className="text-white text-xs font-semibold truncate max-w-[80px]">
-                            {comment.userId} {/* يعرض الـ userId كإسم كاتب للكومنت حالياً */}
-                          </p>
-                          <p className="text-[#7f7f7f] text-[9px]">
-                            {formatTime(comment.createdAt)}
-                          </p>
-                        </div>
-                        <p className="text-[#b8adad] text-xs leading-relaxed break-words">
-                          {comment.userComment} {/* نص الكومنت من الـ backend */}
-                        </p>
-                        <button className="text-[#7ee3ff] text-[10px] mt-1 flex items-center gap-1 hover:opacity-70 transition-opacity">
-                          <CornerDownLeft size={9} />
-                          Reply
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Comment input */}
-            <div className="relative">
-              <input
-                style={{
-                  width: "100%",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: "10px",
-                  padding: "9px 36px 9px 12px",
-                  color: "#eeeeee",
-                  fontSize: "11px",
-                  outline: "none",
-                }}
-                placeholder={isAddingComment ? "Posting comment..." : "Enter Your Comment Here..."}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isAddingComment} 
-              />
-              <button
-                onClick={handleComment}
-                disabled={!commentText.trim() || isAddingComment}
-                className="absolute right-2 top-1/2 -translate-y-1/2 disabled:opacity-30 transition-opacity"
+          {/* ===== RIGHT PANEL: COMMENTS (Animated) ===== */}
+          <AnimatePresence initial={false}>
+            {commentsOpen && (
+              <motion.div
+                key="comments-panel"
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 400, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="flex flex-col overflow-hidden shrink-0"
+                style={{ background: "#061022" }}
               >
-                <CornerDownLeft size={13} color="#7ee3ff" />
-              </button>
-            </div>
-          </div>
+                <div className="flex flex-col p-5 h-full" style={{ width: 400 }}>
+                  {/* Comments header */}
+                  <div className="flex items-center gap-2 mb-5">
+                    <img src={CommentIcon} alt="Comment" className="w-4 h-4" />
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: "#7ee3ff" }}
+                    >
+                      Comments
+                    </span>
+                    {serverComments.length > 0 && (
+                      <span
+                        className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ background: "#7ee3ff", color: "#060b1b" }}
+                      >
+                        {serverComments.length}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Comments list */}
+                  <div
+                    className="flex-1 overflow-y-auto space-y-4 mb-3"
+                    style={{ scrollbarWidth: "none" }}
+                  >
+                    {isLoadingComments ? (
+                      <p className="text-[#7f7f7f] text-xs text-center mt-8">
+                        Loading comments...
+                      </p>
+                    ) : serverComments.length === 0 ? (
+                      <p className="text-[#7f7f7f] text-xs text-center mt-8">
+                        No comments yet
+                      </p>
+                    ) : (
+                      serverComments.map((comment: ApiComment) => (
+                        <div key={comment.id}>
+                          <div className="flex items-start gap-2.5">
+                            <div
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                              style={{
+                                background:
+                                  "linear-gradient(135deg, #2a4a7f 0%, #1a3060 100%)",
+                                border: "1.5px solid rgba(126,227,255,0.15)",
+                                color: "#7ee3ff",
+                              }}
+                            >
+                              {comment.userId?.charAt(0).toUpperCase() || "U"}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline gap-2 mb-0.5">
+                                <p className="text-white text-xs font-semibold truncate max-w-[80px]">
+                                  {comment.userId}
+                                </p>
+                                <p className="text-[#7f7f7f] text-[9px]">
+                                  {formatTime(comment.createdAt)}
+                                </p>
+                              </div>
+                              <p className="text-[#b8adad] text-xs leading-relaxed break-words">
+                                {comment.userComment}
+                              </p>
+                              <button className="text-[#7ee3ff] text-[10px] mt-1 flex items-center gap-1 hover:opacity-70 transition-opacity">
+                                <CornerDownLeft size={9} />
+                                Reply
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Comment input */}
+                  <div className="relative">
+                    <input
+                      style={{
+                        width: "100%",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: "10px",
+                        padding: "9px 36px 9px 12px",
+                        color: "#eeeeee",
+                        fontSize: "11px",
+                        outline: "none",
+                      }}
+                      placeholder={
+                        isAddingComment
+                          ? "Posting comment..."
+                          : "Enter Your Comment Here..."
+                      }
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      disabled={isAddingComment}
+                    />
+                    <button
+                      onClick={handleComment}
+                      disabled={!commentText.trim() || isAddingComment}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 disabled:opacity-30 transition-opacity"
+                    >
+                      <CornerDownLeft size={13} color="#7ee3ff" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
