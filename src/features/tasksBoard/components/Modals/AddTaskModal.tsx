@@ -17,10 +17,17 @@ interface IAddTaskInputs {
   title: string;
   description?: string;
   startDate: string;
-   deadLine: string;
+  deadLine: string;
   priority: TaskPriority;
+  moduleId?: string; 
+  planId?: string; 
 }
 
+const priorityMap: Record<TaskPriority, number> = {
+  LOW: 0,
+  MEDIUM: 1,
+  HIGH: 2,
+};
 const AddTaskModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { showInviteModal } = useSelector((s: RootState) => s.tasks);
@@ -34,24 +41,37 @@ const AddTaskModal: React.FC = () => {
     formState: { errors },
   } = useForm<IAddTaskInputs>({
     defaultValues: { priority: "HIGH" },
-  });
+  }); 
 
   const onSubmit: SubmitHandler<IAddTaskInputs> = async (data) => {
-    try {
-      const res= await addTask({
-        title: data.title,
-        description: data.description ?? "",
-        status: 0,                                              // عدّل حسب الـ API
-        startDate: new Date(data.startDate).toISOString(),
-        deadLine: new Date(data.deadLine).toISOString(),
-      }).unwrap();
+  try {
+    const userIdsPayload = assignees.length > 0 
+      ? assignees.map(member => member.id)
+      : ["user-1"];
 
-      console.log("Task created successfully:", res);
-      dispatch(closeAddTaskModal());
-    } catch (err) {
-      console.error("Failed to create task:", err);
-    }
-  };
+    const apiPayload = {
+      title: data.title,
+      description: data.description ?? "",
+      status: 0,
+      priority: priorityMap[data.priority],
+      startDate: new Date(data.startDate).toISOString(),
+      deadLine: new Date(data.deadLine).toISOString(),
+      moduleId: "string", 
+      planId: "string",
+      userIds: userIdsPayload
+    };
+
+    console.log("Payload Sent to API:", apiPayload);
+
+    // إرسال الطلب (Mutation)
+    const res = await addTask(apiPayload).unwrap();
+
+    console.log("Task created successfully:", res);
+    dispatch(closeAddTaskModal());
+  } catch (err) {
+    console.error("Failed to create task:", err);
+  }
+};
 
   const handleInviteConfirm = (members: TeamMember[]) => {
     setAssignees((prev) => [...prev, ...members]);
@@ -159,27 +179,27 @@ const AddTaskModal: React.FC = () => {
               </div>
 
             
-               <div className="flex-1">
-                <label style={labelStyle}>Deadline</label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    style={{
-                      ...inputStyle,
-                      paddingRight: "36px",
-                      colorScheme: "dark",
-                      borderColor: errors.deadLine ? "#df5d5d60" : "rgba(255,255,255,0.09)",
-                    }}
-                    {...register("deadLine", { required: "Required" })}
-                  />
-                  <Calendar
-                    size={13}
-                    color="#7f7f7f"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                  />
-                </div>
-                {errors.deadLine && <p style={errorStyle}>{errors.deadLine.message}</p>}
-              </div>
+              <div className="flex-1">
+  <label style={labelStyle}>Deadline</label>
+  <div className="relative">
+    <input
+      type="date"
+      style={{
+        ...inputStyle,
+        paddingRight: "36px",
+        colorScheme: "dark",
+        borderColor: errors.deadLine ? "#df5d5d60" : "rgba(255,255,255,0.09)",
+      }}
+      {...register("deadLine", { required: "Required" })}
+    />
+    <Calendar
+      size={13}
+      color="#7f7f7f"
+      className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+    />
+  </div>
+  {errors.deadLine && <p style={errorStyle}>{errors.deadLine.message}</p>}
+</div>
                           {/* Priority */}
             <div>
               <label style={labelStyle}>Priority</label>

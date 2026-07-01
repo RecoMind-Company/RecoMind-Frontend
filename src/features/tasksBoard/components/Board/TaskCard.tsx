@@ -51,13 +51,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const handleCardClick = () => {
     dispatch(openTaskModal(task));
   };
-
+  
   return (
     <div
       draggable
       onDragStart={(e) => onDragStart?.(e, task.id)}
       onClick={handleCardClick}
-      className="group relative rounded-xl p-3.5 mb-2.5 max-h-[104px] cursor-pointer select-none transition-all duration-200"
+      className="group relative rounded-xl p-3.5 mb-2.5 max-h-[140px] cursor-pointer select-none transition-all duration-200"
       style={{
         background: isDragging ? "rgba(126,227,255,0.08)" : "#0E152A",
         border: isDragging
