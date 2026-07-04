@@ -24,7 +24,7 @@ const PlanTaskCard: React.FC<PlanTaskCardProps> = ({ task, isDragging, onDragSta
       draggable
       onDragStart={(e) => onDragStart?.(e, task.id)}
       onClick={() => onClick?.(task)}
-      className="group relative rounded-xl p-3.5 mb-2.5 max-h-[140px] cursor-pointer select-none transition-all duration-200"
+      className="group relative rounded-xl p-3 mb-2.5 max-h-[190px] cursor-pointer select-none transition-all duration-200"
       style={{
         background: isDragging ? "rgba(126,227,255,0.08)" : "#0E152A",
         border: isDragging ? "1px solid rgba(126,227,255,0.35)" : "1px solid rgba(255,255,255,0.07)",

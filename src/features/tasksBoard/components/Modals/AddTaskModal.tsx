@@ -246,7 +246,7 @@ const AddTaskModal: React.FC = () => {
             <button
               type="button"
               onClick={() => dispatch(openInviteModal())}
-              className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all hover:bg-white/[0.04]"
+              className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all hover:bg-white/4"
               style={{ border: "1px dashed rgba(255,255,255,0.12)" }}
             >
               <div
