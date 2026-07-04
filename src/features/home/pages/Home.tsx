@@ -147,6 +147,9 @@ const Home: React.FC = () => {
 
         {/* Bell Icon */}
         <button
+          id="home-notifications-btn"
+          name="notifications"
+          aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
           onClick={() => dispatch(toggleNotifications())}
           className="relative mt-1 w-10 h-10 right-0 top-10 md:top-8.75 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
         >
@@ -198,6 +201,8 @@ const Home: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold text-lg">Daily Focus</h2>
             <button
+              id="home-view-all-tasks-btn"
+              aria-label="View all tasks"
               onClick={() => navigate("/home/tasks")}
               className="text-[#7ee3ff] text-sm hover:opacity-70 transition-opacity underline"
             >
@@ -213,7 +218,7 @@ const Home: React.FC = () => {
                 border: "1px solid rgba(255,255,255,0.06)",
               }}
             >
-              <p className="text-[#7f7f7f] text-sm">No tasks for today 🎉</p>
+              <p className="text-[#7f7f7f] text-sm">No tasks for today...</p>
             </div>
           ) : (
             todayTasks.map((task) => (

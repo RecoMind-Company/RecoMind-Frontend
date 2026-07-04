@@ -51,6 +51,10 @@ const Navbar = () => {
   return (
     <>
       <button
+        id="navbar-toggle-btn"
+        name="menu-toggle"
+        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className={`md:hidden fixed top-4 right-4 z-60 p-2 rounded-md transition-all duration-300
           ${
