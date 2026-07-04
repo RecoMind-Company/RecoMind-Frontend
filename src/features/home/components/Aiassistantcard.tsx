@@ -27,6 +27,8 @@ const AIAssistantCard: React.FC = () => {
       </p>
 
       <button
+        id="ai-assistant-btn"
+        aria-label="Ask AI Assistant for help"
         onClick={() => navigate("/home/chatbot")}
         className="w-full py-2.5 rounded-[14px] text-sm bg-(--Secondary) text-(--Primary) font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.01] active:scale-[0.99]"
  

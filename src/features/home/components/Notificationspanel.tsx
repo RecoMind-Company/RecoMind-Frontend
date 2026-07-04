@@ -94,6 +94,9 @@ const NotificationsPanel: React.FC = () => {
             return (
               <button
                 key={pill.key}
+                id={`notif-filter-${pill.key}`}
+                aria-pressed={isActive}
+                aria-label={`Filter notifications by ${pill.label.toLowerCase()}`}
                 onClick={() => setActiveFilter(pill.key)}
                 className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
                 style={{
