@@ -15,9 +15,9 @@ export type FilterType =
 // ================= API RESPONSE TYPES =================
 export interface PlanData {
   id: string;
-  description: string;
+  description: string | null;
   goal: string;
-  planType: string;
+  planType: string | null;
   status: string;
   isApproved: boolean;
   feedback: string | null;
