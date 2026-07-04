@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import type { RootState } from "@/app/store";
 import type { BoardType, TaskStatus, Task } from "../../types";
 import KanbanColumn from "./KanbanColumn";
@@ -76,7 +77,9 @@ const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
 
 const BoardView: React.FC = () => {
   const { activeBoard, selectedDate } = useSelector((s: RootState) => s.tasks);
-  const { data: plansData } = useGetAllTasksQuery("");
+  const [searchParams] = useSearchParams();
+  const planId = searchParams.get("planId") || "";
+  const { data: plansData } = useGetAllTasksQuery(planId, { skip: !planId });
   const { data: personalData } = useGetAllTasksPersonalQuery("");
 
   const columns = activeBoard === "plans" ? PLANS_COLUMNS : PERSONAL_COLUMNS;

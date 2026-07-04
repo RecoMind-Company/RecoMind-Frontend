@@ -807,8 +807,8 @@ export const taskSlice = createApi({
       invalidatesTags: [{ type: "Task", id: "LIST" }],
     }),
     getAllTasks: builder.query({
-      query: () => ({
-        url: "/api/tasks/plan-1/all?moduleId=string",
+      query: (planId: string) => ({
+        url: `/api/tasks/${planId}/all?moduleId=string`,
         method: "GET",
       }),
       providesTags: (result) =>
