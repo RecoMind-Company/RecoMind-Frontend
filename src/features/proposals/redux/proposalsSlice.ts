@@ -187,12 +187,24 @@ export const saveDraft = createAsyncThunk(
   "proposals/saveDraft",
   async (proposal: Proposal, { rejectWithValue }) => {
     try {
-      if (proposal.validationReportData) {
-        await client.post("/ValidationReport/add", {
-          content: proposal.validationReportData,
-          status: 1, // Draft
-        });
-      }
+      const content = proposal.validationReportData || {
+        executive_summary: proposal.description || proposal.plan || "",
+        validation_decision: "",
+        confidence_score: 0,
+        key_findings: {
+          precedent_analysis: "",
+          resource_assessment: "",
+          market_trends: "",
+        },
+        recommendations: [],
+        risk_factors: [],
+        next_steps: [],
+      };
+      await client.post("/ValidationReport/add", {
+        userRequest: proposal.plan || proposal.description || "",
+        content,
+        status: 1,
+      });
       return { ...proposal, status: "draft" as const };
     } catch (error: any) {
       return rejectWithValue(
@@ -219,7 +231,10 @@ export const sendForApproval = createAsyncThunk(
         risk_factors: [],
         next_steps: [],
       };
-      await client.post("/ValidationReport/send", { content });
+      await client.post("/ValidationReport/send", {
+        userRequest: proposal.plan || proposal.description || "",
+        content,
+      });
       return { ...proposal, status: "under_review" as const };
     } catch (error: any) {
       return rejectWithValue(
