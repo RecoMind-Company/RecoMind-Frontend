@@ -54,7 +54,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
 
   const handleClick = () => {
     if (proposal.status === "accepted") {
-      navigate(`/home/tasks?planId=${proposal.id}`);
+      navigate(`/home/plan-tasks?planId=${proposal.id}&planName=${encodeURIComponent(proposal.title)}`);
     } else {
       dispatch(openProposalModal(proposal));
     }

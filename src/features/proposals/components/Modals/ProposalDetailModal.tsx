@@ -91,7 +91,7 @@ const ProposalDetailModal: React.FC = () => {
         onClick={() => dispatch(closeProposalModal())}
       >
         <div
-          className="w-full max-w-sm rounded-2xl overflow-hidden flex flex-col"
+          className="w-full max-w-4xl rounded-2xl overflow-hidden flex flex-col"
           style={{
             background: "#060B1B",
             border: "1.5px solid rgba(126,227,255,0.12)",
@@ -362,11 +362,9 @@ const ProposalDetailModal: React.FC = () => {
                   {proposal.title}
                 </h2>
                 <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
+                  className="text-[10px] font-semibold rounded-md w-[20%]"
                   style={{
-                    background: s.bg,
                     color: s.color,
-                    border: `1px solid ${s.border}`,
                   }}
                 >
                   {s.label}
