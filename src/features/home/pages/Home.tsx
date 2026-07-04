@@ -218,7 +218,7 @@ const Home: React.FC = () => {
                 border: "1px solid rgba(255,255,255,0.06)",
               }}
             >
-              <p className="text-[#7f7f7f] text-sm">No tasks for today 🎉</p>
+              <p className="text-[#7f7f7f] text-sm">No tasks for today...</p>
             </div>
           ) : (
             todayTasks.map((task) => (
