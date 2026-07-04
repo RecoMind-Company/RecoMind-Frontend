@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   X,
   MessageSquare,
@@ -8,7 +8,10 @@ import {
   Save,
   FileText,
   Clock,
+  ChevronDown,
+  Check,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import {
@@ -57,6 +60,19 @@ const ProposalDetailModal: React.FC = () => {
   const { selectedProposal, showProposalModal, isValidating, validationSteps } =
     useSelector((s: RootState) => s.proposals);
   const [commentText, setCommentText] = useState("");
+  const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setPlanDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   if (!showProposalModal || !selectedProposal) return null;
 
@@ -356,20 +372,111 @@ const ProposalDetailModal: React.FC = () => {
             className="flex items-start justify-between px-6 py-5 shrink-0"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           >
-            <div>
+            <div ref={dropdownRef} className="relative">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-white font-bold text-base">
-                  {proposal.title}
-                </h2>
+                <button
+                  onClick={() => setPlanDropdownOpen((v) => !v)}
+                  className="flex items-center gap-2"
+                >
+                  <h2 className="text-white font-bold text-base text-start">
+                    {proposal.title}
+                  </h2>
+                  <ChevronDown
+                    size={16}
+                    color="#7ee3ff"
+                    style={{
+                      transition: "transform 0.2s",
+                      transform: planDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                  />
+                </button>
                 <span
                   className="text-[10px] font-semibold rounded-md w-[20%]"
-                  style={{
-                    color: s.color,
-                  }}
+                  style={{ color: s.color }}
                 >
                   {s.label}
                 </span>
               </div>
+
+              {/* Dropdown — positioned above, outside modal overflow */}
+              {planDropdownOpen && (
+                <div
+                  className="fixed rounded-xl z-100"
+                  style={{
+                    width: 324,
+                    background: "#141A2B",
+                    boxShadow: "0px 8px 20px 0px #160A0A80",
+                    animation: "dropDown 0.15s ease",
+                    left: "160px",
+                    top: "185px",
+                    borderRadius: "12px",
+                  }}
+                  ref={(el) => {
+                    if (el && dropdownRef.current) {
+                      const rect = dropdownRef.current.getBoundingClientRect();
+                      el.style.left = `${rect.left - 40}px`;
+                      el.style.top = `${rect.top - 150}px`;
+                    }
+                  }}
+                >
+                  <style>{`
+                    @keyframes dropDown {
+                      from { opacity: 0; transform: translateY(6px); }
+                      to   { opacity: 1; transform: translateY(0); }
+                    }
+                  `}</style>
+
+                  <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8, background: "#141A2B", borderRadius: "12px" }}>
+                    {/* Open New Branch — active with check */}
+                    <button
+                      onClick={() => {
+                        navigate("/home/proposals");
+                        dispatch(closeProposalModal());
+                      }}
+                      className="flex items-center justify-between gap-2 rounded-lg transition-all"
+                      style={{
+                        padding: "10px 12px",
+                        background: "#141A2B",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = "0px 8px 20px 0px #160A0A80";
+                        e.currentTarget.style.background = "rgba(126,227,255,0.07)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.background = "#141A2B";
+                      }}
+                    >
+                      <span className="text-sm font-medium truncate" style={{ color: "#7ee3ff" }}>
+                        Open New Branch (New)
+                      </span>
+                      <Check size={14} color="#64b883" className="shrink-0" />
+                    </button>
+
+                    {/* Current plan name */}
+                    <div
+                      className="flex items-center justify-between gap-2 rounded-lg transition-all"
+                      style={{
+                        padding: "10px 12px",
+                        background: "#141A2B",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = "0px 8px 20px 0px #160A0A80";
+                        e.currentTarget.style.background = "rgba(126,227,255,0.07)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.background = "#141A2B";
+                      }}
+                    >
+                      <span className="text-sm font-medium truncate" style={{ color: "#b8adad" }}>
+                        {proposal.title}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <p
                 className="text-[10px] font-semibold uppercase tracking-wider"
                 style={{ color: "#7f7f7f" }}
@@ -380,13 +487,6 @@ const ProposalDetailModal: React.FC = () => {
                 {proposal.plan}
               </p>
             </div>
-            {/* <button
-              onClick={() => dispatch(closeProposalModal())}
-              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors ml-4 shrink-0"
-              style={{ border: "1px solid rgba(255,255,255,0.08)" }}
-            >
-              <X size={14} color="#7f7f7f" />
-            </button> */}
           </div>
 
           {/* Rejection Feedback */}
