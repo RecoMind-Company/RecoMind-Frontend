@@ -9,6 +9,7 @@ import {
   useGetAllTasksQuery,
   useGetAllTasksPersonalQuery,
 } from "../../redux/tasksSlice";
+import { useGetAllPlansQuery } from "../../redux/plansSlice";
 
 const PLANS_COLUMNS: { status: TaskStatus; label: string; dotColor: string }[] =
   [
@@ -27,7 +28,12 @@ const PERSONAL_COLUMNS: {
   { status: "done", label: "Done", dotColor: "#64b883" },
 ];
 
-const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
+const transformApiTask = (
+  apiTask: any,
+  boardType: BoardType,
+  planName?: string,
+  planNameMap?: Record<string, string>,
+): Task => {
   const now = new Date();
   const deadlineStr = apiTask.deadLine || apiTask.deadline || apiTask.dueDate;
   const startStr = apiTask.startDate || apiTask.start;
@@ -47,13 +53,19 @@ const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
     ? { isLate: true as const, lateDisplay: "Overdue" }
     : { isLate: false as const, lateDisplay: undefined };
 
+  const priorityRaw = String(apiTask.priority || "Medium").toUpperCase();
+  const priority =
+    priorityRaw === "HIGH" || priorityRaw === "LOW"
+      ? (priorityRaw as Task["priority"])
+      : "MEDIUM";
+
   return {
     id: apiTask.questId,
     title: apiTask.title,
     description: apiTask.description || "",
-    project: "Project",
+    project: planName || (apiTask.planId && planNameMap?.[apiTask.planId]) || "Plan",
     status,
-    priority: "MEDIUM" as const,
+    priority,
     startDate: startStr,
     dueDate: deadlineStr,
     dueDateDisplay: deadlineStr
@@ -79,25 +91,38 @@ const BoardView: React.FC = () => {
   const { activeBoard, selectedDate } = useSelector((s: RootState) => s.tasks);
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId") || "";
-  const { data: plansData } = useGetAllTasksQuery(planId, { skip: !planId });
+  const planName = searchParams.get("planName") || "";
+  const { data: plansData } = useGetAllTasksQuery(planId, { skip: !planId || planId === "" });
   const { data: personalData } = useGetAllTasksPersonalQuery("");
+  const { data: allPlans } = useGetAllPlansQuery();
+
+  const planNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (allPlans || []).forEach((p) => {
+      map[p.id] = p.goal || p.description || "Plan";
+    });
+    return map;
+  }, [allPlans]);
 
   const columns = activeBoard === "plans" ? PLANS_COLUMNS : PERSONAL_COLUMNS;
 
   const transformedTasks = useMemo(() => {
     const plansTasks = (plansData || []).map((task: any) =>
-      transformApiTask(task, "plans"),
+      transformApiTask(task, "plans", planName, planNameMap),
     );
     const personalTasks = (personalData || []).map((task: any) =>
-      transformApiTask(task, "personal"),
+      transformApiTask(task, "personal", "", planNameMap),
     );
     return [...plansTasks, ...personalTasks];
-  }, [plansData, personalData]);
+  }, [plansData, personalData, planName, planNameMap]);
 
   const boardTasks = useMemo(
     () =>
       transformedTasks.filter((task: Task) => {
         if (task.boardType !== activeBoard) return false;
+        if (activeBoard === "plans" && planId) {
+          return true;
+        }
         const taskStartISO = task.startDate
           ? toLocalISODate(new Date(task.startDate))
           : null;
@@ -108,7 +133,7 @@ const BoardView: React.FC = () => {
         const matchesDue = taskDueISO && taskDueISO === selectedDate;
         return Boolean(matchesStart || matchesDue);
       }),
-    [transformedTasks, activeBoard, selectedDate],
+    [transformedTasks, activeBoard, selectedDate, planId],
   );
 
   return (
