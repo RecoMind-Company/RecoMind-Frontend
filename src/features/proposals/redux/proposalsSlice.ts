@@ -9,70 +9,76 @@ import type {
   PlanData,
   PlanApiResponse,
   ProposalStatus,
+  ValidationReportData,
+  GenerateReportResponse,
 } from "../types";
 
-// ================= MOCK DATA =================
-const mockReport = `Overview
-This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality.
-
-The validation process is designed to reduce execution risk and increase the likelihood of measurable impact by analyzing the plan across three critical dimensions:
-1. Industry & Peer Benchmarking
-2. Internal Company Resources
-3. Market Trends & External Signals
-
-Only validated plans proceed to AI task generation and execution.
-
-1. Validation Scope
-The validation focuses on answering the following key questions:
-• Has a similar plan been successfully implemented before?
-• Does the company have the required resources to execute this plan?
-• Is the plan aligned with current and emerging market trends?
-
-2. Validation Steps & Results
-2.1 Industry & Peer Benchmarking
-Objective:
-Assess how similar companies or industry peers executed comparable plans and identify best practices and risks.
-Methodology:
-• Analysis of public case studies, industry reports, and comparable company actions.
-• Identification of success factors and common failure points.`;
-
-const mockComments: ProposalComment[] = [
-  {
-    id: "c1",
-    author: "Samy Ahmed",
-    time: "Sat 3:00 pm",
-    text: "Great job on the report, Ahmed! Your work on the brand awareness campaign is really making an impact.",
-  },
-  {
-    id: "c2",
-    author: "Magdy Mohammed",
-    time: "Sat 3:00 pm",
-    text: "Great job on the report, Ahmed! Your work on the brand.",
-  },
-];
-
-const mockRejection = [
-  {
-    id: "r1",
-    reviewer: "Samy Ahmed",
-    time: "Sat 3:00 pm",
-    message:
-      "The proposal is strategically sound; however, the projected $500K budget exceeds our current Q2 allocation. Please revise the plan to scale down initial costs by 20% or consider a phased implementation approach.",
-  },
-  {
-    id: "r2",
-    reviewer: "Magdy Mohammed",
-    time: "Sat 3:00 pm",
-    message:
-      "Great job on the report, Ahmed! Your work on the brand awareness campaign is really making an impact.",
-  },
-];
-
+// ================= VALIDATION STEPS =================
 const VALIDATION_STEPS: ValidationStep[] = [
   { label: "Similar Companies Benchmarking", done: false },
   { label: "Market Trend Validation", done: false },
   { label: "Company Resources Validation", done: false },
 ];
+
+// ================= VALIDATION REPORT HELPERS =================
+function formatValidationReport(data: ValidationReportData): string {
+  let report = "";
+  report += "Executive Summary\n";
+  report += `${data.executive_summary}\n\n`;
+  report += "Validation Decision\n";
+  report += `${data.validation_decision}\n\n`;
+  report += `Confidence Score: ${data.confidence_score}\n\n`;
+  report += "Key Findings\n\n";
+  report += `1. Precedent Analysis\n${data.key_findings.precedent_analysis}\n\n`;
+  report += `2. Resource Assessment\n${data.key_findings.resource_assessment}\n\n`;
+  report += `3. Market Trends\n${data.key_findings.market_trends}\n\n`;
+  report += "Recommendations\n";
+  data.recommendations.forEach((r, i) => {
+    report += `${i + 1}. ${r}\n`;
+  });
+  report += "\nRisk Factors\n";
+  data.risk_factors.forEach((r, i) => {
+    report += `${i + 1}. ${r}\n`;
+  });
+  report += "\nNext Steps\n";
+  data.next_steps.forEach((s, i) => {
+    report += `${i + 1}. ${s}\n`;
+  });
+  return report;
+}
+
+async function pollValidationReport(
+  taskId: string,
+  dispatch: (action: unknown) => void,
+): Promise<ValidationReportData> {
+  const maxAttempts = 60;
+  const delay = 3000;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await client.get(
+        `/ValidationReport/generated/${taskId}`,
+        { validateStatus: (status: number) => status === 200 || status === 202 },
+      );
+
+      if (response.status === 200 && response.data?.executive_summary) {
+        dispatch(markValidationStep(0));
+        dispatch(markValidationStep(1));
+        dispatch(markValidationStep(2));
+        return response.data as ValidationReportData;
+      }
+
+      if (attempt >= 2) dispatch(markValidationStep(0));
+      if (attempt >= 8) dispatch(markValidationStep(1));
+      if (attempt >= 16) dispatch(markValidationStep(2));
+
+      await new Promise((r) => setTimeout(r, delay));
+    } catch {
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw new Error("Validation timed out. Please try again.");
+}
 
 // ================= API MAPPING =================
 function mapPlanToProposal(plan: PlanData): Proposal {
@@ -133,26 +139,26 @@ export const startValidation = createAsyncThunk(
   "proposals/startValidation",
   async (planText: string, { dispatch, rejectWithValue }) => {
     try {
-      // TODO: Connect to real AI validation API
-      // const response = await client.post("/proposals/validate", { plan: planText });
-      // return response.data;
+      // Step 1: Generate validation report
+      const generateRes = await client.post<GenerateReportResponse>(
+        "/ValidationReport/generate",
+        { userRequest: planText },
+      );
+      const taskId = generateRes.data.task_id;
 
-      // Simulate streaming validation steps
-      for (let i = 0; i < VALIDATION_STEPS.length; i++) {
-        await new Promise((r) => setTimeout(r, 1200));
-        dispatch(markValidationStep(i));
-      }
-      await new Promise((r) => setTimeout(r, 600));
+      // Step 2: Poll for the generated report
+      const reportData = await pollValidationReport(taskId, dispatch);
+      const formattedReport = formatValidationReport(reportData);
 
       return {
-        report: mockReport,
+        report: formattedReport,
         proposal: {
           id: `p${Date.now()}`,
           title: planText.slice(0, 30) || "New Proposal",
-          description:
-            "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
+          description: planText,
           plan: planText,
-          validationReport: mockReport,
+          validationReport: formattedReport,
+          validationReportData: reportData,
           status: "pending" as const,
           progress: 0,
           comments: [],
@@ -162,7 +168,7 @@ export const startValidation = createAsyncThunk(
       };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Validation failed",
+        error.response?.data?.message || error.message || "Validation failed",
       );
     }
   },
@@ -172,9 +178,12 @@ export const saveDraft = createAsyncThunk(
   "proposals/saveDraft",
   async (proposal: Proposal, { rejectWithValue }) => {
     try {
-      // TODO: Connect to API
-      // const response = await client.post("/proposals/draft", proposal);
-      // return response.data;
+      if (proposal.validationReportData) {
+        await client.post("/ValidationReport/add", {
+          ...proposal.validationReportData,
+          status: 1, // Draft
+        });
+      }
       return { ...proposal, status: "draft" as const };
     } catch (error: any) {
       return rejectWithValue(
@@ -188,9 +197,12 @@ export const sendForApproval = createAsyncThunk(
   "proposals/sendForApproval",
   async (proposal: Proposal, { rejectWithValue }) => {
     try {
-      // TODO: Connect to API
-      // const response = await client.post("/proposals/submit", proposal);
-      // return response.data;
+      if (proposal.validationReportData) {
+        await client.post("/ValidationReport/add", {
+          ...proposal.validationReportData,
+          status: 0, // UnderReview
+        });
+      }
       return { ...proposal, status: "under_review" as const };
     } catch (error: any) {
       return rejectWithValue(
@@ -233,22 +245,27 @@ export const revalidateProposal = createAsyncThunk(
   "proposals/revalidate",
   async (proposal: Proposal, { dispatch, rejectWithValue }) => {
     try {
-      // TODO: Connect to API
-      // const response = await client.post(`/proposals/${proposal.id}/revalidate`);
-      // return response.data;
-      for (let i = 0; i < VALIDATION_STEPS.length; i++) {
-        await new Promise((r) => setTimeout(r, 1000));
-        dispatch(markValidationStep(i));
-      }
-      await new Promise((r) => setTimeout(r, 500));
+      // Step 1: Generate validation report
+      const generateRes = await client.post<GenerateReportResponse>(
+        "/ValidationReport/generate",
+        { userRequest: proposal.plan },
+      );
+      const taskId = generateRes.data.task_id;
+
+      // Step 2: Poll for the generated report
+      const reportData = await pollValidationReport(taskId, dispatch);
+      const formattedReport = formatValidationReport(reportData);
+
       return {
         ...proposal,
-        status: "under_review" as const,
+        validationReport: formattedReport,
+        validationReportData: reportData,
+        status: "pending" as const,
         rejectionFeedback: [],
-      };
+      } as Proposal;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Revalidation failed",
+        error.response?.data?.message || error.message || "Revalidation failed",
       );
     }
   },
@@ -402,6 +419,7 @@ const proposalsSlice = createSlice({
       })
       .addCase(revalidateProposal.fulfilled, (state, action) => {
         state.isValidating = false;
+        state.currentValidationReport = action.payload.validationReport;
         const idx = state.proposals.findIndex(
           (p) => p.id === action.payload.id,
         );
