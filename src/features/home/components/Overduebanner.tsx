@@ -44,6 +44,8 @@ const OverdueBanner: React.FC<OverdueBannerProps> = ({ count, onViewTasks }) => 
         </div>
       </div>
       <button
+        id="overdue-view-tasks-btn"
+        aria-label="View overdue tasks"
         onClick={onViewTasks}
         className="p-2 md:px-4 md:py-3 rounded-[14px] text-xs md:text-lg font-medium text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
         style={{
