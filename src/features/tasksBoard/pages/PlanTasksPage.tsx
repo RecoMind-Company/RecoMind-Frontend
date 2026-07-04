@@ -97,6 +97,9 @@ const CalendarStats: React.FC<{ tasks: Task[] }> = ({ tasks }) => {
   );
 };
 
+const FILTERS = ["All", "To-Do", "Overdue"] as const;
+type FilterType = (typeof FILTERS)[number];
+
 const PlanTasksPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId") || "";
@@ -110,10 +113,29 @@ const PlanTasksPage: React.FC = () => {
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [taskOverrides, setTaskOverrides] = useState<Record<string, TaskStatus>>({});
+  const [activeFilter, setActiveFilter] = useState<FilterType>("All");
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load overrides from localStorage
+  const [taskOverrides, setTaskOverrides] = useState<Record<string, TaskStatus>>(() => {
+    try {
+      const stored = localStorage.getItem(`taskOverrides:${planId}`);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Persist overrides to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`taskOverrides:${planId}`, JSON.stringify(taskOverrides));
+    } catch {
+      // ignore
+    }
+  }, [taskOverrides, planId]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -147,6 +169,13 @@ const PlanTasksPage: React.FC = () => {
       return t;
     });
   }, [tasksData, resolvedPlanName, taskOverrides]);
+
+  const filteredTasks = useMemo(() => {
+    if (activeFilter === "All") return tasks;
+    if (activeFilter === "To-Do") return tasks.filter((t: Task) => t.status === "todo");
+    if (activeFilter === "Overdue") return tasks.filter((t: Task) => t.status === "overdue");
+    return tasks;
+  }, [tasks, activeFilter]);
 
   const handleDragStart = useCallback((e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData("taskId", taskId);
@@ -275,9 +304,43 @@ const PlanTasksPage: React.FC = () => {
             )}
           </div>
 
-          {/* Comments icon */}
-          <button
-            onClick={() => setCommentsOpen((v) => !v)}
+          {/* Filter pills + Comments icon */}
+          <div className="flex items-center gap-3">
+            {FILTERS.map((f) => {
+              const isActive = activeFilter === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setActiveFilter(f)}
+                  className="flex items-center justify-center font-medium transition-all"
+                  style={{
+                    width: 70,
+                    height: 33,
+                    borderRadius: "24403200px",
+                    gap: 8,
+                    paddingTop: 8,
+                    paddingRight: 16,
+                    paddingBottom: 8,
+                    paddingLeft: 16,
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: isActive
+                      ? "rgba(126,227,255,0.4)"
+                      : "rgba(255,255,255,0.1)",
+                    background: isActive
+                      ? "rgba(126,227,255,0.12)"
+                      : "transparent",
+                    color: isActive ? "#7ee3ff" : "#7f7f7f",
+                    fontSize: 12,
+                  }}
+                >
+                  {f}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => setCommentsOpen((v) => !v)}
             className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
             style={{
               background: commentsOpen
@@ -300,6 +363,7 @@ const PlanTasksPage: React.FC = () => {
               }}
             />
           </button>
+          </div>
         </div>
 
         {/* ===== STATS ===== */}
@@ -309,7 +373,7 @@ const PlanTasksPage: React.FC = () => {
         <div className="flex-1 overflow-x-auto overflow-y-hidden">
           <div className="flex gap-4 h-full min-w-max">
             {COLUMNS.map((col) => {
-              const colTasks = tasks.filter((t: Task) => t.status === col.status);
+              const colTasks = filteredTasks.filter((t: Task) => t.status === col.status);
               const isOver = dragOverColumn === col.status;
 
               return (

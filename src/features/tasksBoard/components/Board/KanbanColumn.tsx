@@ -3,17 +3,18 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
 import type { Task, TaskStatus } from "../../types";
 import TaskCard from "./TaskCard";
-import { setDragOver, localMoveTask } from "../../redux/tasksSlice";
+import { setDragOver } from "../../redux/tasksSlice";
 
 interface KanbanColumnProps {
   status: TaskStatus;
   label: string;
   tasks: Task[];
   dotColor: string;
+  onDropOverride?: (taskId: string, status: TaskStatus) => void;
 }
 
-const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, label, tasks, dotColor }) => {
-  
+const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, label, tasks, dotColor, onDropOverride }) => {
+
   const dispatch = useDispatch<AppDispatch>();
   const dragOverColumn = useSelector((s: RootState) => s.tasks.dragOverColumn);
   const isOver = dragOverColumn === status;
@@ -37,7 +38,11 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, label, tasks, dotCo
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
     if (taskId) {
-      dispatch(localMoveTask({ taskId, newStatus: status }));
+      if (onDropOverride) {
+        onDropOverride(taskId, status);
+      } else {
+        dispatch(setDragOver(null));
+      }
     }
     dispatch(setDragOver(null));
   };

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import type { RootState } from "@/app/store";
@@ -92,9 +92,29 @@ const BoardView: React.FC = () => {
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId") || "";
   const planName = searchParams.get("planName") || "";
+  const [taskOverrides, setTaskOverrides] = useState<Record<string, TaskStatus>>(() => {
+    try {
+      const stored = localStorage.getItem("taskOverrides:board");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("taskOverrides:board", JSON.stringify(taskOverrides));
+    } catch {
+      // ignore
+    }
+  }, [taskOverrides]);
   const { data: plansData } = useGetAllTasksQuery(planId, { skip: !planId || planId === "" });
   const { data: personalData } = useGetAllTasksPersonalQuery("");
   const { data: allPlans } = useGetAllPlansQuery();
+
+  const handleDrop = useCallback((taskId: string, status: TaskStatus) => {
+    setTaskOverrides((prev) => ({ ...prev, [taskId]: status }));
+  }, []);
 
   const planNameMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -113,8 +133,19 @@ const BoardView: React.FC = () => {
     const personalTasks = (personalData || []).map((task: any) =>
       transformApiTask(task, "personal", "", planNameMap),
     );
-    return [...plansTasks, ...personalTasks];
-  }, [plansData, personalData, planName, planNameMap]);
+    const all = [...plansTasks, ...personalTasks];
+    return all.map((t: Task) => {
+      const override = taskOverrides[t.id];
+      if (override) {
+        return {
+          ...t,
+          status: override,
+          completed: override === "review" || override === "done",
+        };
+      }
+      return t;
+    });
+  }, [plansData, personalData, planName, planNameMap, taskOverrides]);
 
   const boardTasks = useMemo(
     () =>
@@ -176,6 +207,7 @@ const BoardView: React.FC = () => {
             label={col.label}
             dotColor={col.dotColor}
             tasks={boardTasks.filter((t: Task) => t.status === col.status)}
+            onDropOverride={handleDrop}
           />
         ))}
       </div>
