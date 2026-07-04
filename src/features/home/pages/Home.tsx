@@ -44,7 +44,7 @@ const Home: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.home);
 
-  const { data: plansTasks } = useGetAllTasksQuery("");
+  const { data: plansTasks } = useGetAllTasksQuery("", { skip: true });
   const { data: personalTasks } = useGetAllTasksPersonalQuery("");
 
   const todayTasks = useMemo(() => {
