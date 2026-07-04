@@ -71,7 +71,7 @@ const InputField = ({
           className={`w-full h-[52px] text-[16px] font-medium px-4 pr-[110px] rounded-lg border transition-all
             ${
               isEditing
-                ? "bg-[#454A55] border-[var(--Secondary)] text-white outline-none"
+                ? "bg-[#454A55] border-(--Secondary) text-white outline-none"
                 : "bg-[#454A5599] border-transparent text-[#B9B8B8]"
             }`}
         />
