@@ -808,15 +808,15 @@ export const taskSlice = createApi({
     }),
     getAllTasks: builder.query({
       query: (planId: string) => ({
-        url: `/api/tasks/${planId}/all?moduleId=string`,
+        url: `/api/tasks/${planId}/all`,
         method: "GET",
       }),
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }: { id: string }) => ({
+              ...result.map(({ questId }: { questId: string }) => ({
                 type: "Task" as const,
-                id,
+                id: questId,
               })),
               { type: "Task", id: "LIST" },
             ]
@@ -830,9 +830,9 @@ export const taskSlice = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }: { id: string }) => ({
+              ...result.map(({ questId }: { questId: string }) => ({
                 type: "Task" as const,
-                id,
+                id: questId,
               })),
               { type: "Task", id: "LIST" },
             ]
@@ -856,16 +856,59 @@ export const taskSlice = createApi({
       invalidatesTags: (result, error, { questId }) => [
         { type: "Task", id: questId },
         { type: "Task", id: "LIST" },
-        { type: "Comment", id: questId } 
+        { type: "Comment", id: questId }
+      ],
+    }),
+    updateTaskStatus: builder.mutation({
+      query: ({ questId, status }: { questId: string; status: string }) => ({
+        url: `/api/tasks/update/${questId}`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: (result, error, { questId }) => [
+        { type: "Task", id: questId },
+        { type: "Task", id: "LIST" },
+      ],
+    }),
+    getTaskById: builder.query({
+      query: (questId: string) => ({
+        url: `/api/tasks/${questId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, questId) => [
+        { type: "Task" as const, id: questId },
+      ],
+    }),
+    getPlanComments: builder.query({
+      query: (planId: string) => ({
+        url: `/api/PlanComment/${planId}/plan-all`,
+        method: "GET",
+      }),
+      providesTags: (result, error, planId) => [
+        { type: "Comment" as const, id: `plan-${planId}` },
+      ],
+    }),
+    addPlanComment: builder.mutation({
+      query: ({ planId, userComment }: { planId: string; userComment: string }) => ({
+        url: `/api/PlanComment/${planId}/add-plan`,
+        method: "POST",
+        body: { userComment },
+      }),
+      invalidatesTags: (result, error, { planId }) => [
+        { type: "Comment", id: `plan-${planId}` },
       ],
     }),
   }),
 });
 
-export const { 
-  useAddTaskMutation, 
-  useGetAllTasksQuery, 
-  useGetAllTasksPersonalQuery, 
+export const {
+  useAddTaskMutation,
+  useGetAllTasksQuery,
+  useGetAllTasksPersonalQuery,
   useAddTaskCommentMutation,
-  useGetTaskCommentsQuery 
+  useGetTaskCommentsQuery,
+  useUpdateTaskStatusMutation,
+  useGetTaskByIdQuery,
+  useGetPlanCommentsQuery,
+  useAddPlanCommentMutation,
 } = taskSlice;

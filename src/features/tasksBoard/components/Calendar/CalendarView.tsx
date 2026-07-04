@@ -14,6 +14,7 @@ import {
   useGetAllTasksQuery,
   useGetAllTasksPersonalQuery,
 } from "../../redux/tasksSlice";
+import { useGetAllPlansQuery } from "../../redux/plansSlice";
 import { toLocalISODate } from "../../utils/dateUtils";
 
 const toISO = (d: Date) => toLocalISODate(d);
@@ -35,7 +36,12 @@ const getTasksForDate = (tasks: Task[], iso: string) =>
     return due === iso || start === iso;
   });
 
-const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
+const transformApiTask = (
+  apiTask: any,
+  boardType: BoardType,
+  planName?: string,
+  planNameMap?: Record<string, string>,
+): Task => {
   const now = new Date();
   const deadlineStr = apiTask.deadLine || apiTask.deadline || apiTask.dueDate;
   const startStr = apiTask.startDate || apiTask.start;
@@ -51,13 +57,19 @@ const transformApiTask = (apiTask: any, boardType: BoardType): Task => {
     status = "todo";
   }
 
+  const priorityRaw = String(apiTask.priority || "Medium").toUpperCase();
+  const priority =
+    priorityRaw === "HIGH" || priorityRaw === "LOW"
+      ? (priorityRaw as Task["priority"])
+      : "MEDIUM";
+
   return {
     id: apiTask.questId,
     title: apiTask.title,
     description: apiTask.description || "",
-    project: "Project",
+    project: planName || (apiTask.planId && planNameMap?.[apiTask.planId]) || "Plan",
     status,
-    priority: "MEDIUM" as const,
+    priority,
     startDate: startStr,
     dueDate: deadlineStr,
     dueDateDisplay: deadlineStr
@@ -339,19 +351,29 @@ const CalendarView: React.FC = () => {
   );
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId") || "";
-  const { data: plansTasks } = useGetAllTasksQuery(planId, { skip: !planId });
+  const planName = searchParams.get("planName") || "";
+  const { data: plansTasks } = useGetAllTasksQuery(planId, { skip: !planId || planId === "" });
   const { data: personalTasks } = useGetAllTasksPersonalQuery("");
+  const { data: allPlans } = useGetAllPlansQuery();
+
+  const planNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (allPlans || []).forEach((p) => {
+      map[p.id] = p.goal || p.description || "Plan";
+    });
+    return map;
+  }, [allPlans]);
 
   const transformedTasks = useMemo(() => {
     return [
       ...(plansTasks || []).map((apiTask: any) =>
-        transformApiTask(apiTask, "plans"),
+        transformApiTask(apiTask, "plans", planName, planNameMap),
       ),
       ...(personalTasks || []).map((apiTask: any) =>
-        transformApiTask(apiTask, "personal"),
+        transformApiTask(apiTask, "personal", "", planNameMap),
       ),
     ];
-  }, [plansTasks, personalTasks]);
+  }, [plansTasks, personalTasks, planName, planNameMap]);
 
   const { year, month } = useMemo(
     () => parseMonth(calendarMonth),

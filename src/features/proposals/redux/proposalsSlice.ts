@@ -206,12 +206,20 @@ export const sendForApproval = createAsyncThunk(
   "proposals/sendForApproval",
   async (proposal: Proposal, { rejectWithValue }) => {
     try {
-      if (proposal.validationReportData) {
-        await client.post("/ValidationReport/add", {
-          content: proposal.validationReportData,
-          status: 0, // UnderReview
-        });
-      }
+      const content = proposal.validationReportData || {
+        executive_summary: proposal.description || proposal.plan || "",
+        validation_decision: "",
+        confidence_score: 0,
+        key_findings: {
+          precedent_analysis: "",
+          resource_assessment: "",
+          market_trends: "",
+        },
+        recommendations: [],
+        risk_factors: [],
+        next_steps: [],
+      };
+      await client.post("/ValidationReport/send", { content });
       return { ...proposal, status: "under_review" as const };
     } catch (error: any) {
       return rejectWithValue(
