@@ -101,6 +101,48 @@ function ChatBotContextProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Load history from API on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const history = await chatbotAPI.getHistory();
+        if (history && history.length > 0) {
+          const historySession: ChatSession = {
+            id: `history-${Date.now()}`,
+            title: "Chat History",
+            messages: history.map((item, i) => ({
+              id: `hist-user-${i}`,
+              type: "user" as const,
+              content: item.query,
+              timestamp: new Date().toISOString(),
+            })).flatMap((m, i) => [
+              m,
+              {
+                id: `hist-ai-${i}`,
+                type: "ai" as const,
+                content: formatResponse(history[i]?.responseMessage ?? ""),
+                timestamp: new Date().toISOString(),
+              },
+            ]),
+            conversationHistory: history.flatMap((item) => [
+              { role: "user", parts: [{ text: item.query }] },
+              { role: "model", parts: [{ text: item.responseMessage }] },
+            ]),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          setChatSessions((prev) => {
+            if (prev.length > 0) return prev;
+            return [historySession];
+          });
+        }
+      } catch {
+        // ignore — use local sessions
+      }
+    };
+    loadHistory();
+  }, []);
+
   const formatResponse = (text: string): string => {
     let formatted = text;
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
@@ -253,44 +295,18 @@ function ChatBotContextProvider({ children }: { children: React.ReactNode }) {
     );
 
     try {
-      console.log("📤 Sending message to API...");
-
       // Step 1: Create task
-      const taskResponse = (await chatbotAPI.sendMessage(
-        promptToSend,
-        userId,
-        userRole
-      )) as { task_id?: string };
-
-      console.log("✅ Task created:", taskResponse);
+      const taskResponse = await chatbotAPI.sendMessage(promptToSend);
 
       if (taskResponse.task_id) {
-        console.log("🎯 Task ID:", taskResponse.task_id);
-        console.log("⏳ Starting to poll for response...");
-
         // Step 2: Wait for response with polling
-        const finalResponse = (await chatbotAPI.waitForResponse(
+        const finalResponse = await chatbotAPI.waitForResponse(
           taskResponse.task_id,
-          userId,
-          userRole,
           promptToSend,
-          (progressData: unknown) => {
-            console.log("📈 Progress update:", progressData);
-          }
-        )) as {
-          responseMessage?: string;
-          result?: string;
-          answer?: string;
-        };
+        );
 
-        console.log("✅ Final response received:", finalResponse);
-
-        // Format the response message
         const aiResponseText = formatResponse(
-          finalResponse.responseMessage ??
-            finalResponse.result ??
-            finalResponse.answer ??
-            "Response received successfully!"
+          finalResponse.response || "Response received successfully!",
         );
 
         // Add AI message
@@ -394,7 +410,12 @@ function ChatBotContextProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const clearChatHistory = () => {
+  const clearChatHistory = async () => {
+    try {
+      await chatbotAPI.deleteHistory();
+    } catch {
+      // ignore — clear locally regardless
+    }
     cancelAnimation();
     setChatSessions([]);
     setCurrentSessionId(null);
