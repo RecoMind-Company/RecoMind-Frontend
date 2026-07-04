@@ -3,21 +3,20 @@ import client from "@/api/client";
 
 export interface UserProfile {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
   role: string;
-  phoneNumber?: string;
+  phone?: string;
   jobTitle?: string;
-  imagePath?: string;
-  // Add other fields as per API response
+  photo?: string;
 }
 
 export interface UpdateProfilePayload {
-  fullName: string;
+  name: string;
   email: string;
-  phoneNumber?: string;
+  phone?: string;
   jobTitle?: string;
-  imagePath?: string;
+  photo?: string;
 }
 
 type StoredAuthUser = Record<string, unknown> & {
@@ -34,7 +33,7 @@ const syncStoredUserProfile = (profile: UserProfile) => {
       localStorage.getItem("user") ?? "{}",
     ) as StoredAuthUser;
     const nextName =
-      profile.fullName || currentUser.fullName || currentUser.name;
+      profile.name || currentUser.fullName || currentUser.name;
 
     localStorage.setItem(
       "user",
@@ -73,15 +72,15 @@ export const useUpdateProfile = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.setQueryData<UserProfile | undefined>(["profile"], (old) => {
-        if (data && data.fullName) {
+        if (data && data.name) {
           return data;
         }
         return { ...(old || {}), ...variables } as UserProfile;
       });
       syncStoredUserProfile(
-        data?.fullName
+        data?.name
           ? data
-          : { ...(variables as UserProfile), fullName: variables.fullName },
+          : { ...(variables as UserProfile), name: variables.name },
       );
     },
   });

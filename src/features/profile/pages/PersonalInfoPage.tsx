@@ -133,17 +133,17 @@ const PersonalInfoPage = () => {
   useEffect(() => {
     if (profile && !didInit) {
       const stored = getStoredProfile();
-      const isComplete = !!(profile.jobTitle && profile.phoneNumber);
+      const isComplete = !!(profile.jobTitle && profile.phone);
       setUserData((prev) => ({
         ...prev,
         name:
           stored.name ||
           storedUser.fullName ||
           storedUser.name ||
-          profile.fullName ||
+          profile.name ||
           prev.name,
         email: stored.email || profile.email || prev.email,
-        phone: stored.phone || profile.phoneNumber || prev.phone,
+        phone: stored.phone || profile.phone || prev.phone,
         jobTitle: stored.jobTitle || profile.jobTitle || prev.jobTitle,
         profileImage: avatarUrl || prev.profileImage,
         isProfileComplete: !!(stored.jobTitle || stored.phone || isComplete),
@@ -195,18 +195,18 @@ const PersonalInfoPage = () => {
   const handleSaveChanges = async () => {
     try {
       const payload = {
-        fullName: userData.name,
+        name: userData.name,
         email: userData.email,
-        ...(userData.phone ? { phoneNumber: userData.phone } : {}),
+        ...(userData.phone ? { phone: userData.phone } : {}),
         ...(userData.jobTitle ? { jobTitle: userData.jobTitle } : {}),
       };
 
       const updated = await updateProfile(payload);
       setUserData((prev) => ({
         ...prev,
-        name: updated?.fullName || prev.name,
+        name: updated?.name || prev.name,
         email: updated?.email || prev.email,
-        phone: updated?.phoneNumber || prev.phone,
+        phone: updated?.phone || prev.phone,
         jobTitle: updated?.jobTitle || prev.jobTitle,
         isProfileComplete: !!(userData.jobTitle && userData.phone),
       }));
@@ -234,9 +234,9 @@ const PersonalInfoPage = () => {
   ) => {
     try {
       const payload = {
-        fullName: userData.name,
+        name: userData.name,
         email: userData.email,
-        phoneNumber,
+        phone: phoneNumber,
         jobTitle,
       };
 
@@ -324,6 +324,7 @@ const PersonalInfoPage = () => {
                 label="Name"
                 value={userData.name}
                 onChange={(newValue) => handleInputChange("name", newValue)}
+                resetEdit={resetEdit}
               />
 
               <InputField
@@ -331,6 +332,7 @@ const PersonalInfoPage = () => {
                 value={userData.email}
                 onChange={(newValue) => handleInputChange("email", newValue)}
                 type="email"
+                resetEdit={resetEdit}
               />
             </div>
 

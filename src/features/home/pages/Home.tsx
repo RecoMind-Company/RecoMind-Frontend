@@ -100,7 +100,7 @@ const Home: React.FC = () => {
   }, [dispatch]);
 
   const displayName =
-    profile?.fullName || storedUser.fullName || storedUser.name || "User";
+    profile?.name || storedUser.fullName || storedUser.name || "User";
 
   if (loading) {
     return (
