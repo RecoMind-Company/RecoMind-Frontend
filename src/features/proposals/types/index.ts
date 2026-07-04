@@ -32,6 +32,31 @@ export interface PlanApiResponse {
   error: string | null;
 }
 
+// ================= VALIDATION REPORT API TYPES =================
+export interface KeyFindings {
+  precedent_analysis: string;
+  resource_assessment: string;
+  market_trends: string;
+}
+
+export interface ValidationReportData {
+  executive_summary: string;
+  validation_decision: string;
+  confidence_score: number;
+  key_findings: KeyFindings;
+  recommendations: string[];
+  risk_factors: string[];
+  next_steps: string[];
+}
+
+export interface GenerateReportResponse {
+  task_id: string;
+  status: string;
+  message: string;
+}
+
+export type ValidationReportStatus = 0 | 1 | 2 | 3; // UnderReview | Draft | Rejected | Accepted
+
 // ================= MODELS =================
 export interface ProposalComment {
   id: string;
@@ -72,6 +97,7 @@ export interface Proposal {
   feedback?: string | null;
   duration?: string;
   modules?: unknown[];
+  validationReportData?: ValidationReportData;
 }
 
 // ================= STATE =================
