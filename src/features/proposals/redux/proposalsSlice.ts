@@ -82,18 +82,24 @@ async function pollValidationReport(
 
 // ================= API MAPPING =================
 function mapPlanToProposal(plan: PlanData): Proposal {
-  let status: ProposalStatus = "draft";
-  if (plan.status === "Draft") {
+  const rawStatus = plan.status?.toLowerCase();
+
+  let status: ProposalStatus;
+  if (rawStatus === "accepted") {
+    status = "accepted";
+  } else if (rawStatus === "rejected") {
+    status = "rejected";
+  } else if (plan.isApproved || plan.feedback) {
+    status = "under_review";
+  } else {
     status = "draft";
-  } else if (plan.status === "active") {
-    status = plan.isApproved ? "accepted" : "under_review";
   }
 
   const proposal: Proposal = {
     id: plan.id,
-    title: plan.goal || plan.description.slice(0, 30),
-    description: plan.description,
-    plan: plan.description,
+    title: plan.goal || plan.description || "Untitled Plan",
+    description: plan.description || plan.goal || "",
+    plan: plan.description || plan.goal || "",
     validationReport: "",
     status,
     progress: 0,
@@ -101,12 +107,15 @@ function mapPlanToProposal(plan: PlanData): Proposal {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     goal: plan.goal,
-    planType: plan.planType,
     isApproved: plan.isApproved,
     feedback: plan.feedback,
     duration: plan.duration,
     modules: plan.modules,
   };
+
+  if (plan.planType) {
+    proposal.planType = plan.planType;
+  }
 
   if (plan.feedback) {
     proposal.rejectionFeedback = [
