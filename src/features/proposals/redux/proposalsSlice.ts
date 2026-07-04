@@ -1,10 +1,14 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import client from "@/api/client";
 import type {
   Proposal,
   ProposalsState,
   FilterType,
   ProposalComment,
   ValidationStep,
+  PlanData,
+  PlanApiResponse,
+  ProposalStatus,
 } from "../types";
 
 // ================= MOCK DATA =================
@@ -64,143 +68,59 @@ const mockRejection = [
   },
 ];
 
-const mockProposals: Proposal[] = [
-  {
-    id: "p1",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
-    plan: "Social Media Growth Social Media GrowthSocial Media Growth",
-    validationReport: mockReport,
-    status: "accepted",
-    progress: 20,
-    comments: mockComments,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p2",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
-    plan: "Social Media Growth Social Media GrowthSocial Media Growth",
-    validationReport: mockReport,
-    status: "rejected",
-    progress: 0,
-    rejectionFeedback: mockRejection,
-    comments: mockComments,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p3",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
-    plan: "Social Media Growth Social Media GrowthSocial Media Growth",
-    validationReport: mockReport,
-    status: "under_review",
-    progress: 50,
-    comments: mockComments,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p4",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
-    plan: "Social Media Growth Social Media GrowthSocial Media Growth",
-    validationReport: mockReport,
-    status: "accepted",
-    progress: 20,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p5",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
-    plan: "Social Media Growth Social Media GrowthSocial Media Growth",
-    validationReport: mockReport,
-    status: "rejected",
-    progress: 0,
-    rejectionFeedback: mockRejection,
-    comments: mockComments,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p6",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan before execution to ensure it is feasible, relevant, and aligned with business reality ...",
-    plan: "Social Media Growth Social Media GrowthSocial Media Growth",
-    validationReport: mockReport,
-    status: "under_review",
-    progress: 50,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p7",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan ...",
-    plan: "Draft plan 1",
-    validationReport: "",
-    status: "draft",
-    progress: 0,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p8",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan ...",
-    plan: "Draft plan 2",
-    validationReport: "",
-    status: "draft",
-    progress: 0,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "p9",
-    title: "Social Media Growth",
-    description:
-      "This validation report evaluates the selected action plan ...",
-    plan: "Draft plan 3",
-    validationReport: "",
-    status: "draft",
-    progress: 0,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
 const VALIDATION_STEPS: ValidationStep[] = [
   { label: "Similar Companies Benchmarking", done: false },
   { label: "Market Trend Validation", done: false },
   { label: "Company Resources Validation", done: false },
 ];
 
+// ================= API MAPPING =================
+function mapPlanToProposal(plan: PlanData): Proposal {
+  let status: ProposalStatus = "draft";
+  if (plan.status === "Draft") {
+    status = "draft";
+  } else if (plan.status === "active") {
+    status = plan.isApproved ? "accepted" : "under_review";
+  }
+
+  const proposal: Proposal = {
+    id: plan.id,
+    title: plan.goal || plan.description.slice(0, 30),
+    description: plan.description,
+    plan: plan.description,
+    validationReport: "",
+    status,
+    progress: 0,
+    comments: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    goal: plan.goal,
+    planType: plan.planType,
+    isApproved: plan.isApproved,
+    feedback: plan.feedback,
+    duration: plan.duration,
+    modules: plan.modules,
+  };
+
+  if (plan.feedback) {
+    proposal.rejectionFeedback = [
+      { reviewer: "Reviewer", time: "", message: plan.feedback },
+    ];
+  }
+
+  return proposal;
+}
+
 // ================= ASYNC THUNKS =================
 export const fetchProposals = createAsyncThunk(
   "proposals/fetchProposals",
   async (_, { rejectWithValue }) => {
     try {
-      // TODO: Connect to API
-      // const response = await client.get("/proposals");
-      // return response.data;
-      return mockProposals;
+      const response = await client.get<PlanApiResponse[]>("/Plan/GetAll");
+      const proposals = response.data
+        .filter((item) => item.isSuccess && item.value)
+        .map((item) => mapPlanToProposal(item.value));
+      return proposals;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch proposals",
@@ -336,7 +256,7 @@ export const revalidateProposal = createAsyncThunk(
 
 // ================= SLICE =================
 const initialState: ProposalsState = {
-  proposals: mockProposals,
+  proposals: [],
   activeFilter: "all",
   planInput: "",
   isInputExpanded: false,
