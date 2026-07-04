@@ -12,6 +12,26 @@ export type FilterType =
   | "under_review"
   | "draft";
 
+// ================= API RESPONSE TYPES =================
+export interface PlanData {
+  id: string;
+  description: string;
+  goal: string;
+  planType: string;
+  status: string;
+  isApproved: boolean;
+  feedback: string | null;
+  duration: string;
+  modules: unknown[];
+}
+
+export interface PlanApiResponse {
+  value: PlanData;
+  isSuccess: boolean;
+  isFailure: boolean;
+  error: string | null;
+}
+
 // ================= MODELS =================
 export interface ProposalComment {
   id: string;
@@ -45,6 +65,13 @@ export interface Proposal {
   comments: ProposalComment[];
   createdAt: string; // ISO
   updatedAt: string; // ISO
+  // API fields
+  goal?: string;
+  planType?: string;
+  isApproved?: boolean;
+  feedback?: string | null;
+  duration?: string;
+  modules?: unknown[];
 }
 
 // ================= STATE =================
