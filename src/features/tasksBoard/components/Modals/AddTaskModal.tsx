@@ -5,7 +5,7 @@ import { useForm, Controller, type SubmitHandler } from "react-hook-form";
 import type { AppDispatch, RootState } from "@/app/store";
 import InviteModal from "./InviteModal";
 import type { TaskPriority, TeamMember } from "../../types";
-import { useAddTaskMutation, closeAddTaskModal, openInviteModal } from "../../redux/tasksSlice";
+import { useAddTaskMutation, closeAddTaskModal, openInviteModal, taskSlice } from "../../redux/tasksSlice";
 
 const priorityOptions: { label: string; value: TaskPriority; color: string }[] = [
   { label: "HIGH",   value: "HIGH",   color: "#df5d5d" },
@@ -45,9 +45,17 @@ const AddTaskModal: React.FC = () => {
 
   const onSubmit: SubmitHandler<IAddTaskInputs> = async (data) => {
   try {
-    const userIdsPayload = assignees.length > 0 
-      ? assignees.map(member => member.id)
-      : ["user-1"];
+    let currentUserId = "userId";
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") ?? "{}");
+      if (storedUser.id) {
+        currentUserId = storedUser.id;
+      } else if (storedUser.userId) {
+        currentUserId = storedUser.userId;
+      }
+    } catch {
+      // keep default
+    }
 
     const apiPayload = {
       title: data.title,
@@ -56,17 +64,14 @@ const AddTaskModal: React.FC = () => {
       priority: priorityMap[data.priority],
       startDate: new Date(data.startDate).toISOString(),
       deadLine: new Date(data.deadLine).toISOString(),
-      moduleId: "string", 
-      planId: "string",
-      userIds: userIdsPayload
+      moduleId: null,
+      planId: null,
+      userIds: [currentUserId]
     };
 
-    console.log("Payload Sent to API:", apiPayload);
+    await addTask(apiPayload).unwrap();
 
-    // إرسال الطلب (Mutation)
-    const res = await addTask(apiPayload).unwrap();
-
-    console.log("Task created successfully:", res);
+    dispatch(taskSlice.util.invalidateTags([{ type: "Task", id: "LIST" }]));
     dispatch(closeAddTaskModal());
   } catch (err) {
     console.error("Failed to create task:", err);

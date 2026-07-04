@@ -804,7 +804,9 @@ export const taskSlice = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: [{ type: "Task", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Task", id: "LIST" },
+      ],
     }),
     getAllTasks: builder.query({
       query: (planId: string) => ({
