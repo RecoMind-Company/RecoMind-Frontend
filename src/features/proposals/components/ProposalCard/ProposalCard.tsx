@@ -1,5 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import type { AppDispatch } from "@/app/store";
 import type { Proposal } from "../../types";
 import { openProposalModal } from "../../redux/proposalsSlice";
@@ -48,7 +49,16 @@ const statusConfig = {
 
 const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const s = statusConfig[proposal.status];
+
+  const handleClick = () => {
+    if (proposal.status === "accepted") {
+      navigate(`/home/tasks?planId=${proposal.id}`);
+    } else {
+      dispatch(openProposalModal(proposal));
+    }
+  };
   const firstComment = proposal.rejectionFeedback?.[0] || proposal.comments[0];
   const avatarInitial = firstComment
     ? "author" in firstComment
@@ -60,7 +70,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
 
   return (
     <div
-      onClick={() => dispatch(openProposalModal(proposal))}
+      onClick={handleClick}
       className="rounded-xl p-4 cursor-pointer transition-all duration-200 hover:translate-y-[-2px] group"
       style={{
         background: "rgba(255,255,255,0.03)",

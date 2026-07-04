@@ -52,7 +52,7 @@ async function pollValidationReport(
   dispatch: (action: unknown) => void,
 ): Promise<ValidationReportData> {
   const maxAttempts = 60;
-  const delay = 3000;
+  const delay = 5000;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -180,7 +180,7 @@ export const saveDraft = createAsyncThunk(
     try {
       if (proposal.validationReportData) {
         await client.post("/ValidationReport/add", {
-          ...proposal.validationReportData,
+          content: proposal.validationReportData,
           status: 1, // Draft
         });
       }
@@ -199,7 +199,7 @@ export const sendForApproval = createAsyncThunk(
     try {
       if (proposal.validationReportData) {
         await client.post("/ValidationReport/add", {
-          ...proposal.validationReportData,
+          content: proposal.validationReportData,
           status: 0, // UnderReview
         });
       }

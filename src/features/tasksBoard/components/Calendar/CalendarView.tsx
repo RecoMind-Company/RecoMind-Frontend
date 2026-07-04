@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { ChevronLeft, ChevronRight, LayoutGrid, Calendar } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import type { AppDispatch, RootState } from "@/app/store";
 import type { BoardType, Task } from "../../types";
 import {
@@ -336,7 +337,9 @@ const CalendarView: React.FC = () => {
   const { calendarSelectedDate, calendarMonth } = useSelector(
     (s: RootState) => s.tasks,
   );
-  const { data: plansTasks } = useGetAllTasksQuery("");
+  const [searchParams] = useSearchParams();
+  const planId = searchParams.get("planId") || "";
+  const { data: plansTasks } = useGetAllTasksQuery(planId, { skip: !planId });
   const { data: personalTasks } = useGetAllTasksPersonalQuery("");
 
   const transformedTasks = useMemo(() => {
