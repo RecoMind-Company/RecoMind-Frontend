@@ -1,5 +1,6 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { ChevronDown, Check } from "lucide-react";
 import { useGetAllTasksQuery } from "../redux/tasksSlice";
 import { useGetAllPlansQuery } from "../redux/plansSlice";
 import type { Task, TaskStatus } from "../types";
@@ -110,6 +111,19 @@ const PlanTasksPage: React.FC = () => {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskOverrides, setTaskOverrides] = useState<Record<string, TaskStatus>>({});
+  const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setPlanDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const resolvedPlanName = useMemo(() => {
     if (planNameFromUrl) return planNameFromUrl;
@@ -187,10 +201,78 @@ const PlanTasksPage: React.FC = () => {
       >
         {/* ===== HEADER ===== */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
-          <div>
-            <h1 className="text-white text-2xl font-bold" style={{ fontFamily: "sans-serif" }}>
-              {resolvedPlanName}
-            </h1>
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setPlanDropdownOpen((v) => !v)}
+              className="flex items-center gap-2"
+            >
+              <h1 className="text-white text-2xl font-bold" style={{ fontFamily: "sans-serif" }}>
+                {resolvedPlanName}
+              </h1>
+              <ChevronDown
+                size={20}
+                color="#7ee3ff"
+                style={{
+                  transition: "transform 0.2s",
+                  transform: planDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </button>
+
+            {/* Dropdown */}
+            {planDropdownOpen && (
+              <div
+                className="absolute left-0 top-full mt-2 rounded-xl overflow-hidden z-30"
+                style={{
+                  width: 324,
+                  background: "#141A2B",
+                  boxShadow: "0px 8px 20px 0px #160A0A80",
+                  animation: "dropDown 0.15s ease",
+                }}
+              >
+                <style>{`
+                  @keyframes dropDown {
+                    from { opacity: 0; transform: translateY(-6px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                  }
+                `}</style>
+
+                <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8, background: "#141A2B" }}>
+                  {/* Open New Branch — default, no dot */}
+                  <button
+                    onClick={() => navigate("/home/proposals")}
+                    className="flex items-center rounded-lg transition-all"
+                    style={{ padding: "10px 12px", background: "transparent" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = "0px 8px 20px 0px #160A0A80";
+                      e.currentTarget.style.background = "rgba(126,227,255,0.07)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.background = "transparent";
+                    }}
+                  >
+                    <span className="text-sm font-medium truncate" style={{ color: "#7ee3ff" }}>
+                      Open New Branch
+                    </span>
+                  </button>
+
+                  {/* Current plan name with check */}
+                  <div
+                    className="flex items-center justify-between gap-2 rounded-lg"
+                    style={{
+                      padding: "10px 12px",
+                      background: "transparent",
+                    }}
+                  >
+                    <span className="text-sm font-medium truncate" style={{ color: "#b8adad" }}>
+                      {resolvedPlanName}
+                    </span>
+                    <Check size={14} color="#64b883" className="shrink-0" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Comments icon */}
