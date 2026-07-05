@@ -13,6 +13,8 @@ import type {
   GenerateReportResponse,
 } from "../types";
 
+import { taskSlice } from "../../tasksBoard/redux/tasksSlice";
+
 // ================= VALIDATION STEPS =================
 const VALIDATION_STEPS: ValidationStep[] = [
   { label: "Similar Companies Benchmarking", done: false },
@@ -246,7 +248,7 @@ export const sendForApproval = createAsyncThunk(
 
 export const sendDraftForApproval = createAsyncThunk(
   "proposals/sendDraftForApproval",
-  async (proposal: Proposal, { rejectWithValue }) => {
+  async (proposal: Proposal, { rejectWithValue, dispatch }) => {
     try {
       // Dedicated flow for DRAFT plans only.
       // PATCH /ValidationReport/update with { id, status: 0 }
@@ -255,7 +257,18 @@ export const sendDraftForApproval = createAsyncThunk(
         id: proposal.id,
         status: 0,
       });
-      return { ...proposal, status: "under_review" as const };
+
+      dispatch(
+        taskSlice.util.invalidateTags([
+          { type: "Task", id: "DRAFTS_LIST" },
+          { type: "Task", id: "UNDER_REVIEW_LIST" },
+        ]),
+      );
+
+      return {
+        ...proposal,
+        status: "under_review" as const,
+      };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to send draft for approval",
