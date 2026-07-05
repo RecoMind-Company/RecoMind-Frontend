@@ -14,7 +14,7 @@ interface ChatSession {
 }
 
 function Sidebar() {
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [editingSession, setEditingSession] = useState<string | null>(null);
