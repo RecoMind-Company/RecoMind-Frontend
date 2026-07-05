@@ -244,6 +244,26 @@ export const sendForApproval = createAsyncThunk(
   },
 );
 
+export const sendDraftForApproval = createAsyncThunk(
+  "proposals/sendDraftForApproval",
+  async (proposal: Proposal, { rejectWithValue }) => {
+    try {
+      // Dedicated flow for DRAFT plans only.
+      // PATCH /ValidationReport/update with { id, status: 0 }
+      // status 0 => UnderReview (moves plan from draft -> under_review)
+      await client.patch("/ValidationReport/update", {
+        id: proposal.id,
+        status: 0,
+      });
+      return { ...proposal, status: "under_review" as const };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to send draft for approval",
+      );
+    }
+  },
+);
+
 export const addComment = createAsyncThunk(
   "proposals/addComment",
   async (
@@ -446,6 +466,33 @@ const proposalsSlice = createSlice({
         state.selectedProposal = null;
       })
       .addCase(sendForApproval.rejected, (state, action) => {
+        state.isSendingApproval = false;
+        state.error = action.payload as string;
+      })
+      // sendDraftForApproval
+      .addCase(sendDraftForApproval.pending, (state) => {
+        state.isSendingApproval = true;
+      })
+      .addCase(sendDraftForApproval.fulfilled, (state, action) => {
+        state.isSendingApproval = false;
+
+        const idx = state.proposals.findIndex(
+          (p) => p.id === action.payload.id,
+        );
+
+        if (idx >= 0) {
+          state.proposals[idx] = action.payload;
+        }
+
+        if (state.selectedProposal?.id === action.payload.id) {
+          state.selectedProposal = action.payload;
+        }
+
+        state.showProposalModal = false;
+        state.showSuccessModal = "sent";
+        state.selectedProposal = null;
+      })
+      .addCase(sendDraftForApproval.rejected, (state, action) => {
         state.isSendingApproval = false;
         state.error = action.payload as string;
       })
