@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import type { AppDispatch, RootState } from "@/app/store";
 import { closeSuccessModal } from "../../redux/proposalsSlice";
 import sendApproval from "../../../../assets/images/send_approval.png"
@@ -8,6 +9,7 @@ import doneApproval from "../../../../assets/images/doneApproval.png"
 
 const SuccessModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { showSuccessModal } = useSelector((s: RootState) => s.proposals);
 
   if (!showSuccessModal) return null;
@@ -18,6 +20,7 @@ const SuccessModal: React.FC = () => {
   useEffect(() => { 
     const timer = setTimeout(() => {
       dispatch(closeSuccessModal());
+      navigate("/home/proposals");
     }, 3000);
     return () => clearTimeout(timer);
   }, [dispatch]);

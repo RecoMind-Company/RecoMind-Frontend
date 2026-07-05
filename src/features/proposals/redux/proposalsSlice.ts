@@ -318,6 +318,8 @@ const initialState: ProposalsState = {
   showSuccessModal: null,
   loading: false,
   error: null,
+  isSavingDraft: false,
+  isSendingApproval: false,
 };
 
 const proposalsSlice = createSlice({
@@ -404,7 +406,11 @@ const proposalsSlice = createSlice({
         state.error = action.payload as string;
       })
       // saveDraft
+      .addCase(saveDraft.pending, (state) => {
+        state.isSavingDraft = true;
+      })
       .addCase(saveDraft.fulfilled, (state, action) => {
+        state.isSavingDraft = false;
         const idx = state.proposals.findIndex(
           (p) => p.id === action.payload.id,
         );
@@ -417,8 +423,16 @@ const proposalsSlice = createSlice({
         state.showSuccessModal = "saved";
         state.selectedProposal = null;
       })
+      .addCase(saveDraft.rejected, (state, action) => {
+        state.isSavingDraft = false;
+        state.error = action.payload as string;
+      })
       // sendForApproval
+      .addCase(sendForApproval.pending, (state) => {
+        state.isSendingApproval = true;
+      })
       .addCase(sendForApproval.fulfilled, (state, action) => {
+        state.isSendingApproval = false;
         const idx = state.proposals.findIndex(
           (p) => p.id === action.payload.id,
         );
@@ -430,6 +444,10 @@ const proposalsSlice = createSlice({
         state.showProposalModal = false;
         state.showSuccessModal = "sent";
         state.selectedProposal = null;
+      })
+      .addCase(sendForApproval.rejected, (state, action) => {
+        state.isSendingApproval = false;
+        state.error = action.payload as string;
       })
       // addComment
       .addCase(addComment.fulfilled, (state, action) => {
