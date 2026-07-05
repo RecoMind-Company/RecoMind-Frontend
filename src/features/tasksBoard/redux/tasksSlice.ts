@@ -900,7 +900,14 @@ export const taskSlice = createApi({
         { type: "Comment", id: `plan-${planId}` },
       ],
     }),
+    getDraftProposals: builder.query({
+    query: ({ limit = 4, status = 1 }: { limit?: number; status?: number } = {}) => ({
+    url: `/api/ValidationReport/created-by-status?limit=${limit}&status=${status}`,
+    method: "GET",
   }),
+  providesTags: [{ type: "Task", id: "DRAFTS_LIST" }],
+})
+      }),
 });
 
 export const {
@@ -913,4 +920,5 @@ export const {
   useGetTaskByIdQuery,
   useGetPlanCommentsQuery,
   useAddPlanCommentMutation,
+  useGetDraftProposalsQuery
 } = taskSlice;

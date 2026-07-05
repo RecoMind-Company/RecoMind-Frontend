@@ -2,7 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
-import type { FilterType } from "../types";
+import type { FilterType, Proposal } from "../types";
+import { useGetDraftProposalsQuery } from "../../tasksBoard/redux/tasksSlice";
 import { setActiveFilter } from "../redux/proposalsSlice";
 import ProposalCard from "../components/ProposalCard/ProposalCard";
 
@@ -12,6 +13,43 @@ const FILTERS: { label: string; value: FilterType }[] = [
   { label: "Rejected", value: "rejected" },
   { label: "Under Review", value: "under_review" },
 ];
+
+// شكل الـ Draft الراجع من الـ API
+interface DraftApiItem {
+  id: string;
+  userQuestion: string;
+  content: {
+    executive_summary: string;
+    validation_decision: string;
+    confidence_score: number;
+    key_findings: {
+      precedent_analysis: string;
+      resource_assessment: string;
+      market_trends: string;
+    };
+    recommendations: string[];
+    risk_factors: string[];
+    next_steps: string[];
+  };
+  createdBy: string;
+  createdAt: string;
+  status: string;
+}
+
+const mapDraftToProposal = (draft: DraftApiItem): Proposal => ({
+  id: draft.id,
+  title: draft.userQuestion,
+  userQuestion: draft.userQuestion,
+  description: draft.content.executive_summary,
+  content: draft.content,
+  status: "draft",
+  createdAt: draft.createdAt,
+  createdBy: draft.createdBy,
+  comments: [],
+  progress: 0,
+  plan: draft.userQuestion,
+  validationReport: draft.content.executive_summary,
+});
 
 const ProposalsGrid: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -23,6 +61,16 @@ const ProposalsGrid: React.FC = () => {
 
   const isDraftsView = activeFilter === "draft";
 
+  // نجيب الدرافتس من الـ API بس لما تبقى الفيو دي مفتوحة
+  const {
+    data: draftsResponse,
+    isLoading: isDraftsLoading,
+    isError: isDraftsError,
+  } = useGetDraftProposalsQuery(
+    { limit: 4, status: 1 },
+    { skip: !isDraftsView },
+  );
+console.log(draftsResponse, "draftsResponse");
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -37,11 +85,16 @@ const ProposalsGrid: React.FC = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = proposals.filter((p) => {
-    if (activeFilter === "all") return p.status !== "draft";
-    if (activeFilter === "draft") return p.status === "draft";
-    return p.status === activeFilter;
-  });
+  const draftProposals: Proposal[] = isDraftsView
+    ? ((draftsResponse ?? []) as DraftApiItem[]).map(mapDraftToProposal)
+    : [];
+
+  const filtered = isDraftsView
+    ? draftProposals
+    : proposals.filter((p) => {
+        if (activeFilter === "all") return p.status !== "draft";
+        return p.status === activeFilter;
+      });
 
   const activeLabel =
     FILTERS.find((f) => f.value === activeFilter)?.label ?? "All";
@@ -160,7 +213,31 @@ const ProposalsGrid: React.FC = () => {
       </div>
 
       {/* Grid */}
-      {filtered.length === 0 ? (
+      {isDraftsView && isDraftsLoading ? (
+        <div
+          className="rounded-2xl p-12 text-center"
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px dashed rgba(255,255,255,0.08)",
+          }}
+        >
+          <p className="text-sm" style={{ color: "#7f7f7f" }}>
+            Loading drafts...
+          </p>
+        </div>
+      ) : isDraftsView && isDraftsError ? (
+        <div
+          className="rounded-2xl p-12 text-center"
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px dashed rgba(223,93,93,0.2)",
+          }}
+        >
+          <p className="text-sm" style={{ color: "#df5d5d" }}>
+            Failed to load drafts.
+          </p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div
           className="rounded-2xl p-12 text-center"
           style={{
