@@ -124,4 +124,5 @@ export interface ProposalsState {
   error: string | null;
   isSavingDraft?: boolean;
   isSendingApproval?: boolean;
+  isSendingDraftApproval?: boolean;
 }
