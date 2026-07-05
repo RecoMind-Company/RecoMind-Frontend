@@ -1,6 +1,7 @@
 import "./planSidebar.css";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Target, ClipboardList, Clock } from "lucide-react";
 import { useGetAllPlansQuery } from "../../redux/plansSlice";
 import type { RootState } from "@/app/store";
@@ -39,7 +40,7 @@ function SkeletonCard() {
 }
 
 // ── Plan Card ────────────────────────────────────────────────────────────────
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({ plan, onClick }: { plan: Plan; onClick?: () => void }) {
   const progress = usePlanProgress(plan);
   const days = parseInt(plan.duration, 10);
   const durationLabel = isNaN(days)
@@ -48,8 +49,18 @@ function PlanCard({ plan }: { plan: Plan }) {
       ? `${Math.round(days / 30)}mo`
       : `${days}d`;
 
+  const isAccepted = plan.status?.toLowerCase() === "accepted";
+
   return (
-    <div className="ps-plan-card">
+    <div 
+      className={`ps-plan-card ${isAccepted ? "ps-clickable" : ""}`}
+      onClick={isAccepted ? onClick : undefined}
+      style={{
+        cursor: isAccepted ? "pointer" : "default",
+        opacity: isAccepted ? 1 : 0.6,
+      }}
+      title={isAccepted ? "Click to view plan tasks" : "Plan not accepted yet"}
+    >
       <div className="ps-card-header">
         <p className="ps-card-name">{plan.goal || "Unnamed Plan"}</p>
         <span className="ps-status-badge">{plan.status || "Unknown"}</span>
@@ -84,12 +95,21 @@ function PlanCard({ plan }: { plan: Plan }) {
 
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function PlanSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const navigate = useNavigate();
   const {
     data: plans = [],
     isLoading,
     isError,
   } = useGetAllPlansQuery(undefined, { skip: !hasToken() });
+
+  const handlePlanClick = (plan: Plan) => {
+    // Only allow clicking on accepted plans
+    if (plan.status?.toLowerCase() !== "accepted") return;
+    
+    // Navigate to plan tasks page with plan details
+    navigate(`/home/plan-tasks?planId=${plan.id}&planName=${encodeURIComponent(plan.goal)}`);
+  };
 
   return (
     <div className={`plan-sidebar${collapsed ? " ps-closed" : ""}`}>
@@ -145,7 +165,13 @@ export default function PlanSidebar() {
 
           {!isLoading &&
             !isError &&
-            plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)}
+            plans.map((plan) => (
+              <PlanCard 
+                key={plan.id} 
+                plan={plan} 
+                onClick={() => handlePlanClick(plan)}
+              />
+            ))}
         </div>
       </div>
     </div>
