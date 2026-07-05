@@ -2,7 +2,13 @@ import React, { useRef, useState, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
-import type { FilterType } from "../types";
+import type { FilterType, Proposal } from "../types";
+import {
+  useGetDraftProposalsQuery,
+  useGetAcceptedPlansQuery,
+  useGetRejectedProposalsQuery,
+  useGetUnderReviewProposalsQuery,
+} from "../../tasksBoard/redux/tasksSlice";
 import { setActiveFilter } from "../redux/proposalsSlice";
 import ProposalCard from "../components/ProposalCard/ProposalCard";
 
@@ -13,15 +19,115 @@ const FILTERS: { label: string; value: FilterType }[] = [
   { label: "Under Review", value: "under_review" },
 ];
 
+// ── شكل الـ Draft/Rejected/UnderReview (endpoint: ValidationReport/created-by-status) ──
+interface ValidationReportApiItem {
+  id: string;
+  userQuestion: string;
+  content: {
+    executive_summary: string;
+    validation_decision: string;
+    confidence_score: number;
+    key_findings: {
+      precedent_analysis: string;
+      resource_assessment: string;
+      market_trends: string;
+    };
+    recommendations: string[];
+    risk_factors: string[];
+    next_steps: string[];
+  };
+  createdBy: string;
+  createdAt: string;
+  status: string;
+}
+
+// ── شكل الـ Accepted (endpoint: /api/Plan/GetByStatus/Accepted) ──
+interface AcceptedPlanWrapper {
+  value: {
+    id: string;
+    description: string | null;
+    goal: string;
+    planType: string | null;
+    status: string;
+    isApproved: boolean;
+    feedback: string | null;
+    duration: string;
+    modules: unknown[];
+  };
+  isSuccess: boolean;
+  isFailure: boolean;
+  error: string | null;
+}
+
+const mapValidationReportToProposal = (
+  item: ValidationReportApiItem,
+  status: "draft" | "rejected" | "under_review",
+): Proposal => ({
+  id: item.id,
+  title: item.userQuestion,
+  userQuestion: item.userQuestion,
+  description: item.content?.executive_summary || "",
+  content: item.content,
+  status,
+  createdAt: item.createdAt,
+  createdBy: item.createdBy,
+  comments: [],
+  progress: 0,
+  plan: item.userQuestion,
+  validationReport: item.content?.executive_summary || "",
+});
+
+const mapAcceptedToProposal = (wrapper: AcceptedPlanWrapper): Proposal => {
+  const item = wrapper.value;
+  return {
+    id: item.id,
+    title: item.goal,
+    description: item.description || `Duration: ${item.duration} days`,
+    status: "accepted",
+    createdAt: new Date().toISOString(),
+    comments: [],
+    progress: 0,
+    plan: item.goal,
+    validationReport: "",
+  };
+};
+
 const ProposalsGrid: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { proposals, activeFilter } = useSelector(
-    (s: RootState) => s.proposals,
-  );
+  const { activeFilter } = useSelector((s: RootState) => s.proposals);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isDraftsView = activeFilter === "draft";
+
+  // ── Drafts (منفصلين لوحدهم) ──
+  const {
+    data: draftsResponse,
+    isLoading: isDraftsLoading,
+    isError: isDraftsError,
+  } = useGetDraftProposalsQuery(
+    { limit: 4, status: 1 },
+    { skip: !isDraftsView },
+  );
+
+  // ── Accepted + Rejected + Under Review (مجمّعين مع بعض) ──
+  const {
+    data: acceptedResponse,
+    isLoading: isAcceptedLoading,
+    isError: isAcceptedError,
+  } = useGetAcceptedPlansQuery(undefined, { skip: isDraftsView });
+
+  const {
+    data: rejectedResponse,
+    isLoading: isRejectedLoading,
+    isError: isRejectedError,
+  } = useGetRejectedProposalsQuery({ limit: 10 }, { skip: isDraftsView });
+
+  const {
+    data: underReviewResponse,
+    isLoading: isUnderReviewLoading,
+    isError: isUnderReviewError,
+  } = useGetUnderReviewProposalsQuery({ limit: 10 }, { skip: isDraftsView });
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -37,11 +143,49 @@ const ProposalsGrid: React.FC = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = proposals.filter((p) => {
-    if (activeFilter === "all") return p.status !== "draft";
-    if (activeFilter === "draft") return p.status === "draft";
-    return p.status === activeFilter;
-  });
+  // ── تحويل كل النتائج لشكل Proposal موحد ──
+  const draftProposals: Proposal[] = isDraftsView
+    ? ((draftsResponse ?? []) as ValidationReportApiItem[]).map((item) =>
+        mapValidationReportToProposal(item, "draft"),
+      )
+    : [];
+
+  const acceptedProposals: Proposal[] = !isDraftsView
+    ? ((acceptedResponse ?? []) as AcceptedPlanWrapper[]).map(mapAcceptedToProposal)
+    : [];
+
+  const rejectedProposals: Proposal[] = !isDraftsView
+    ? ((rejectedResponse ?? []) as ValidationReportApiItem[]).map((item) =>
+        mapValidationReportToProposal(item, "rejected"),
+      )
+    : [];
+
+  const underReviewProposals: Proposal[] = !isDraftsView
+    ? ((underReviewResponse ?? []) as ValidationReportApiItem[]).map((item) =>
+        mapValidationReportToProposal(item, "under_review"),
+      )
+    : [];
+
+  // ── الثلاثة مصادر مجمّعين هنا، وبعدين نفلتر حسب الـ activeFilter ──
+  const allNonDraftProposals: Proposal[] = [
+    ...acceptedProposals,
+    ...rejectedProposals,
+    ...underReviewProposals,
+  ];
+
+  const filtered = isDraftsView
+    ? draftProposals
+    : activeFilter === "all"
+      ? allNonDraftProposals
+      : allNonDraftProposals.filter((p) => p.status === activeFilter);
+
+  const isLoading = isDraftsView
+    ? isDraftsLoading
+    : isAcceptedLoading || isRejectedLoading || isUnderReviewLoading;
+
+  const isError = isDraftsView
+    ? isDraftsError
+    : isAcceptedError || isRejectedError || isUnderReviewError;
 
   const activeLabel =
     FILTERS.find((f) => f.value === activeFilter)?.label ?? "All";
@@ -55,8 +199,10 @@ const ProposalsGrid: React.FC = () => {
     <div>
       {/* Section header */}
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-white font-bold text-[28px]"
-        style={{fontFamily: "sans-serif"}}>
+        <h2
+          className="text-white font-bold text-[28px]"
+          style={{ fontFamily: "sans-serif" }}
+        >
           {isDraftsView ? "Your Drafts" : "Your Proposals"}
         </h2>
 
@@ -160,7 +306,31 @@ const ProposalsGrid: React.FC = () => {
       </div>
 
       {/* Grid */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div
+          className="rounded-2xl p-12 text-center"
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px dashed rgba(255,255,255,0.08)",
+          }}
+        >
+          <p className="text-sm" style={{ color: "#7f7f7f" }}>
+            {isDraftsView ? "Loading drafts..." : "Loading proposals..."}
+          </p>
+        </div>
+      ) : isError ? (
+        <div
+          className="rounded-2xl p-12 text-center"
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px dashed rgba(223,93,93,0.2)",
+          }}
+        >
+          <p className="text-sm" style={{ color: "#df5d5d" }}>
+            {isDraftsView ? "Failed to load drafts." : "Failed to load proposals."}
+          </p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div
           className="rounded-2xl p-12 text-center"
           style={{

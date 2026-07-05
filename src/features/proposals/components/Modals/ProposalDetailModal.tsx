@@ -55,6 +55,44 @@ const statusConfig = {
   },
 };
 
+const DetailSection: React.FC<{ title: string; text?: string }> = ({ title, text }) => {
+  if (!text) return null;
+  return (
+    <div className="mb-5">
+      <p
+        className="text-[10px] font-bold uppercase tracking-wider mb-2"
+        style={{ color: "#7f7f7f" }}
+      >
+        {title}
+      </p>
+      <p className="text-xs leading-relaxed whitespace-pre-line" style={{ color: "#b8adad" }}>
+        {text}
+      </p>
+    </div>
+  );
+};
+
+const DetailListSection: React.FC<{ title: string; items?: string[] }> = ({ title, items }) => {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="mb-5">
+      <p
+        className="text-[10px] font-bold uppercase tracking-wider mb-2"
+        style={{ color: "#7f7f7f" }}
+      >
+        {title}
+      </p>
+      <ul className="space-y-1.5 list-disc pr-4">
+        {items.map((item, i) => (
+          <li key={i} className="text-xs leading-relaxed" style={{ color: "#b8adad" }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const ProposalDetailModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { selectedProposal, showProposalModal, isValidating, validationSteps } =
@@ -94,9 +132,10 @@ const ProposalDetailModal: React.FC = () => {
   };
 
   // ========================================================
-  // DRAFT VIEW — compact modal with only "Send for Approval"
+  // DRAFT VIEW — compact modal, full report content + "Send for Approval"
   // ========================================================
   if (isDraft) {
+    const content = proposal.content;
     return (
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -125,7 +164,7 @@ const ProposalDetailModal: React.FC = () => {
             .scroll-thin::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:4px; }
           `}</style>
 
-          {/* Input bar */}
+          {/* Input bar — shows userQuestion */}
           <div
             className="px-5 py-4 flex items-center gap-3"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
@@ -138,7 +177,7 @@ const ProposalDetailModal: React.FC = () => {
                 color: "#7f7f7f",
               }}
             >
-              {proposal.plan || "Open A new Branch"}
+              {proposal.userQuestion || "Open A new Branch"}
             </div>
             <button
               onClick={() => dispatch(closeProposalModal())}
@@ -149,8 +188,8 @@ const ProposalDetailModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Date + status row */}
-          <div className="px-5 py-3 flex items-center gap-3">
+          {/* Date + status + decision/confidence row */}
+          <div className="px-5 py-3 flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5">
               <Clock size={11} color="#7f7f7f" />
               <span className="text-[11px]" style={{ color: "#7f7f7f" }}>
@@ -168,9 +207,19 @@ const ProposalDetailModal: React.FC = () => {
             >
               {s.label}
             </span>
+            {content?.validation_decision && (
+              <span className="text-[11px]" style={{ color: "#7f7f7f" }}>
+                Decision: <span style={{ color: "#7ee3ff" }}>{content.validation_decision}</span>
+              </span>
+            )}
+            {content?.confidence_score !== undefined && (
+              <span className="text-[11px]" style={{ color: "#7f7f7f" }}>
+                Confidence: <span style={{ color: "#64b883" }}>{content.confidence_score}%</span>
+              </span>
+            )}
           </div>
 
-          {/* Report */}
+          {/* Full Report */}
           <div className="flex-1 overflow-y-auto scroll-thin px-5 pb-4">
             <h3
               className="text-white font-bold text-base mb-3"
@@ -181,12 +230,25 @@ const ProposalDetailModal: React.FC = () => {
             >
               The Validation Report
             </h3>
-            <div
-              className="text-xs leading-relaxed whitespace-pre-line"
-              style={{ color: "#b8adad" }}
-            >
-              {proposal.validationReport || "No validation report available."}
-            </div>
+
+            {content ? (
+              <>
+                <DetailSection title="Executive Summary" text={content.executive_summary} />
+                <DetailSection title="Precedent Analysis" text={content.key_findings?.precedent_analysis} />
+                <DetailSection title="Resource Assessment" text={content.key_findings?.resource_assessment} />
+                <DetailSection title="Market Trends" text={content.key_findings?.market_trends} />
+                <DetailListSection title="Recommendations" items={content.recommendations} />
+                <DetailListSection title="Risk Factors" items={content.risk_factors} />
+                <DetailListSection title="Next Steps" items={content.next_steps} />
+              </>
+            ) : (
+              <div
+                className="text-xs leading-relaxed whitespace-pre-line"
+                style={{ color: "#b8adad" }}
+              >
+                {proposal.validationReport || "No validation report available."}
+              </div>
+            )}
           </div>
 
           {/* Send for Approval only */}
