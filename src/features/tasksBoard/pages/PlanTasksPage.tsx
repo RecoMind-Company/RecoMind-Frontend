@@ -304,27 +304,31 @@ const PlanTasksPage: React.FC = () => {
             )}
           </div>
 
-          {/* Filter pills + Comments icon */}
-          <div className="flex items-center gap-3">
-            {FILTERS.map((f) => {
-              const isActive = activeFilter === f;
-              return (
-                <button
-                  key={f}
-                  onClick={() => setActiveFilter(f)}
-                  className="flex items-center justify-center font-medium transition-all"
-                  style={{
-                    width: 70,
-                    height: 33,
-                    borderRadius: "24403200px",
-                    gap: 8,
-                    paddingTop: 8,
-                    paddingRight: 16,
-                    paddingBottom: 8,
-                    paddingLeft: 16,
-                    borderWidth: 1,
-                    borderStyle: "solid",
-                    borderColor: isActive
+        </div>
+
+        {/* ===== STATS ===== */}
+        <CalendarStats tasks={tasks} />
+
+        {/* Filter pills + Comments icon */}
+        <div className="flex items-center gap-3 justify-end w-full mb-3">
+          {FILTERS.map((f) => {
+            const isActive = activeFilter === f;
+            return (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className="flex items-center justify-center font-medium transition-all"
+                style={{
+                  height: 33,
+                  borderRadius: "24403200px",
+                  gap: 8,
+                  paddingTop: 8,
+                  paddingRight: 16,
+                  paddingBottom: 8,
+                  paddingLeft: 16,
+                  borderWidth: 1,
+                  borderStyle: "solid",
+                  borderColor: isActive
                       ? "rgba(126,227,255,0.4)"
                       : "rgba(255,255,255,0.1)",
                     background: isActive
@@ -364,10 +368,6 @@ const PlanTasksPage: React.FC = () => {
             />
           </button>
           </div>
-        </div>
-
-        {/* ===== STATS ===== */}
-        <CalendarStats tasks={tasks} />
 
         {/* ===== KANBAN ===== */}
         <div className="flex-1 overflow-x-auto overflow-y-hidden">
