@@ -496,8 +496,7 @@ const ProposalDetailModal: React.FC = () => {
               <div
                 className="mx-6 mt-4 rounded-xl p-4 shrink-0"
                 style={{
-                  background: "rgba(223,93,93,0.06)",
-                  border: "1px solid rgba(223,93,93,0.2)",
+                  border: "1px solid #2E3650",
                 }}
               >
                 <p
@@ -551,11 +550,10 @@ const ProposalDetailModal: React.FC = () => {
                 <button
                   onClick={() => dispatch(revalidateProposal(proposal))}
                   disabled={isValidating}
-                  className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
+                  className="w-full mt-4 py-2.5 rounded-[6px] text-xl font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
                   style={{
-                    background: "rgba(126,227,255,0.1)",
-                    color: "#7ee3ff",
-                    border: "1px solid rgba(126,227,255,0.2)",
+                    background: "#00485D",
+                    color: "#EFEFEF",
                   }}
                 >
                   {isValidating ? (
