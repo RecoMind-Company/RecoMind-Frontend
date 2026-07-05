@@ -20,6 +20,7 @@ import {
   sendForApproval,
   addComment,
   revalidateProposal,
+  sendDraftForApproval,
 } from "../../redux/proposalsSlice";
 
 const statusConfig = {
@@ -263,7 +264,7 @@ const ProposalDetailModal: React.FC = () => {
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
           >
             <button
-              onClick={() => dispatch(sendForApproval(proposal))}
+              onClick={() => dispatch(sendDraftForApproval(proposal))}
               disabled={isSendingApproval}
               className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
