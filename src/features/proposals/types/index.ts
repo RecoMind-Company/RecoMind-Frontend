@@ -89,7 +89,7 @@ export interface Proposal {
   rejectionFeedback?: RejectionFeedback[];
   comments: ProposalComment[];
   createdAt: string; // ISO
-  updatedAt: string; // ISO
+  updatedAt?: string; // ISO
   // API fields
   goal?: string;
   planType?: string;
@@ -98,6 +98,9 @@ export interface Proposal {
   duration?: string;
   modules?: unknown[];
   validationReportData?: ValidationReportData;
+  userQuestion?: string;
+  createdBy?: string;
+  content?: ValidationReportData;
 }
 
 // ================= STATE =================

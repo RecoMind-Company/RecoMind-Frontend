@@ -51,6 +51,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const s = statusConfig[proposal.status];
+  const isDraft = proposal.status === "draft";
 
   const handleClick = () => {
     if (proposal.status === "accepted") {
@@ -59,7 +60,8 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
       dispatch(openProposalModal(proposal));
     }
   };
-  const firstComment = proposal.rejectionFeedback?.[0] || proposal.comments[0];
+
+  const firstComment = proposal.rejectionFeedback?.[0] || proposal.comments?.[0];
   const avatarInitial = firstComment
     ? "author" in firstComment
       ? firstComment.author.charAt(0)
@@ -91,8 +93,8 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
     >
       {/* Title + status */}
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-white font-bold text-[20px] leading-snug">
-          {proposal.title}
+        <h3 className="text-white font-bold text-[20px] leading-snug line-clamp-1">
+          {isDraft ? proposal.userQuestion : proposal.title}
           {s.dot && (
             <span
               className="inline-block w-1.5 h-1.5 rounded-full ml-1 mb-0.5 align-middle"
@@ -110,18 +112,18 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
         </span>
       </div>
 
-      {/* Description label */}
+      {/* Description / Executive Summary label */}
       <p
         className="text-[10px] font-semibold mb-1"
         style={{ color: "#7f7f7f" }}
       >
-        Description
+        {isDraft ? "Executive Summary" : "Description"}
       </p>
       <p
-        className="text-base leading-relaxed mb-3 line-clamp-3"
+        className={`text-base leading-relaxed mb-3 ${isDraft ? "line-clamp-2" : "line-clamp-3"}`}
         style={{ color: "#CBCBCB" }}
       >
-        {proposal.description}
+        {isDraft ? proposal.content?.executive_summary : proposal.description}
       </p>
 
       {/* Progress bar (accepted) */}

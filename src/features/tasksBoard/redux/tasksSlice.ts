@@ -784,7 +784,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const taskSlice = createApi({
   reducerPath: "task",
-  tagTypes: ["Task", "Comment"], 
+  tagTypes: ["Task", "Comment","Plan"], 
   refetchOnReconnect: true,
   refetchOnMountOrArgChange: true,
   baseQuery: fetchBaseQuery({
@@ -900,7 +900,41 @@ export const taskSlice = createApi({
         { type: "Comment", id: `plan-${planId}` },
       ],
     }),
+    getDraftProposals: builder.query({
+    query: ({ limit = 4, status = 1 }: { limit?: number; status?: number } = {}) => ({
+    url: `/api/ValidationReport/created-by-status?limit=${limit}&status=${status}`,
+    method: "GET",
   }),
+  providesTags: [{ type: "Task", id: "DRAFTS_LIST" }],
+    }),
+    getRejectedProposals: builder.query({
+      query: ({ limit = 4 }: { limit?: number } = {}) => ({
+        url: `/api/ValidationReport/created-by-status?limit=${limit}&status=2`,
+        method: "GET",
+      }),
+      providesTags: [{ type: "Task", id: "REJECTED_LIST" }],
+    }),
+    getUnderReviewProposals: builder.query({
+      query: ({ limit = 4 }: { limit?: number } = {}) => ({
+        url: `/api/ValidationReport/created-by-status?limit=${limit}&status=0`,
+        method: "GET",
+      }),
+      providesTags: [{ type: "Task", id: "UNDER_REVIEW_LIST" }],
+    }),
+    getAcceptedPlans: builder.query({
+      query: () => ({
+        url: `/api/Plan/GetByStatus/Accepted`,
+        method: "GET",
+      }),
+      providesTags: [
+        { type: "Plan" as const, id: "Accepted" },
+        { type: "Plan", id: "LIST" },
+      ],
+    }),
+    
+
+  
+      }),
 });
 
 export const {
@@ -913,4 +947,8 @@ export const {
   useGetTaskByIdQuery,
   useGetPlanCommentsQuery,
   useAddPlanCommentMutation,
+  useGetDraftProposalsQuery,
+  useGetAcceptedPlansQuery,
+  useGetRejectedProposalsQuery,
+  useGetUnderReviewProposalsQuery 
 } = taskSlice;
