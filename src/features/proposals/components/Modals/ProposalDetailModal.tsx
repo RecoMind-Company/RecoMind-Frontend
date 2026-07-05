@@ -95,8 +95,14 @@ const DetailListSection: React.FC<{ title: string; items?: string[] }> = ({ titl
 
 const ProposalDetailModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { selectedProposal, showProposalModal, isValidating, validationSteps } =
-    useSelector((s: RootState) => s.proposals);
+  const {
+    selectedProposal,
+    showProposalModal,
+    isValidating,
+    validationSteps,
+    isSavingDraft,
+    isSendingApproval,
+  } = useSelector((s: RootState) => s.proposals);
   const [commentText, setCommentText] = useState("");
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -258,14 +264,27 @@ const ProposalDetailModal: React.FC = () => {
           >
             <button
               onClick={() => dispatch(sendForApproval(proposal))}
-              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              disabled={isSendingApproval}
+              className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 background: "linear-gradient(135deg, #7ee3ff 0%, #4fb8d8 100%)",
                 color: "#060b1b",
               }}
             >
-              <Send size={13} />
-              Send for Approval
+              {isSendingApproval ? (
+                <>
+                  <span
+                    className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                    style={{ borderColor: "#060b1b", borderTopColor: "transparent" }}
+                  />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send size={13} />
+                  Send for Approval
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -301,7 +320,7 @@ const ProposalDetailModal: React.FC = () => {
         <div className="proposal-fullpage-content flex-1 px-6 py-8 pb-4">
           {/* Plan input bar */}
           <div
-            className="w-full px-4 py-3 rounded-xl text-sm mb-6"
+            className="w-full px-4 py-3 rounded-xl text-sm mb-3"
             style={{
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -310,6 +329,13 @@ const ProposalDetailModal: React.FC = () => {
           >
             {proposal.plan || "Open A new Branch"}
           </div>
+
+          {/* Description */}
+          {proposal.description && (
+            <p className="text-xs mb-6 leading-relaxed" style={{ color: "#7f7f7f" }}>
+              {proposal.description}
+            </p>
+          )}
 
           {/* Report title */}
           <h3 className="text-white font-bold text-xl mb-4">
@@ -336,7 +362,8 @@ const ProposalDetailModal: React.FC = () => {
           <div className="flex gap-1.5">
             <button
               onClick={() => dispatch(saveDraft(proposal))}
-              className="rounded-md text-sm font-semibold flex items-center justify-center gap-1.5 transition-all hover:opacity-90"
+              disabled={isSavingDraft || isSendingApproval}
+              className="rounded-md text-sm font-semibold flex items-center justify-center gap-1.5 transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 width: "50%",
                 height: "52px",
@@ -347,12 +374,25 @@ const ProposalDetailModal: React.FC = () => {
                 border: "none",
               }}
             >
-              <Save size={13} />
-              Save Draft
+              {isSavingDraft ? (
+                <>
+                  <span
+                    className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                    style={{ borderColor: "#060b1b", borderTopColor: "transparent" }}
+                  />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={13} />
+                  Save Draft
+                </>
+              )}
             </button>
             <button
               onClick={() => dispatch(sendForApproval(proposal))}
-              className="rounded-md text-sm font-semibold flex items-center justify-center gap-1.5 transition-all hover:opacity-90"
+              disabled={isSendingApproval || isSavingDraft}
+              className="rounded-md text-sm font-semibold flex items-center justify-center gap-1.5 transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 width: "50%",
                 height: "52px",
@@ -363,8 +403,20 @@ const ProposalDetailModal: React.FC = () => {
                 border: "none",
               }}
             >
-              <Send size={13} />
-              Send for Approval
+              {isSendingApproval ? (
+                <>
+                  <span
+                    className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                    style={{ borderColor: "#060b1b", borderTopColor: "transparent" }}
+                  />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send size={13} />
+                  Send for Approval
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -552,115 +604,118 @@ const ProposalDetailModal: React.FC = () => {
           </div>
 
           {/* Rejection Feedback */}
-          {isRejected &&
-            proposal.rejectionFeedback &&
-            proposal.rejectionFeedback.length > 0 && (
-              <div
-                className="mx-6 mt-4 rounded-xl p-4 shrink-0"
+          {isRejected && (
+            <div
+              className="mx-6 mt-4 rounded-xl p-4 shrink-0"
+              style={{
+                border: "1px solid #2E3650",
+              }}
+            >
+              {proposal.rejectionFeedback &&
+                proposal.rejectionFeedback.length > 0 && (
+                  <>
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-wider mb-3"
+                      style={{ color: "#df5d5d" }}
+                    >
+                      Rejection Feedback
+                    </p>
+                    <div className="space-y-3 mb-4">
+                      {proposal.rejectionFeedback.map((fb, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <div
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                            style={{
+                              background: "linear-gradient(135deg,#3a1a1a,#2a1010)",
+                              color: "#df5d5d",
+                              border: "1.5px solid rgba(223,93,93,0.2)",
+                            }}
+                          >
+                            {fb.reviewer.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-white text-xs font-semibold">
+                                {fb.reviewer}
+                              </span>
+                              <span
+                                className="text-[9px]"
+                                style={{ color: "#7f7f7f" }}
+                              >
+                                {fb.time}
+                              </span>
+                            </div>
+                            <p
+                              className="text-xs leading-relaxed mt-0.5"
+                              style={{ color: "#b8adad" }}
+                            >
+                              {fb.message}
+                            </p>
+                            <button
+                              className="flex items-center gap-1 text-[10px] mt-1 hover:opacity-70 transition-opacity"
+                              style={{ color: "#7ee3ff" }}
+                            >
+                              <CornerDownLeft size={9} /> Reply
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              {/* Re-Validate */}
+              <button
+                onClick={() => dispatch(revalidateProposal(proposal))}
+                disabled={isValidating}
+                className="w-full py-2.5 rounded-[6px] text-xl font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
                 style={{
-                  border: "1px solid #2E3650",
+                  background: "#00485D",
+                  color: "#EFEFEF",
                 }}
               >
-                <p
-                  className="text-[10px] font-bold uppercase tracking-wider mb-3"
-                  style={{ color: "#df5d5d" }}
-                >
-                  Rejection Feedback
-                </p>
-                <div className="space-y-3">
-                  {proposal.rejectionFeedback.map((fb, i) => (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
-                        style={{
-                          background: "linear-gradient(135deg,#3a1a1a,#2a1010)",
-                          color: "#df5d5d",
-                          border: "1.5px solid rgba(223,93,93,0.2)",
-                        }}
+                {isValidating ? (
+                  <>
+                    <span
+                      className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                      style={{
+                        borderColor: "#7ee3ff",
+                        borderTopColor: "transparent",
+                      }}
+                    />
+                    Re-Validating...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={13} /> Re-Validate
+                  </>
+                )}
+              </button>
+              {isValidating && (
+                <div className="mt-3 space-y-1.5">
+                  {validationSteps.map((step, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      {step.done ? (
+                        <span style={{ color: "#64b883" }}>✓</span>
+                      ) : (
+                        <span
+                          className="inline-block w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
+                          style={{
+                            borderColor: "#7ee3ff",
+                            borderTopColor: "transparent",
+                          }}
+                        />
+                      )}
+                      <span
+                        style={{ color: step.done ? "#64b883" : "#b8adad" }}
                       >
-                        {fb.reviewer.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-white text-xs font-semibold">
-                            {fb.reviewer}
-                          </span>
-                          <span
-                            className="text-[9px]"
-                            style={{ color: "#7f7f7f" }}
-                          >
-                            {fb.time}
-                          </span>
-                        </div>
-                        <p
-                          className="text-xs leading-relaxed mt-0.5"
-                          style={{ color: "#b8adad" }}
-                        >
-                          {fb.message}
-                        </p>
-                        <button
-                          className="flex items-center gap-1 text-[10px] mt-1 hover:opacity-70 transition-opacity"
-                          style={{ color: "#7ee3ff" }}
-                        >
-                          <CornerDownLeft size={9} /> Reply
-                        </button>
-                      </div>
+                        {step.label}
+                      </span>
                     </div>
                   ))}
                 </div>
-                {/* Re-Validate */}
-                <button
-                  onClick={() => dispatch(revalidateProposal(proposal))}
-                  disabled={isValidating}
-                  className="w-full mt-4 py-2.5 rounded-[6px] text-xl font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{
-                    background: "#00485D",
-                    color: "#EFEFEF",
-                  }}
-                >
-                  {isValidating ? (
-                    <>
-                      <span
-                        className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                        style={{
-                          borderColor: "#7ee3ff",
-                          borderTopColor: "transparent",
-                        }}
-                      />
-                      Re-Validating...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw size={13} /> Re-Validate
-                    </>
-                  )}
-                </button>
-                {isValidating && (
-                  <div className="mt-3 space-y-1.5">
-                    {validationSteps.map((step, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs">
-                        {step.done ? (
-                          <span style={{ color: "#64b883" }}>✓</span>
-                        ) : (
-                          <span
-                            className="inline-block w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
-                            style={{
-                              borderColor: "#7ee3ff",
-                              borderTopColor: "transparent",
-                            }}
-                          />
-                        )}
-                        <span
-                          style={{ color: step.done ? "#64b883" : "#b8adad" }}
-                        >
-                          {step.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
           {/* Validation Report */}
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[] scrollbar-track-transparent px-6 py-4">

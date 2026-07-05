@@ -122,4 +122,6 @@ export interface ProposalsState {
   // Loading / Error
   loading: boolean;
   error: string | null;
+  isSavingDraft?: boolean;
+  isSendingApproval?: boolean;
 }
