@@ -19,7 +19,6 @@ const FILTERS: { label: string; value: FilterType }[] = [
   { label: "Under Review", value: "under_review" },
 ];
 
-// ── شكل الـ Draft/Rejected/UnderReview (endpoint: ValidationReport/created-by-status) ──
 interface ValidationReportApiItem {
   id: string;
   userQuestion: string;
@@ -100,7 +99,6 @@ const ProposalsGrid: React.FC = () => {
 
   const isDraftsView = activeFilter === "draft";
 
-  // ── Drafts (منفصلين لوحدهم) ──
   const {
     data: draftsResponse,
     isLoading: isDraftsLoading,
@@ -110,7 +108,6 @@ const ProposalsGrid: React.FC = () => {
     { skip: !isDraftsView },
   );
 
-  // ── Accepted + Rejected + Under Review (مجمّعين مع بعض) ──
   const {
     data: acceptedResponse,
     isLoading: isAcceptedLoading,
@@ -166,7 +163,6 @@ const ProposalsGrid: React.FC = () => {
       )
     : [];
 
-  // ── الثلاثة مصادر مجمّعين هنا، وبعدين نفلتر حسب الـ activeFilter ──
   const allNonDraftProposals: Proposal[] = [
     ...acceptedProposals,
     ...rejectedProposals,

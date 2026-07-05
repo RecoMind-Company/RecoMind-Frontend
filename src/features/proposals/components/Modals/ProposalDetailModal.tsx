@@ -440,7 +440,7 @@ const ProposalDetailModal: React.FC = () => {
                   onClick={() => setPlanDropdownOpen((v) => !v)}
                   className="flex items-center gap-2"
                 >
-                  <h2 className="text-white font-bold text-base text-start">
+                  <h2 className="text-white font-bold text-base text-start line-clamp-1">
                     {proposal.title}
                   </h2>
                   <ChevronDown
@@ -470,7 +470,7 @@ const ProposalDetailModal: React.FC = () => {
                     boxShadow: "0px 8px 20px 0px #160A0A80",
                     animation: "dropDown 0.15s ease",
                     left: "160px",
-                    top: "185px",
+                    top: "300px",
                     borderRadius: "12px",
                   }}
                   ref={(el) => {
