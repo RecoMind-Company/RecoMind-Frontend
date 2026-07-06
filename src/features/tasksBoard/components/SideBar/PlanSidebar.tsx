@@ -1,5 +1,5 @@
 import "./planSidebar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Megaphone, Target } from "lucide-react";
@@ -114,7 +114,7 @@ interface PlanSidebarProps {
 
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function PlanSidebar({ onCollapsedChange }: PlanSidebarProps) {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
@@ -122,6 +122,10 @@ export default function PlanSidebar({ onCollapsedChange }: PlanSidebarProps) {
     isLoading,
     isError,
   } = useGetAcceptedPlansQuery(undefined, { skip: !hasToken() });
+
+  useEffect(() => {
+    onCollapsedChange?.(false);
+  }, []);
 
   const activePlanId = searchParams.get("planId") || "";
   const plans = (acceptedPlansResponse as (AcceptedPlanWrapper | Plan)[])

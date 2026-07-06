@@ -174,7 +174,7 @@ const PlanTasksPage: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const pagePaddingLeft = sidebarCollapsed ? "224px" : "478px";
+  const pagePaddingLeft = sidebarCollapsed ? "86px" : "340px";
 
   // Load overrides from localStorage
   const [taskOverrides, setTaskOverrides] = useState<Record<string, TaskStatus>>(() => {
