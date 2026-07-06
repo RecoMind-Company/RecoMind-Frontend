@@ -56,8 +56,23 @@ const getAssignedUsers = (apiTask: any) => {
     apiTask.assignees ||
     apiTask.users ||
     [];
+  let users = Array.isArray(source) && source.length > 0
+    ? source.map(mapAssignedUser)
+    : [];
 
-  return Array.isArray(source) ? source.map(mapAssignedUser) : [];
+  if (users.length === 0) {
+    try {
+      const stored = JSON.parse(localStorage.getItem("taskAssignees") || "{}");
+      const taskId = apiTask.questId || apiTask.id;
+      if (stored[taskId]) {
+        users = stored[taskId];
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return users;
 };
 
 const transformApiTask = (apiTask: any, planName: string): Task => {
@@ -76,10 +91,12 @@ const transformApiTask = (apiTask: any, planName: string): Task => {
     status = "todo";
   }
 
-  const priorityRaw = String(apiTask.priority || "Medium").toUpperCase();
-  const priority =
-    priorityRaw === "HIGH" || priorityRaw === "LOW"
-      ? (priorityRaw as Task["priority"])
+  const rawPriority = apiTask.priority;
+  const priority: Task["priority"] =
+    rawPriority === 0 || rawPriority === "0" || (typeof rawPriority === "string" && rawPriority.toUpperCase() === "LOW")
+      ? "LOW"
+      : rawPriority === 2 || rawPriority === "2" || (typeof rawPriority === "string" && rawPriority.toUpperCase() === "HIGH")
+      ? "HIGH"
       : "MEDIUM";
 
   return {
