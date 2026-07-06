@@ -10,6 +10,7 @@ export interface TeamMember {
   name: string;
   role: string;
   avatar?: string;
+  teamId?: string;
 }
 
 export interface Comment {

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   X,
-  MessageSquare,
   CornerDownLeft,
   RefreshCw,
   Send,
@@ -24,6 +23,7 @@ import {
   sendDraftForApproval,
 } from "../../redux/proposalsSlice";
 import { motion } from "framer-motion";
+import CommentIcon from "@/assets/images/comments-line_svgrepo.com.png";
 
 const statusConfig = {
   accepted: {
@@ -828,7 +828,7 @@ const ProposalDetailModal: React.FC = () => {
                       border: "1px solid rgba(255,255,255,0.09)",
                     }}
                   >
-                    <MessageSquare size={13} color="#7ee3ff" />
+                    <img src={CommentIcon} alt="Comments" className="w-4 h-4" />
                     <span className="text-white text-xs font-semibold">Comments</span>
                     {proposal.comments.length > 0 && (
                       <span
@@ -937,7 +937,7 @@ const ProposalDetailModal: React.FC = () => {
                   }}
                   aria-label="Show comments"
                 >
-                  <MessageSquare size={16} />
+                  <img src={CommentIcon} alt="Comments" className="w-4 h-4" />
                   {proposal.comments.length > 0 && (
                     <span
                       className="absolute -top-1.5 -right-1.5 text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center"

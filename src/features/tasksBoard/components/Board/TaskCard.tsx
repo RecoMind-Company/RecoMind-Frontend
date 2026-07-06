@@ -163,16 +163,17 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </div>
           {/* Assignees */}
           {task.assignees.length > 0 && (
-            <div className="flex items-center gap-1 ">
+            <div className="flex items-center pl-1">
               {task.assignees.slice(0, 3).map((a, i) => (
                 <div
                   key={a.id}
                   title={a.name}
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0"
                   style={{
                     background: `hsl(${(i * 80 + 200) % 360}, 45%, 38%)`,
                     border: "1.5px solid rgba(255,255,255,0.12)",
-                    marginLeft: i > 0 ? "-5px" : "0",
+                    marginLeft: i > 0 ? "-6px" : "0",
+                    zIndex: task.assignees.length - i,
                   }}
                 >
                   {a.name.charAt(0)}

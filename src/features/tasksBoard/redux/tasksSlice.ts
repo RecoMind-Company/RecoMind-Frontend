@@ -861,6 +861,32 @@ export const taskSlice = createApi({
         { type: "Comment", id: questId }
       ],
     }),
+    getTeamMembers: builder.query({
+      query: () => ({
+        url: "/api/Team/team-members",
+        method: "GET",
+      }),
+      providesTags: [{ type: "Task", id: "TEAM_MEMBERS" }],
+    }),
+    addUserToTask: builder.mutation({
+      query: ({
+        userId,
+        questId,
+        teamId,
+      }: {
+        userId: string;
+        questId: string;
+        teamId: string;
+      }) => ({
+        url: "/api/user-tasks/add-user-to-task",
+        method: "POST",
+        body: { userId, questId, teamId },
+      }),
+      invalidatesTags: (result, error, { questId }) => [
+        { type: "Task", id: questId },
+        { type: "Task", id: "LIST" },
+      ],
+    }),
     updateTaskStatus: builder.mutation({
       query: ({ questId, status }: { questId: string; status: string }) => ({
         url: `/api/tasks/update/${questId}`,
@@ -942,6 +968,8 @@ export const {
   useGetAllTasksQuery,
   useGetAllTasksPersonalQuery,
   useAddTaskCommentMutation,
+  useGetTeamMembersQuery,
+  useAddUserToTaskMutation,
   useGetTaskCommentsQuery,
   useUpdateTaskStatusMutation,
   useGetTaskByIdQuery,

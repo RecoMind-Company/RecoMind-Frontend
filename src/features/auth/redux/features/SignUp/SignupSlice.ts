@@ -18,7 +18,6 @@ export const SignupFunction = createAsyncThunk(
   async (data: { email: string; fullName: string; password: string; role: string }, thunkApi) => {
     const { rejectWithValue } = thunkApi;
     try {
-      console.log(data);
       // Use the auth API endpoint
       const response = await fetch("https://api.recomind.site/api/Authentication/register", {
         method: "POST",
