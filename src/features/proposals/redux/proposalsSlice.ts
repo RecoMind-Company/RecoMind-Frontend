@@ -128,6 +128,79 @@ function mapPlanToProposal(plan: PlanData): Proposal {
   return proposal;
 }
 
+function proposalToValidationReportCacheItem(
+  proposal: Proposal,
+  status: 0 | 1,
+) {
+  return {
+    id: proposal.id,
+    userQuestion:
+      proposal.userQuestion || proposal.plan || proposal.description || proposal.title,
+    content: proposal.validationReportData ||
+      proposal.content || {
+        executive_summary: proposal.validationReport || proposal.description || "",
+        validation_decision: "",
+        confidence_score: 0,
+        key_findings: {
+          precedent_analysis: "",
+          resource_assessment: "",
+          market_trends: "",
+        },
+        recommendations: [],
+        risk_factors: [],
+        next_steps: [],
+      },
+    createdBy: proposal.createdBy || "",
+    createdAt: proposal.createdAt,
+    status: String(status),
+  };
+}
+
+function removeProposalFromCachedList(list: unknown, proposalId: string) {
+  if (!Array.isArray(list)) return;
+  const idx = list.findIndex((item) => item?.id === proposalId);
+  if (idx >= 0) list.splice(idx, 1);
+}
+
+function upsertProposalInCachedList(list: unknown, item: { id: string }) {
+  if (!Array.isArray(list)) return;
+  const idx = list.findIndex((entry) => entry?.id === item.id);
+  if (idx >= 0) {
+    list[idx] = item;
+  } else {
+    list.unshift(item);
+  }
+}
+
+function moveRevalidatedProposalInCache(
+  dispatch: (action: unknown) => void,
+  proposal: Proposal,
+  destination: "draft" | "under_review",
+) {
+  const reportStatus = destination === "draft" ? 1 : 0;
+  const cacheItem = proposalToValidationReportCacheItem(proposal, reportStatus);
+
+  dispatch(
+    taskSlice.util.updateQueryData(
+      "getRejectedProposals",
+      { limit: 10 },
+      (draft) => removeProposalFromCachedList(draft, proposal.id),
+    ),
+  );
+
+  dispatch(
+    taskSlice.util.updateQueryData(
+      destination === "draft" ? "getDraftProposals" : "getUnderReviewProposals",
+      destination === "draft" ? { limit: 4, status: 1 } : { limit: 10 },
+      (draft) => upsertProposalInCachedList(draft, cacheItem),
+    ),
+  );
+}
+
+function isExistingValidationReport(proposal: Proposal) {
+  return Boolean(proposal.userQuestion || proposal.createdBy || proposal.content);
+}
+
 // ================= ASYNC THUNKS =================
 export const fetchProposals = createAsyncThunk(
   "proposals/fetchProposals",
@@ -187,8 +260,19 @@ export const startValidation = createAsyncThunk(
 
 export const saveDraft = createAsyncThunk(
   "proposals/saveDraft",
-  async (proposal: Proposal, { rejectWithValue }) => {
+  async (proposal: Proposal, { dispatch, rejectWithValue }) => {
     try {
+      if (isExistingValidationReport(proposal)) {
+        await client.patch("/ValidationReport/update", {
+          id: proposal.id,
+          status: 1,
+        });
+
+        const updatedProposal = { ...proposal, status: "draft" as const };
+        moveRevalidatedProposalInCache(dispatch, updatedProposal, "draft");
+        return updatedProposal;
+      }
+
       const content = proposal.validationReportData || {
         executive_summary: proposal.description || proposal.plan || "",
         validation_decision: "",
@@ -207,7 +291,8 @@ export const saveDraft = createAsyncThunk(
         content,
         status: 1,
       });
-      return { ...proposal, status: "draft" as const };
+      const updatedProposal = { ...proposal, status: "draft" as const };
+      return updatedProposal;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to save draft",
@@ -218,8 +303,19 @@ export const saveDraft = createAsyncThunk(
 
 export const sendForApproval = createAsyncThunk(
   "proposals/sendForApproval",
-  async (proposal: Proposal, { rejectWithValue }) => {
+  async (proposal: Proposal, { dispatch, rejectWithValue }) => {
     try {
+      if (isExistingValidationReport(proposal)) {
+        await client.patch("/ValidationReport/update", {
+          id: proposal.id,
+          status: 0,
+        });
+
+        const updatedProposal = { ...proposal, status: "under_review" as const };
+        moveRevalidatedProposalInCache(dispatch, updatedProposal, "under_review");
+        return updatedProposal;
+      }
+
       const content = proposal.validationReportData || {
         executive_summary: proposal.description || proposal.plan || "",
         validation_decision: "",
@@ -237,7 +333,8 @@ export const sendForApproval = createAsyncThunk(
         userRequest: proposal.plan || proposal.description || "",
         content,
       });
-      return { ...proposal, status: "under_review" as const };
+      const updatedProposal = { ...proposal, status: "under_review" as const };
+      return updatedProposal;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to send proposal",
