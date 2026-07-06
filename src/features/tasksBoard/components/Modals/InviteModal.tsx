@@ -2,31 +2,67 @@ import React, { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/app/store";
-import { closeInviteModal } from "../../redux/tasksSlice";
+import {
+  closeInviteModal,
+  useAddUserToTaskMutation,
+  useGetTeamMembersQuery,
+} from "../../redux/tasksSlice";
 import type { TeamMember } from "../../types";
 
-const MOCK_MEMBERS: TeamMember[] = [
-  { id: "m1", name: "Ahmed Mohammed", role: "Developer" },
-  { id: "m2", name: "Ramadan Alaa", role: "Marketer" },
-  { id: "m3", name: "Ali Hasan", role: "Designer" },
-  { id: "m4", name: "Saleh Zaki", role: "Project Manager" },
-];
-
-interface InviteModalProps {
-  onConfirm: (members: TeamMember[]) => void;
+interface TeamMembersResponse {
+  teamId: string;
+  employeesId: string[];
 }
 
-const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
+interface InviteModalProps {
+  questId?: string;
+  onClose?: () => void;
+  onConfirm: (members: TeamMember[]) => void | Promise<void>;
+}
+
+const toTitleCase = (value: string) =>
+  value
+    .split(/[.\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+
+const mapEmployeeToMember = (employeeId: string, teamId: string): TeamMember => {
+  const parts = employeeId.split("-");
+  const department = parts[0] || "Team";
+  const rawName = parts[1] || employeeId;
+  const rawRole = parts[2] || "member";
+
+  return {
+    id: employeeId,
+    name: toTitleCase(rawName),
+    role: `${toTitleCase(department)} ${toTitleCase(rawRole)}`,
+    teamId,
+  };
+};
+
+const InviteModal: React.FC<InviteModalProps> = ({ questId, onClose, onConfirm }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { data, isLoading, isError } = useGetTeamMembersQuery(undefined);
+  const [addUserToTask, { isLoading: isAssigning }] = useAddUserToTaskMutation();
 
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");
 
-  const filteredMembers = useMemo(() => {
-    return MOCK_MEMBERS.filter((member) =>
-      member.name.toLowerCase().includes(search.toLowerCase())
+  const members = useMemo(() => {
+    const response = data as TeamMembersResponse | undefined;
+    if (!response?.teamId || !Array.isArray(response.employeesId)) return [];
+    return response.employeesId.map((employeeId) =>
+      mapEmployeeToMember(employeeId, response.teamId),
     );
-  }, [search]);
+  }, [data]);
+
+  const filteredMembers = useMemo(() => {
+    const normalizedSearch = search.toLowerCase();
+    return members.filter((member) =>
+      `${member.name} ${member.role} ${member.id}`.toLowerCase().includes(normalizedSearch),
+    );
+  }, [members, search]);
 
   const toggle = (id: string) => {
     setSelected((prev) =>
@@ -34,12 +70,30 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
     );
   };
 
-  const handleAdd = () => {
-    const members = MOCK_MEMBERS.filter((_, index) =>
-      selected.includes(`m${index + 1}-${index}`)
-    );
+  const handleAdd = async () => {
+    const selectedMembers = members.filter((member) => selected.includes(member.id));
 
-    onConfirm(members);
+    try {
+      if (questId) {
+        for (const member of selectedMembers) {
+          await addUserToTask({
+              userId: member.id,
+              questId,
+              teamId: member.teamId || "",
+          }).unwrap();
+        }
+      }
+
+      await onConfirm(selectedMembers);
+      onClose?.();
+      dispatch(closeInviteModal());
+    } catch (err) {
+      console.error("Failed to assign team members:", err);
+    }
+  };
+
+  const handleClose = () => {
+    onClose?.();
     dispatch(closeInviteModal());
   };
 
@@ -65,7 +119,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
           </span>
 
           <button
-            onClick={() => dispatch(closeInviteModal())}
+            onClick={handleClose}
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition"
           >
             <X size={18} color="#ffffff" />
@@ -118,20 +172,31 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
             scrollbar-thumb-rounded-full
           "
         >
-          {filteredMembers.length === 0 && (
+          {isLoading && (
+            <div className="py-8 text-center text-[#7F8499] text-sm">
+              Loading team members...
+            </div>
+          )}
+
+          {isError && !isLoading && (
+            <div className="py-8 text-center text-[#df5d5d] text-sm">
+              Failed to load team members
+            </div>
+          )}
+
+          {!isLoading && !isError && filteredMembers.length === 0 && (
             <div className="py-8 text-center text-[#7F8499] text-sm">
               No team members found
             </div>
           )}
 
-          {filteredMembers.map((member, index) => {
-            const uniqueId = `${member.id}-${index}`;
-            const isSelected = selected.includes(uniqueId);
+          {!isLoading && !isError && filteredMembers.map((member, index) => {
+            const isSelected = selected.includes(member.id);
 
             return (
               <button
-                key={uniqueId}
-                onClick={() => toggle(uniqueId)}
+                key={member.id}
+                onClick={() => toggle(member.id)}
                 className="w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left"
                 style={{
                   background: "#161C2D",
@@ -195,14 +260,14 @@ const InviteModal: React.FC<InviteModalProps> = ({ onConfirm }) => {
         <div className="p-4 pt-2">
           <button
             onClick={handleAdd}
-            disabled={selected.length === 0}
+            disabled={selected.length === 0 || isAssigning}
             className="w-full h-11 rounded-xl font-semibold text-[#060B1B] transition-all disabled:opacity-40 hover:opacity-90"
             style={{
               background: "linear-gradient(180deg,#7EE3FF,#69CAE6)",
             }}
           >
-            Add
-            {selected.length > 0 && ` (${selected.length})`}
+            {isAssigning ? "Assigning..." : "Add"}
+            {!isAssigning && selected.length > 0 && ` (${selected.length})`}
           </button>
         </div>
       </div>

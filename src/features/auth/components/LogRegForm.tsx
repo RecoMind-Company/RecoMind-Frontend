@@ -45,7 +45,6 @@ const LogRegForm = ({ title }: LogRegFormProps) => {
   });
 
   const onSubmit = async (data: AuthFormData) => {
-    console.log(data);
     try {
       if (isSignUp) {
         const res = await registerMutation({ ...data, role: "admin" }).unwrap();
