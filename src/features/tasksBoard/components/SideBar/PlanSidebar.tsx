@@ -114,7 +114,7 @@ interface PlanSidebarProps {
 
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function PlanSidebar({ onCollapsedChange }: PlanSidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
