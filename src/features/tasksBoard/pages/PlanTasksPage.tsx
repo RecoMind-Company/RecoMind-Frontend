@@ -115,8 +115,10 @@ const PlanTasksPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>("All");
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pagePaddingLeft = sidebarCollapsed ? "86px" : "340px";
 
   // Load overrides from localStorage
   const [taskOverrides, setTaskOverrides] = useState<Record<string, TaskStatus>>(() => {
@@ -206,10 +208,10 @@ const PlanTasksPage: React.FC = () => {
   if (isLoading) {
     return (
       <>
-        <PlanSidebar />
+        <PlanSidebar onCollapsedChange={setSidebarCollapsed} />
         <div
           className="flex items-center justify-center min-h-[60vh]"
-          style={{ paddingLeft: "80px" }}
+          style={{ paddingLeft: pagePaddingLeft, transition: "padding-left 0.35s ease" }}
         >
           <div
             className="w-10 h-10 rounded-full border-2 animate-spin"
@@ -222,11 +224,11 @@ const PlanTasksPage: React.FC = () => {
 
   return (
     <>
-      <PlanSidebar />
+      <PlanSidebar onCollapsedChange={setSidebarCollapsed} />
 
       <div
         className="flex flex-col py-6 md:px-8 overflow-x-hidden"
-        style={{ paddingLeft: "80px" }}
+        style={{ paddingLeft: pagePaddingLeft, transition: "padding-left 0.35s ease" }}
       >
         {/* ===== HEADER ===== */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
