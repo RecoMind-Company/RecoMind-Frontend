@@ -484,9 +484,7 @@ const ProposalDetailModal: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden mr-4">
           {/* Header */}
           <div
-            className="flex items-start justify-between px-6 py-5 shrink-0"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-          >
+            className="flex items-start justify-between px-6 py-5 shrink-0">
             <div ref={dropdownRef} className="relative">
               <div className="flex items-center gap-2 mb-1">
                 <button
@@ -592,15 +590,6 @@ const ProposalDetailModal: React.FC = () => {
                 </div>
               )}
 
-              <p
-                className="text-[10px] font-semibold uppercase tracking-wider"
-                style={{ color: "#7f7f7f" }}
-              >
-                Plan
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: "#b8adad" }}>
-                {proposal.plan}
-              </p>
             </div>
           </div>
 
@@ -612,6 +601,20 @@ const ProposalDetailModal: React.FC = () => {
                 border: "1px solid #2E3650",
               }}
             >
+              {proposal.description && (
+                <div className="mb-4">
+                  <p
+                    className="text-[10px] font-bold uppercase tracking-wider mb-2"
+                    style={{ color: "#7f7f7f" }}
+                  >
+                    Description
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: "#b8adad" }}>
+                    {proposal.description}
+                  </p>
+                </div>
+              )}
+
               {proposal.rejectionFeedback &&
                 proposal.rejectionFeedback.length > 0 && (
                   <>
