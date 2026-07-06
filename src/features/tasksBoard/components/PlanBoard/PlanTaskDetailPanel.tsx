@@ -244,19 +244,6 @@ const PlanTaskDetailPanel: React.FC<PlanTaskDetailPanelProps> = ({ task, onClose
             <div>
               <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold">Members</p>
-                <button
-                  type="button"
-                  onClick={() => setInviteOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-colors hover:bg-white/10"
-                  style={{
-                    color: "#7ee3ff",
-                    border: "1px solid rgba(126,227,255,0.2)",
-                    background: "rgba(126,227,255,0.08)",
-                  }}
-                >
-                  <UserPlus size={12} />
-                  Assign
-                </button>
               </div>
               {liveTask.assignees && liveTask.assignees.length > 0 ? (
                 <div className="space-y-2">

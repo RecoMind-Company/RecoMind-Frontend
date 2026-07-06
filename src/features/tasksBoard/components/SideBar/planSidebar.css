@@ -1,5 +1,5 @@
 .plan-sidebar {
-  min-height: 100vh;
+  height: 100vh;
   width: 324px;
   position: fixed;
   left: 134px;
@@ -325,10 +325,12 @@
 }
 
 @keyframes ps-shimmer {
+
   0%,
   100% {
     opacity: 0.45;
   }
+
   50% {
     opacity: 0.9;
   }
