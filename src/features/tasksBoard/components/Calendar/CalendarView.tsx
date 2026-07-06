@@ -19,6 +19,65 @@ import { toLocalISODate } from "../../utils/dateUtils";
 
 const toISO = (d: Date) => toLocalISODate(d);
 
+const toTitleCase = (value: string) =>
+  value
+    .split(/[.\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+
+const mapAssignedUser = (assignedUser: any, index: number) => {
+  const userId =
+    typeof assignedUser === "string"
+      ? assignedUser
+      : assignedUser?.userId ||
+        assignedUser?.employeeId ||
+        assignedUser?.id ||
+        assignedUser?.user?.id ||
+        `assigned-${index}`;
+  const parts = String(userId).split("-");
+  const rawName =
+    assignedUser?.name ||
+    assignedUser?.fullName ||
+    assignedUser?.userName ||
+    assignedUser?.user?.name ||
+    parts[1] ||
+    String(userId);
+  const rawRole = assignedUser?.role || parts[2] || "member";
+
+  return {
+    id: String(userId),
+    name: toTitleCase(String(rawName)) || String(userId),
+    role: toTitleCase(String(rawRole)) || "Member",
+  };
+};
+
+const getAssignedUsers = (apiTask: any) => {
+  const source =
+    apiTask.userAssignedQuests ||
+    apiTask.assignedUsers ||
+    apiTask.assignees ||
+    apiTask.users ||
+    [];
+  let users = Array.isArray(source) && source.length > 0
+    ? source.map(mapAssignedUser)
+    : [];
+
+  if (users.length === 0) {
+    try {
+      const stored = JSON.parse(localStorage.getItem("taskAssignees") || "{}");
+      const taskId = apiTask.questId || apiTask.id;
+      if (stored[taskId]) {
+        users = stored[taskId];
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return users;
+};
+
 const parseMonth = (m: string) => {
   const parts = m.split("-");
   const year = Number(parts[0]) || new Date().getFullYear();
@@ -57,10 +116,12 @@ const transformApiTask = (
     status = "todo";
   }
 
-  const priorityRaw = String(apiTask.priority || "Medium").toUpperCase();
-  const priority =
-    priorityRaw === "HIGH" || priorityRaw === "LOW"
-      ? (priorityRaw as Task["priority"])
+  const rawPriority = apiTask.priority;
+  const priority: Task["priority"] =
+    rawPriority === 0 || rawPriority === "0" || (typeof rawPriority === "string" && rawPriority.toUpperCase() === "LOW")
+      ? "LOW"
+      : rawPriority === 2 || rawPriority === "2" || (typeof rawPriority === "string" && rawPriority.toUpperCase() === "HIGH")
+      ? "HIGH"
       : "MEDIUM";
 
   return {
@@ -82,12 +143,7 @@ const transformApiTask = (
     completed: apiTask.status === "completed",
     isLate: isOverdue,
     lateDisplay: isOverdue ? "Overdue" : undefined,
-    assignees:
-      apiTask.userAssignedQuests?.map((userId: string) => ({
-        id: userId,
-        name: `User ${userId}`,
-        role: "Member",
-      })) || [],
+    assignees: getAssignedUsers(apiTask),
     comments: [],
   };
 };
