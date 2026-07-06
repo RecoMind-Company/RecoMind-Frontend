@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { X, Clock, Calendar, CornerDownLeft } from "lucide-react";
+import { X, Clock, Calendar, CornerDownLeft, UserPlus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAddTaskCommentMutation, useGetTaskCommentsQuery, useGetTaskByIdQuery } from "../../redux/tasksSlice";
 import CommentIcon from "../../../../assets/images/comments-line_svgrepo.com.png";
-import type { Task } from "../../types";
+import InviteModal from "../Modals/InviteModal";
+import type { Task, TeamMember } from "../../types";
 
 interface ApiComment {
   id: string;
@@ -26,9 +27,54 @@ const priorityConfig = {
   LOW: { color: "#7ee3ff", bg: "rgba(126,227,255,0.10)", border: "rgba(126,227,255,0.2)" },
 };
 
+const toTitleCase = (value: string) =>
+  value
+    .split(/[.\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+
+const memberFromAssignedUser = (assignedUser: any, index: number): TeamMember => {
+  const userId =
+    typeof assignedUser === "string"
+      ? assignedUser
+      : assignedUser?.userId ||
+        assignedUser?.employeeId ||
+        assignedUser?.id ||
+        assignedUser?.user?.id ||
+        `assigned-${index}`;
+  const parts = String(userId).split("-");
+  const rawName =
+    assignedUser?.name ||
+    assignedUser?.fullName ||
+    assignedUser?.userName ||
+    assignedUser?.user?.name ||
+    parts[1] ||
+    String(userId);
+  const rawRole = assignedUser?.role || parts[2] || "member";
+
+  return {
+    id: String(userId),
+    name: toTitleCase(String(rawName)) || String(userId),
+    role: toTitleCase(String(rawRole)) || "Member",
+  };
+};
+
+const getAssignedUsers = (apiTask: any, fallback: TeamMember[]) => {
+  const source =
+    apiTask?.userAssignedQuests ||
+    apiTask?.assignedUsers ||
+    apiTask?.assignees ||
+    apiTask?.users;
+
+  if (!Array.isArray(source)) return fallback;
+  return source.map(memberFromAssignedUser);
+};
+
 const PlanTaskDetailPanel: React.FC<PlanTaskDetailPanelProps> = ({ task, onClose }) => {
   const [commentText, setCommentText] = useState("");
   const [commentsOpen, setCommentsOpen] = useState(true);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [addTaskComment, { isLoading: isAddingComment }] = useAddTaskCommentMutation();
 
   const taskId = task?.id || "";
@@ -44,6 +90,7 @@ const PlanTaskDetailPanel: React.FC<PlanTaskDetailPanelProps> = ({ task, onClose
         description: freshTaskData.description || task.description,
         status: freshTaskData.status === "completed" ? "review" : task.status,
         completed: freshTaskData.status === "completed",
+        assignees: getAssignedUsers(freshTaskData, task.assignees),
       }
     : task;
 
@@ -194,9 +241,24 @@ const PlanTaskDetailPanel: React.FC<PlanTaskDetailPanelProps> = ({ task, onClose
               </div>
             )}
 
-            {liveTask.assignees && liveTask.assignees.length > 0 && (
-              <div>
-                <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold mb-3">Members</p>
+            <div>
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-[#7f7f7f] text-[10px] uppercase tracking-wider font-semibold">Members</p>
+                <button
+                  type="button"
+                  onClick={() => setInviteOpen(true)}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-colors hover:bg-white/10"
+                  style={{
+                    color: "#7ee3ff",
+                    border: "1px solid rgba(126,227,255,0.2)",
+                    background: "rgba(126,227,255,0.08)",
+                  }}
+                >
+                  <UserPlus size={12} />
+                  Assign
+                </button>
+              </div>
+              {liveTask.assignees && liveTask.assignees.length > 0 ? (
                 <div className="space-y-2">
                   {liveTask.assignees.map((member, i) => (
                     <div key={member.id + i} className="flex items-center gap-2.5">
@@ -213,8 +275,10 @@ const PlanTaskDetailPanel: React.FC<PlanTaskDetailPanelProps> = ({ task, onClose
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <p className="text-[#7f7f7f] text-xs">No members assigned yet</p>
+              )}
+            </div>
           </div>
 
           <AnimatePresence initial={false}>
@@ -309,6 +373,15 @@ const PlanTaskDetailPanel: React.FC<PlanTaskDetailPanelProps> = ({ task, onClose
           </AnimatePresence>
         </div>
       </div>
+      {inviteOpen && (
+        <InviteModal
+          questId={liveTask.id}
+          onClose={() => setInviteOpen(false)}
+          onConfirm={() => {
+            setInviteOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

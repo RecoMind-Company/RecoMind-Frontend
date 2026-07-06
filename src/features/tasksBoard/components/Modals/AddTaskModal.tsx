@@ -5,7 +5,12 @@ import { useForm, Controller, type SubmitHandler } from "react-hook-form";
 import type { AppDispatch, RootState } from "@/app/store";
 import InviteModal from "./InviteModal";
 import type { TaskPriority, TeamMember } from "../../types";
-import { useAddTaskMutation, closeAddTaskModal, openInviteModal, taskSlice } from "../../redux/tasksSlice";
+import {
+  useAddTaskMutation,
+  closeAddTaskModal,
+  openInviteModal,
+  taskSlice,
+} from "../../redux/tasksSlice";
 
 const priorityOptions: { label: string; value: TaskPriority; color: string }[] = [
   { label: "HIGH",   value: "HIGH",   color: "#df5d5d" },
@@ -28,6 +33,7 @@ const priorityMap: Record<TaskPriority, number> = {
   MEDIUM: 1,
   HIGH: 2,
 };
+
 const AddTaskModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { showInviteModal } = useSelector((s: RootState) => s.tasks);

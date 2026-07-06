@@ -16,6 +16,50 @@ const COLUMNS: { status: TaskStatus; label: string; dotColor: string }[] = [
   { status: "review", label: "Review/Done", dotColor: "#64b883" },
 ];
 
+const toTitleCase = (value: string) =>
+  value
+    .split(/[.\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+
+const mapAssignedUser = (assignedUser: any, index: number) => {
+  const userId =
+    typeof assignedUser === "string"
+      ? assignedUser
+      : assignedUser?.userId ||
+        assignedUser?.employeeId ||
+        assignedUser?.id ||
+        assignedUser?.user?.id ||
+        `assigned-${index}`;
+  const parts = String(userId).split("-");
+  const rawName =
+    assignedUser?.name ||
+    assignedUser?.fullName ||
+    assignedUser?.userName ||
+    assignedUser?.user?.name ||
+    parts[1] ||
+    String(userId);
+  const rawRole = assignedUser?.role || parts[2] || "member";
+
+  return {
+    id: String(userId),
+    name: toTitleCase(String(rawName)) || String(userId),
+    role: toTitleCase(String(rawRole)) || "Member",
+  };
+};
+
+const getAssignedUsers = (apiTask: any) => {
+  const source =
+    apiTask.userAssignedQuests ||
+    apiTask.assignedUsers ||
+    apiTask.assignees ||
+    apiTask.users ||
+    [];
+
+  return Array.isArray(source) ? source.map(mapAssignedUser) : [];
+};
+
 const transformApiTask = (apiTask: any, planName: string): Task => {
   const now = new Date();
   const deadlineStr = apiTask.deadLine || apiTask.deadline || apiTask.dueDate;
@@ -54,12 +98,7 @@ const transformApiTask = (apiTask: any, planName: string): Task => {
     completed: apiTask.status === "completed",
     isLate: isOverdue || undefined,
     lateDisplay: isOverdue ? "Overdue" : undefined,
-    assignees:
-      apiTask.userAssignedQuests?.map((userId: string) => ({
-        id: userId,
-        name: `User ${userId}`,
-        role: "Member",
-      })) || [],
+    assignees: getAssignedUsers(apiTask),
     comments: [],
   };
 };
