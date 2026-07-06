@@ -23,6 +23,7 @@ import {
   revalidateProposal,
   sendDraftForApproval,
 } from "../../redux/proposalsSlice";
+import { motion } from "framer-motion";
 
 const statusConfig = {
   accepted: {
@@ -155,6 +156,7 @@ const ProposalDetailModal: React.FC = () => {
   } = useSelector((s: RootState) => s.proposals);
   const [commentText, setCommentText] = useState("");
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(true);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -534,7 +536,7 @@ const ProposalDetailModal: React.FC = () => {
         `}</style>
 
         {/* LEFT PANEL */}
-        <div className="flex-1 flex flex-col overflow-hidden mr-4">
+        <div className={`flex-1 flex flex-col overflow-hidden ${commentsOpen ? "" : "mr-0"}`}>
           {/* Header */}
           <div
             className="flex items-start justify-between px-6 py-5 shrink-0">
@@ -802,115 +804,153 @@ const ProposalDetailModal: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL: COMMENTS */}
-        <div className="w-1/2 flex flex-col shrink-0 bg-[#061022] rounded-xl">
-          <div
-            className="flex items-center justify-end gap-2 px-5 py-5 shrink-0"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        {showComments && (
+          <motion.div
+            animate={{
+              width: commentsOpen ? 430 : 56,
+              marginLeft: commentsOpen ? 16 : 12,
+              backgroundColor: commentsOpen ? "#061022" : "rgba(6,16,34,0)",
+            }}
+            transition={{ duration: 0.28, ease: "easeInOut" }}
+            className="flex flex-col shrink-0 overflow-hidden rounded-xl"
           >
-            <div
-              className="flex items-center gap-2 px-4 py-2 rounded-xl"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.09)",
-              }}
-            >
-              <MessageSquare size={13} color="#7ee3ff" />
-              <span className="text-white text-xs font-semibold">Comments</span>
-              {proposal.comments.length > 0 && (
-                <span
-                  className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "#7ee3ff", color: "#060b1b" }}
-                >
-                  {proposal.comments.length}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto scroll-thin px-4 py-3 space-y-4">
-            {proposal.comments.length === 0 ? (
-              <p
-                className="text-center text-xs py-8"
-                style={{ color: "#7f7f7f" }}
-              >
-                No comments yet
-              </p>
-            ) : (
-              proposal.comments.map((c) => (
+            {commentsOpen ? (
+              <div className="flex flex-col h-full" style={{ width: 430 }}>
                 <div
-                  key={c.id}
-                  className="flex items-start gap-2.5 p-2.5 bg-[#0E152A] rounded-lg"
+                  className="flex items-center justify-end gap-2 px-5 py-5 shrink-0"
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
                 >
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                  <button
+                    onClick={() => setCommentsOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors hover:bg-white/10"
                     style={{
-                      background: "linear-gradient(135deg,#2a4a7f,#1a3060)",
-                      color: "#7ee3ff",
-                      border: "1.5px solid rgba(126,227,255,0.15)",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.09)",
                     }}
                   >
-                    {c.author.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-baseline flex-col gap-1 mb-0.5">
-                      <span className="text-white text-xs font-semibold">
-                        {c.author}
+                    <MessageSquare size={13} color="#7ee3ff" />
+                    <span className="text-white text-xs font-semibold">Comments</span>
+                    {proposal.comments.length > 0 && (
+                      <span
+                        className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ background: "#7ee3ff", color: "#060b1b" }}
+                      >
+                        {proposal.comments.length}
                       </span>
-                      <span className="text-[9px]" style={{ color: "#7f7f7f" }}>
-                        {c.time}
-                      </span>
-                    </div>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto scroll-thin px-4 py-3 space-y-4">
+                  {proposal.comments.length === 0 ? (
                     <p
-                      className="text-xs leading-relaxed"
-                      style={{ color: "#b8adad" }}
+                      className="text-center text-xs py-8"
+                      style={{ color: "#7f7f7f" }}
                     >
-                      {c.text}
+                      No comments yet
                     </p>
+                  ) : (
+                    proposal.comments.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-start gap-2.5 p-2.5 bg-[#0E152A] rounded-lg"
+                      >
+                        <div
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                          style={{
+                            background: "linear-gradient(135deg,#2a4a7f,#1a3060)",
+                            color: "#7ee3ff",
+                            border: "1.5px solid rgba(126,227,255,0.15)",
+                          }}
+                        >
+                          {c.author.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline flex-col gap-1 mb-0.5">
+                            <span className="text-white text-xs font-semibold">
+                              {c.author}
+                            </span>
+                            <span className="text-[9px]" style={{ color: "#7f7f7f" }}>
+                              {c.time}
+                            </span>
+                          </div>
+                          <p
+                            className="text-xs leading-relaxed"
+                            style={{ color: "#b8adad" }}
+                          >
+                            {c.text}
+                          </p>
+                          <button
+                            className="flex items-center justify-end w-full gap-1 text-[10px] mt-1 hover:opacity-70 transition-opacity"
+                            style={{ color: "#7ee3ff" }}
+                          >
+                            <CornerDownLeft size={9} /> Reply
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="px-4 pb-4 pt-2 shrink-0">
+                  <div className="relative">
+                    <input
+                      style={{
+                        width: "100%",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: "10px",
+                        padding: "9px 36px 9px 12px",
+                        color: "#eeeeee",
+                        fontSize: "11px",
+                        outline: "none",
+                      }}
+                      placeholder="Enter Your Comment Here..."
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleComment();
+                        }
+                      }}
+                    />
                     <button
-                      className="flex items-center justify-end w-full gap-1 text-[10px] mt-1 hover:opacity-70 transition-opacity"
-                      style={{ color: "#7ee3ff" }}
+                      onClick={handleComment}
+                      disabled={!commentText.trim()}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 disabled:opacity-30 transition-opacity"
                     >
-                      <CornerDownLeft size={9} /> Reply
+                      <CornerDownLeft size={13} color="#7ee3ff" />
                     </button>
                   </div>
                 </div>
-              ))
+              </div>
+            ) : (
+              <div className="flex h-full w-14 items-start justify-center pt-5">
+                <button
+                  onClick={() => setCommentsOpen(true)}
+                  className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    color: "#7ee3ff",
+                  }}
+                  aria-label="Show comments"
+                >
+                  <MessageSquare size={16} />
+                  {proposal.comments.length > 0 && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center"
+                      style={{ background: "#7ee3ff", color: "#060b1b" }}
+                    >
+                      {proposal.comments.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
-          </div>
-
-          <div className="px-4 pb-4 pt-2 shrink-0">
-            <div className="relative">
-              <input
-                style={{
-                  width: "100%",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: "10px",
-                  padding: "9px 36px 9px 12px",
-                  color: "#eeeeee",
-                  fontSize: "11px",
-                  outline: "none",
-                }}
-                placeholder="Enter Your Comment Here..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleComment();
-                  }
-                }}
-              />
-              <button
-                onClick={handleComment}
-                disabled={!commentText.trim()}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 disabled:opacity-30 transition-opacity"
-              >
-                <CornerDownLeft size={13} color="#7ee3ff" />
-              </button>
-            </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
