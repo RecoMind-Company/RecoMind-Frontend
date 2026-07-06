@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/app/store";
+import type { ValidationReportData } from "../../types";
 import {
   closeProposalModal,
   saveDraft,
@@ -94,6 +95,54 @@ const DetailListSection: React.FC<{ title: string; items?: string[] }> = ({ titl
   );
 };
 
+const formatDetailedValidationReport = (content?: ValidationReportData): string => {
+  if (!content) return "";
+
+  const lines = [
+    "Executive Summary",
+    content.executive_summary,
+    "",
+    "Validation Decision",
+    content.validation_decision,
+    "",
+    `Confidence Score: ${content.confidence_score ?? 0}`,
+    "",
+    "Key Findings",
+    "",
+    `1. Precedent Analysis\n${content.key_findings?.precedent_analysis || ""}`,
+    "",
+    `2. Resource Assessment\n${content.key_findings?.resource_assessment || ""}`,
+    "",
+    `3. Market Trends\n${content.key_findings?.market_trends || ""}`,
+  ];
+
+  if (content.recommendations?.length) {
+    lines.push(
+      "",
+      "Recommendations",
+      ...content.recommendations.map((item, i) => `${i + 1}. ${item}`),
+    );
+  }
+
+  if (content.risk_factors?.length) {
+    lines.push(
+      "",
+      "Risk Factors",
+      ...content.risk_factors.map((item, i) => `${i + 1}. ${item}`),
+    );
+  }
+
+  if (content.next_steps?.length) {
+    lines.push(
+      "",
+      "Next Steps",
+      ...content.next_steps.map((item, i) => `${i + 1}. ${item}`),
+    );
+  }
+
+  return lines.filter((line) => line !== undefined && line !== null).join("\n");
+};
+
 const ProposalDetailModal: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -122,6 +171,10 @@ const ProposalDetailModal: React.FC = () => {
   if (!showProposalModal || !selectedProposal) return null;
 
   const proposal = selectedProposal;
+  const validationReportText =
+    formatDetailedValidationReport(proposal.content || proposal.validationReportData) ||
+    proposal.validationReport ||
+    "No validation report available.";
   const s = statusConfig[proposal.status];
   const isRejected = proposal.status === "rejected";
   const isDraft = proposal.status === "draft";
@@ -485,16 +538,17 @@ const ProposalDetailModal: React.FC = () => {
           {/* Header */}
           <div
             className="flex items-start justify-between px-6 py-5 shrink-0">
-            <div ref={dropdownRef} className="relative">
-              <div className="flex items-center gap-2 mb-1">
+            <div ref={dropdownRef} className="relative w-full min-w-0">
+              <div className="flex items-center gap-3 mb-1 min-w-0">
                 <button
                   onClick={() => setPlanDropdownOpen((v) => !v)}
-                  className="flex items-center gap-2"
+                  className="flex min-w-0 flex-1 items-center gap-2"
                 >
-                  <h2 className="text-white font-bold text-base text-start line-clamp-1">
+                  <h2 className="text-white font-bold text-base text-start truncate min-w-0">
                     {proposal.title}
                   </h2>
                   <ChevronDown
+                    className="shrink-0"
                     size={16}
                     color="#7ee3ff"
                     style={{
@@ -504,32 +558,23 @@ const ProposalDetailModal: React.FC = () => {
                   />
                 </button>
                 <span
-                  className="text-[10px] font-semibold rounded-md w-[20%]"
+                  className="shrink-0 whitespace-nowrap text-lg font-semibold rounded-md"
                   style={{ color: s.color }}
                 >
                   {s.label}
                 </span>
               </div>
 
-              {/* Dropdown — positioned above, outside modal overflow */}
+              {/* Dropdown */}
               {planDropdownOpen && (
                 <div
-                  className="fixed rounded-xl z-100"
+                  className="absolute left-0 top-full mt-2 rounded-xl z-100"
                   style={{
                     width: 324,
                     background: "#141A2B",
                     boxShadow: "0px 8px 20px 0px #160A0A80",
                     animation: "dropDown 0.15s ease",
-                    left: "160px",
-                    top: "300px",
                     borderRadius: "12px",
-                  }}
-                  ref={(el) => {
-                    if (el && dropdownRef.current) {
-                      const rect = dropdownRef.current.getBoundingClientRect();
-                      el.style.left = `${rect.left - 40}px`;
-                      el.style.top = `${rect.top - 150}px`;
-                    }
                   }}
                 >
                   <style>{`
@@ -595,134 +640,152 @@ const ProposalDetailModal: React.FC = () => {
 
           {/* Rejection Feedback */}
           {isRejected && (
-            <div
-              className="mx-6 mt-4 rounded-xl p-4 shrink-0"
-              style={{
-                border: "1px solid #2E3650",
-              }}
-            >
+            <div className="mx-6 mt-4 shrink-0">
               {proposal.description && (
-                <div className="mb-4">
+                <>
                   <p
                     className="text-[10px] font-bold uppercase tracking-wider mb-2"
                     style={{ color: "#7f7f7f" }}
                   >
                     Description
                   </p>
-                  <p className="text-xs leading-relaxed" style={{ color: "#b8adad" }}>
-                    {proposal.description}
-                  </p>
-                </div>
+                </>
               )}
 
-              {proposal.rejectionFeedback &&
-                proposal.rejectionFeedback.length > 0 && (
-                  <>
-                    <p
-                      className="text-[10px] font-bold uppercase tracking-wider mb-3"
-                      style={{ color: "#df5d5d" }}
-                    >
-                      Rejection Feedback
-                    </p>
-                    <div className="space-y-3 mb-4">
-                      {proposal.rejectionFeedback.map((fb, i) => (
-                        <div key={i} className="flex items-start gap-2.5">
-                          <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
-                            style={{
-                              background: "linear-gradient(135deg,#3a1a1a,#2a1010)",
-                              color: "#df5d5d",
-                              border: "1.5px solid rgba(223,93,93,0.2)",
-                            }}
-                          >
-                            {fb.reviewer.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-white text-xs font-semibold">
-                                {fb.reviewer}
-                              </span>
-                              <span
-                                className="text-[9px]"
-                                style={{ color: "#7f7f7f" }}
-                              >
-                                {fb.time}
-                              </span>
-                            </div>
-                            <p
-                              className="text-xs leading-relaxed mt-0.5"
-                              style={{ color: "#b8adad" }}
-                            >
-                              {fb.message}
-                            </p>
-                            <button
-                              className="flex items-center gap-1 text-[10px] mt-1 hover:opacity-70 transition-opacity"
-                              style={{ color: "#7ee3ff" }}
-                            >
-                              <CornerDownLeft size={9} /> Reply
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              {/* Re-Validate */}
-              <button
-                onClick={() => dispatch(revalidateProposal(proposal))}
-                disabled={isValidating}
-                className="w-full py-2.5 rounded-[6px] text-xl font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
+              <div
+                className="rounded-xl p-4"
                 style={{
-                  background: "#00485D",
-                  color: "#EFEFEF",
+                  border: "1px solid #2E3650",
                 }}
               >
-                {isValidating ? (
-                  <>
-                    <span
-                      className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                      style={{
-                        borderColor: "#7ee3ff",
-                        borderTopColor: "transparent",
-                      }}
-                    />
-                    Re-Validating...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={13} /> Re-Validate
-                  </>
+                {proposal.description && (
+                  <p className="text-xs leading-relaxed mb-4" style={{ color: "#b8adad" }}>
+                    {proposal.description}
+                  </p>
                 )}
-              </button>
-              {isValidating && (
-                <div className="mt-3 space-y-1.5">
-                  {validationSteps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs">
-                      {step.done ? (
-                        <span style={{ color: "#64b883" }}>✓</span>
-                      ) : (
-                        <span
-                          className="inline-block w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
-                          style={{
-                            borderColor: "#7ee3ff",
-                            borderTopColor: "transparent",
-                          }}
-                        />
-                      )}
-                      <span
-                        style={{ color: step.done ? "#64b883" : "#b8adad" }}
+
+                {proposal.rejectionFeedback &&
+                  proposal.rejectionFeedback.length > 0 && (
+                    <>
+                      <p
+                        className="text-[10px] font-bold uppercase tracking-wider mb-3"
+                        style={{ color: "#df5d5d" }}
                       >
-                        {step.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+                        Rejection Feedback
+                      </p>
+                      <div className="space-y-3 mb-4">
+                        {proposal.rejectionFeedback.map((fb, i) => (
+                          <div key={i} className="flex items-start gap-2.5">
+                            <div
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                              style={{
+                                background: "linear-gradient(135deg,#3a1a1a,#2a1010)",
+                                color: "#df5d5d",
+                                border: "1.5px solid rgba(223,93,93,0.2)",
+                              }}
+                            >
+                              {fb.reviewer.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-white text-xs font-semibold">
+                                  {fb.reviewer}
+                                </span>
+                                <span
+                                  className="text-[9px]"
+                                  style={{ color: "#7f7f7f" }}
+                                >
+                                  {fb.time}
+                                </span>
+                              </div>
+                              <p
+                                className="text-xs leading-relaxed mt-0.5"
+                                style={{ color: "#b8adad" }}
+                              >
+                                {fb.message}
+                              </p>
+                              <button
+                                className="flex items-center gap-1 text-[10px] mt-1 hover:opacity-70 transition-opacity"
+                                style={{ color: "#7ee3ff" }}
+                              >
+                                <CornerDownLeft size={9} /> Reply
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                {/* Re-Validate */}
+                <button
+                  onClick={() => dispatch(revalidateProposal(proposal))}
+                  disabled={isValidating}
+                  className="w-full py-2.5 rounded-[6px] text-xl font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
+                  style={{
+                    background: "#00485D",
+                    color: "#EFEFEF",
+                  }}
+                >
+                  {isValidating ? (
+                    <>
+                      <span
+                        className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                        style={{
+                          borderColor: "#7ee3ff",
+                          borderTopColor: "transparent",
+                        }}
+                      />
+                      Re-Validating...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={13} /> Re-Validate
+                    </>
+                  )}
+                </button>
+                {isValidating && (
+                  <div className="mt-3 space-y-1.5">
+                    {validationSteps.map((step, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        {step.done ? (
+                          <span style={{ color: "#64b883" }}>✓</span>
+                        ) : (
+                          <span
+                            className="inline-block w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
+                            style={{
+                              borderColor: "#7ee3ff",
+                              borderTopColor: "transparent",
+                            }}
+                          />
+                        )}
+                        <span
+                          style={{ color: step.done ? "#64b883" : "#b8adad" }}
+                        >
+                          {step.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Validation Report */}
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[] scrollbar-track-transparent px-6 py-4">
+            {!isRejected && proposal.status === "under_review" && proposal.description && (
+              <div className="mb-5">
+                <p
+                  className="text-[10px] font-bold uppercase tracking-wider mb-2"
+                  style={{ color: "#7f7f7f" }}
+                >
+                  Description
+                </p>
+                <p className="text-xs leading-relaxed line-clamp-3" style={{ color: "#b8adad" }}>
+                  {proposal.description}
+                </p>
+              </div>
+            )}
             <p
               className="text-[10px] font-bold uppercase tracking-wider mb-3"
               style={{ color: "#7f7f7f" }}
@@ -733,7 +796,7 @@ const ProposalDetailModal: React.FC = () => {
               className="text-xs leading-relaxed whitespace-pre-line"
               style={{ color: "#b8adad" }}
             >
-              {proposal.validationReport || "No validation report available."}
+              {validationReportText}
             </div>
           </div>
         </div>
