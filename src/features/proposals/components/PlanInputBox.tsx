@@ -68,7 +68,7 @@ const PlanInputBox: React.FC = () => {
             <button
               onClick={handleValidate}
               disabled={isValidating || !planInput.trim()}
-              className="w-full py-3 rounded-xl text-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl text-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed "
               style={{
                 color: "#060B1B",
                 border: "1px solid rgba(126, 227, 255, 0.25)",
@@ -78,14 +78,14 @@ const PlanInputBox: React.FC = () => {
             >
               {isValidating ? (
                 <>
+                  Start Validating...
                   <span
-                    className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                    className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin"
                     style={{
-                      borderColor: "#7ee3ff",
-                      borderTopColor: "transparent",
+                      borderColor: "#54B9D4",
+                      borderTopColor: "#056A87",
                     }}
                   />
-                  Start Validating
                 </>
               ) : (
                 "Start Validating"

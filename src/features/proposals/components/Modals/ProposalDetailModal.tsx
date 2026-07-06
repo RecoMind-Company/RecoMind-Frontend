@@ -565,25 +565,16 @@ const ProposalDetailModal: React.FC = () => {
                 </span>
               </div>
 
-              {/* Dropdown — positioned above, outside modal overflow */}
+              {/* Dropdown */}
               {planDropdownOpen && (
                 <div
-                  className="fixed rounded-xl z-100"
+                  className="absolute left-0 top-full mt-2 rounded-xl z-100"
                   style={{
                     width: 324,
                     background: "#141A2B",
                     boxShadow: "0px 8px 20px 0px #160A0A80",
                     animation: "dropDown 0.15s ease",
-                    left: "160px",
-                    top: "300px",
                     borderRadius: "12px",
-                  }}
-                  ref={(el) => {
-                    if (el && dropdownRef.current) {
-                      const rect = dropdownRef.current.getBoundingClientRect();
-                      el.style.left = `${rect.left - 40}px`;
-                      el.style.top = `${rect.top - 150}px`;
-                    }
                   }}
                 >
                   <style>{`
