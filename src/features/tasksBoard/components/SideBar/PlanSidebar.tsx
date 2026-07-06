@@ -1,10 +1,9 @@
 import "./planSidebar.css";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Target, ClipboardList, Clock } from "lucide-react";
-import { useGetAllPlansQuery } from "../../redux/plansSlice";
-import type { RootState } from "@/app/store";
+import { Megaphone, Target } from "lucide-react";
+import { useGetAcceptedPlansQuery, useGetAllTasksQuery } from "../../redux/tasksSlice";
 import type { Plan } from "../../types";
 import { assets } from "@/assets/assets";
 
@@ -13,18 +12,45 @@ const hasToken = () =>
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-/** Compute progress % from tasks in the Redux store that match this plan's goal */
-function usePlanProgress(plan: Plan): number {
-  const tasks = useSelector((s: RootState) => s.tasks.tasks);
-  // Match tasks whose project name loosely matches the plan goal
-  const related = tasks.filter(
-    (t) =>
-      t.boardType === "plans" &&
-      t.project.toLowerCase().includes(plan.goal.toLowerCase().slice(0, 8)),
-  );
-  if (related.length === 0) return 0;
-  const done = related.filter((t) => t.completed).length;
-  return Math.round((done / related.length) * 100);
+interface AcceptedPlanWrapper {
+  value: Plan;
+  isSuccess: boolean;
+  isFailure: boolean;
+  error: string | null;
+}
+
+interface ApiTask {
+  questId: string;
+  status?: string;
+  deadLine?: string;
+  deadline?: string;
+  dueDate?: string;
+}
+
+const unwrapAcceptedPlan = (item: AcceptedPlanWrapper | Plan): Plan | null => {
+  if ("value" in item) return item.isSuccess && item.value ? item.value : null;
+  return item;
+};
+
+const isTaskOverdue = (task: ApiTask) => {
+  const deadlineStr = task.deadLine || task.deadline || task.dueDate;
+  if (!deadlineStr || task.status === "completed") return false;
+  return new Date(deadlineStr) < new Date();
+};
+
+const isTaskDone = (task: ApiTask) => task.status === "completed";
+
+const planTitle = (plan: Plan) => plan.goal || plan.description || "Unnamed Plan";
+
+function usePlanTaskStats(planId: string) {
+  const { data = [], isLoading } = useGetAllTasksQuery(planId, { skip: !planId });
+  const tasks = data as ApiTask[];
+  const total = tasks.length;
+  const completed = tasks.filter(isTaskDone).length;
+  const overdue = tasks.filter(isTaskOverdue).length;
+  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return { total, overdue, progress, isLoading };
 }
 
 // ── Skeleton Card ────────────────────────────────────────────────────────────
@@ -40,52 +66,41 @@ function SkeletonCard() {
 }
 
 // ── Plan Card ────────────────────────────────────────────────────────────────
-function PlanCard({ plan, onClick }: { plan: Plan; onClick?: () => void }) {
-  const progress = usePlanProgress(plan);
-  const days = parseInt(plan.duration, 10);
-  const durationLabel = isNaN(days)
-    ? plan.duration
-    : days >= 30
-      ? `${Math.round(days / 30)}mo`
-      : `${days}d`;
+function PlanCard({
+  plan,
+  active,
+  onClick,
+}: {
+  plan: Plan;
+  active: boolean;
+  onClick?: () => void;
+}) {
+  const { total, overdue, progress, isLoading } = usePlanTaskStats(plan.id);
 
-  const isAccepted = plan.status?.toLowerCase() === "accepted";
+  if (!isLoading && total === 0) return null;
 
   return (
     <div 
-      className={`ps-plan-card ${isAccepted ? "ps-clickable" : ""}`}
-      onClick={isAccepted ? onClick : undefined}
-      style={{
-        cursor: isAccepted ? "pointer" : "default",
-        opacity: isAccepted ? 1 : 0.6,
-      }}
-      title={isAccepted ? "Click to view plan tasks" : "Plan not accepted yet"}
+      className={`ps-plan-card ${active ? "ps-active-card" : ""}`}
+      onClick={onClick}
+      title="Click to view plan tasks"
     >
-      <div className="ps-card-header">
-        <p className="ps-card-name">{plan.goal || "Unnamed Plan"}</p>
-        <span className="ps-status-badge">{plan.status || "Unknown"}</span>
-      </div>
+      <p className="ps-card-name">{planTitle(plan)}</p>
 
       <div className="ps-card-meta">
-        {plan.planType && (
-          <span className="ps-meta-chip">
-            <ClipboardList size={10} />
-            {plan.planType}
-          </span>
-        )}
-        {plan.planType && durationLabel && <span className="ps-meta-dot" />}
-        {durationLabel && (
-          <span className="ps-meta-chip">
-            <Clock size={10} />
-            {durationLabel}
-          </span>
+        <span>{isLoading ? "..." : total} Tasks</span>
+        {overdue > 0 ? (
+          <span className="ps-status-badge ps-overdue">{overdue} Overdue</span>
+        ) : (
+          <span className="ps-status-badge ps-on-track">On Track</span>
         )}
       </div>
 
       <div className="ps-progress-row">
         <p className="ps-progress-label">Progress</p>
-        <p className="ps-progress-pct">{progress}%</p>
+        <p className="ps-progress-pct">{isLoading ? "--" : progress}%</p>
       </div>
+
       <div className="ps-progress-track">
         <div className="ps-progress-fill" style={{ width: `${progress}%` }} />
       </div>
@@ -93,22 +108,28 @@ function PlanCard({ plan, onClick }: { plan: Plan; onClick?: () => void }) {
   );
 }
 
+interface PlanSidebarProps {
+  onCollapsedChange?: (collapsed: boolean) => void;
+}
+
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
-export default function PlanSidebar() {
-  const [collapsed, setCollapsed] = useState(true);
+export default function PlanSidebar({ onCollapsedChange }: PlanSidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
-    data: plans = [],
+    data: acceptedPlansResponse = [],
     isLoading,
     isError,
-  } = useGetAllPlansQuery(undefined, { skip: !hasToken() });
+  } = useGetAcceptedPlansQuery(undefined, { skip: !hasToken() });
+
+  const activePlanId = searchParams.get("planId") || "";
+  const plans = (acceptedPlansResponse as (AcceptedPlanWrapper | Plan)[])
+    .map(unwrapAcceptedPlan)
+    .filter((plan): plan is Plan => Boolean(plan));
 
   const handlePlanClick = (plan: Plan) => {
-    // Only allow clicking on accepted plans
-    if (plan.status?.toLowerCase() !== "accepted") return;
-    
-    // Navigate to plan tasks page with plan details
-    navigate(`/home/plan-tasks?planId=${plan.id}&planName=${encodeURIComponent(plan.goal)}`);
+    navigate(`/home/plan-tasks?planId=${plan.id}&planName=${encodeURIComponent(planTitle(plan))}`);
   };
 
   return (
@@ -118,12 +139,23 @@ export default function PlanSidebar() {
         {/* Header */}
         <div className="ps-header">
           <div className="ps-header-info">
-            <p className="ps-title">My Plans</p>
+            <div className="ps-title-row">
+              <span className="ps-title-icon">
+                <Megaphone size={19} />
+              </span>
+              <p className="ps-title">Marketing</p>
+            </div>
             <p className="ps-subtitle">Active Plans</p>
           </div>
           <button
             className="ps-toggle-btn"
-            onClick={() => setCollapsed((c) => !c)}
+            onClick={() => {
+              setCollapsed((current) => {
+                const next = !current;
+                onCollapsedChange?.(next);
+                return next;
+              });
+            }}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <img
@@ -134,10 +166,10 @@ export default function PlanSidebar() {
           </button>
         </div>
 
-        <div className="ps-divider" />
-
         {/* Section label */}
-        <p className="ps-section-label">All Plans</p>
+        <button className="ps-section-label" type="button">
+          All Plans
+        </button>
 
         {/* List */}
         <div className="ps-list">
@@ -169,6 +201,7 @@ export default function PlanSidebar() {
               <PlanCard 
                 key={plan.id} 
                 plan={plan} 
+                active={activePlanId === plan.id}
                 onClick={() => handlePlanClick(plan)}
               />
             ))}
